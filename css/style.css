@@ -127,6 +127,25 @@ main {
   transition: all 0.6s ease;
 }
 
+/* 模块卡片尺寸（保持一致） */
+.module-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 340px; /* 统一高度，可按需调整 */
+}
+
+.module-card .card-img-top {
+  height: 160px;
+  object-fit: cover;
+}
+
+.module-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -141,6 +160,26 @@ main {
 .card-title {
   font-weight: 600;
 }
+
+/* 统一模块“打开项目”按钮样式，保证颜色一致和良好对比度 */
+.btn-module {
+  background-color: #007bff; /* 品牌蓝 */
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, transform 0.12s ease;
+}
+.btn-module:hover,
+.btn-module:focus {
+  background-color: #0056d6;
+  color: #fff;
+  transform: translateY(-2px);
+  text-decoration: none;
+  outline: none;
+  box-shadow: 0 6px 18px rgba(0,123,255,0.18);
+}
+
 
 /* ===== 页脚 ===== */
 footer {
