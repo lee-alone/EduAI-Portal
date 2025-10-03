@@ -18,6 +18,7 @@ header {
 }
 
 .navbar {
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   background: linear-gradient(90deg, rgba(0, 123, 255, 0.8), rgba(0, 180, 255, 0.7));
   transition: all 0.4s ease;
