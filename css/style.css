@@ -32,6 +32,22 @@ header {
 .navbar-brand {
   font-weight: 600;
   letter-spacing: 1px;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+}
+
+.brand-line-1 {
+  font-size: 1rem;
+  display: block;
+}
+
+.brand-line-2 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.9;
+  display: block;
 }
 
 .nav-link {
@@ -70,31 +86,107 @@ header {
   position: relative;
   z-index: 2;
   max-width: 800px;
+  padding: 20px;
+}
+
+/* 透明毛玻璃容器 */
+.glass-container {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .hero h1 {
-  font-size: 3rem;
-  font-weight: 600;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: slideInDown 1s ease-out;
+  letter-spacing: 1.5px;
+  line-height: 1.3;
+  margin-bottom: 25px;
+  opacity: 0;
+  animation-fill-mode: forwards;
 }
 
 .hero p {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.8px;
+  line-height: 1.7;
   margin-top: 20px;
+  opacity: 0;
+  animation: fadeInUp 1s ease-out 0.5s forwards;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem !important;
+  font-weight: 400 !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  letter-spacing: 0.6px !important;
+  line-height: 1.6 !important;
+  margin-top: 15px !important;
+  margin-bottom: 0 !important;
+  opacity: 0;
+  animation: fadeInUp 1s ease-out 0.8s forwards !important;
+}
+
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero .btn {
   margin-top: 30px;
   font-size: 1.1rem;
-  padding: 10px 28px;
+  padding: 12px 32px;
   border-radius: 50px;
+  font-weight: 600;
   transition: all 0.3s ease;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  color: #ffffff;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 
+    0 4px 15px rgba(59, 130, 246, 0.3),
+    0 2px 8px rgba(147, 197, 253, 0.2);
 }
 
 .hero .btn:hover {
   transform: translateY(-3px);
-  background-color: #ffc107;
-  color: #212529;
+  background: linear-gradient(135deg, #1e40af, #1e3a8a);
+  color: #ffffff;
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 
+    0 8px 25px rgba(59, 130, 246, 0.4),
+    0 4px 12px rgba(147, 197, 253, 0.3);
 }
 
 /* ===== 模块区 ===== */
@@ -203,11 +295,29 @@ footer a:hover {
 
 /* ===== 响应式优化 ===== */
 @media (max-width: 768px) {
+  .hero-content {
+    padding: 15px;
+  }
+  
+  .glass-container {
+    padding: 30px 20px;
+    border-radius: 15px;
+  }
+  
   .hero h1 {
     font-size: 2.2rem;
+    letter-spacing: 1px;
+    line-height: 1.4;
   }
   .hero p {
-    font-size: 1rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.95rem !important;
+    letter-spacing: 0.4px !important;
   }
   .section {
     padding: 60px 0;
@@ -215,5 +325,37 @@ footer a:hover {
   .card {
     transform: none !important;
     opacity: 1 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content {
+    padding: 10px;
+  }
+  
+  .glass-container {
+    padding: 25px 15px;
+    border-radius: 12px;
+  }
+  
+  .hero h1 {
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+    line-height: 1.3;
+  }
+  .hero p {
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    line-height: 1.5;
+  }
+  
+  .hero-subtitle {
+    font-size: 0.85rem !important;
+    letter-spacing: 0.3px !important;
+  }
+  
+  .hero .btn {
+    font-size: 1rem;
+    padding: 10px 24px;
   }
 }
