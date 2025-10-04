@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>榜中九思 教育思考助手</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- AI粒子效果容器 -->
+  <div class="particles-container">
+    <div class="particles-left" id="particlesLeft"></div>
+    <div class="particles-right" id="particlesRight"></div>
+  </div>
+  
+  <div class="app-container">
+    <header class="header">
+  <h1>榜中九思 教育思考助手</h1>
+      <p class="subtitle">无论是课堂教学、教研设计，还是教育管理的思考，这里都是您灵感的起点。</p>
+    </header>
+
+    <div class="chat-container">
+      <div class="conversation-area">
+        <div id="response" class="response hidden">
+          <div id="responseContent" class="response-content"></div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-section">
+          <label for="userInput" class="input-label">🌱 请描述您想要探讨的教育问题</label>
+          <div class="input-wrapper">
+    <textarea id="userInput" placeholder="💬 请输入您的教育问题，例如：如何提高学生课堂参与度？"></textarea>
+            <div class="button-group">
+              <button class="primary-button" onclick="console.log('按钮被点击'); sendMessage();">
+                <span id="buttonText">🚀 发送</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+
+  <div class="advanced-settings">
+      <button class="advanced-toggle" onclick="toggleAdvanced()">⚙️ 高级设置</button>
+    <div class="advanced-content" id="advancedContent">
+      <div class="advanced-field">
+          <label for="model" class="field-label">选择思考模型</label>
+        <select id="model">
+            <option value="deepseek-chat" selected>DeepSeek 教育模型</option>
+            <option value="glm-4">智谱 GLM 教育版</option>
+            <option value="qwen-turbo">通义千问 教研助手</option>
+        </select>
+      </div>
+      <div class="advanced-field">
+          <label for="apiKey" class="field-label">API Key（可选）</label>
+        <input type="password" id="apiKey" placeholder="如有专属 API，请在此输入" />
+      </div>
+      <div class="advanced-field">
+          <label for="customPrompt" class="field-label">个性化提示（可选）</label>
+        <input type="text" id="customPrompt" placeholder="例如：请以初中英语教师的角度回答" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

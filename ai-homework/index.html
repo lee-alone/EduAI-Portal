@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>脑力小火花：定制你的学习冒险</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.0.0/build/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="p-6">
+  <div class="max-w-4xl mx-auto card">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold mb-2 text-gray-800">
+        🌟 脑力小火花：定制你的学习冒险 🌟
+      </h1>
+      <p class="text-lg text-gray-600 mb-4">
+        每一次练习都是成长的足迹，每一次挑战都是智慧的积累
+      </p>
+      <div class="inline-block bg-gradient-to-r from-pink-100 to-blue-100 px-4 py-2 rounded-full text-sm text-gray-700">
+        ✨ 让AI成为你的学习伙伴，一起探索知识的海洋
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div class="form-group">
+        <label class="block mb-2 font-semibold">
+          📚 学习领域：
+          <span class="text-sm text-gray-500 font-normal">(告诉我你要学习什么科目)</span>
+        </label>
+        <input id="title" type="text" placeholder="例如：八年级数学、高中物理、初中语文..." class="w-full border rounded p-2"/>
+      </div>
+
+      <div class="form-group">
+        <label class="block mb-2 font-semibold">
+          🎯 学习主题：
+          <span class="text-sm text-gray-500 font-normal">(具体想要练习的知识点)</span>
+        </label>
+        <input id="topic" type="text" placeholder="例如：一元二次方程、光的折射、古诗词鉴赏..." class="w-full border rounded p-2"/>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div class="form-group">
+        <label class="block mb-2 font-semibold">
+          📝 练习风格：
+          <span class="text-sm text-gray-500 font-normal">(选择你喜欢的题型)</span>
+        </label>
+        <select id="type" class="w-full border rounded p-2" aria-label="练习风格">
+          <option>选择题 - 快速检验理解</option>
+          <option>填空题 - 精准掌握细节</option>
+          <option>简答题 - 锻炼表达能力</option>
+          <option>综合题 - 挑战思维能力</option>
+    </select>
+      </div>
+
+      <div class="form-group">
+        <label class="block mb-2 font-semibold">
+          🏆 挑战等级：
+          <span class="text-sm text-gray-500 font-normal">(选择适合的难度)</span>
+        </label>
+        <select id="difficulty" class="w-full border rounded p-2" aria-label="选择挑战等级">
+          <option>基础 - 夯实基础，稳步前进</option>
+          <option>提升 - 挑战自我，突破瓶颈</option>
+          <option>拓展 - 开拓视野，追求卓越</option>
+    </select>
+      </div>
+
+      <div class="form-group">
+        <label class="block mb-2 font-semibold">
+          📊 练习份量：
+          <span class="text-sm text-gray-500 font-normal">(1-10题，量力而行)</span>
+        </label>
+        <input id="num" type="number" min="1" max="10" value="5" class="w-full border rounded p-2" title="选择题目数量" placeholder="输入1-10之间的数字"/>
+      </div>
+    </div>
+
+    <div class="text-center mb-6">
+      <div class="flex flex-wrap justify-center gap-4">
+        <button id="generateBtn" class="btn text-lg px-8 py-3">
+          🚀 开启我的学习冒险
+        </button>
+        <button id="exportPaperBtn" class="btn btn-success text-lg px-6 py-3">
+          💾 保存我的练习成果
+        </button>
+        <button id="exportAnswerBtn" class="btn btn-info text-lg px-6 py-3">
+          🔍 查看解题秘籍
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-6 text-center">
+      <div class="inline-block bg-gray-50 rounded-lg px-6 py-3">
+        <label class="block mb-2 font-semibold text-gray-700">
+          📄 导出格式选择
+        </label>
+        <div class="flex justify-center space-x-6">
+          <label class="flex items-center cursor-pointer">
+            <input type="radio" name="exportFormat" value="word" checked class="mr-2 text-blue-500">
+            <span class="text-gray-700">📝 Word文档</span>
+        </label>
+        </div>
+        <p class="text-sm text-gray-500 mt-2">支持保存和分享你的学习成果</p>
+      </div>
+    </div>
+
+    <div id="output" contenteditable="true" class="mt-8 border-t pt-6 text-gray-800 whitespace-pre-wrap leading-relaxed"></div>
+
+    <details class="mt-8">
+      <summary class="cursor-pointer text-lg font-semibold">
+        ✨ 个性化学习设置 - 让AI更懂你
+      </summary>
+      <div class="advanced">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block mb-3 font-semibold">
+              🤖 选择你的AI学习伙伴：
+            </label>
+        <select id="model" class="w-full border rounded p-2 mb-4">
+              <option value="deepseek-chat" selected>DeepSeek 教育专家 - 专业教学</option>
+              <option value="deepseek-reasoner">DeepSeek 推理大师 - 逻辑思维</option>
+              <option value="glm-4">智谱 GLM 教育版 - 全面覆盖</option>
+              <option value="qwen-turbo">通义千问 教研助手 - 智能辅导</option>
+        </select>
+          </div>
+
+          <div>
+            <label class="block mb-3 font-semibold">
+              🔑 专属API密钥（可选）：
+              <span class="text-sm text-gray-500 font-normal">使用自己的API获得更好体验</span>
+            </label>
+            <input id="apiKey" type="password" placeholder="输入你的API密钥..." 
+               class="w-full border rounded p-2 mb-4" value="sk-0560c9a849694436a71c1ef4c053505a"/>
+          </div>
+        </div>
+
+        <div>
+          <label class="block mb-3 font-semibold">
+            💭 个性化学习要求：
+            <span class="text-sm text-gray-500 font-normal">告诉AI你的特殊需求</span>
+          </label>
+          <textarea id="customPrompt" rows="4" 
+                    placeholder="例如：请在题目中增加生活实例，或者希望题目更有趣味性，或者需要更多图表说明..."
+                    class="w-full border rounded p-2 mb-2 resize-none"></textarea>
+          <p class="text-sm text-gray-500">
+            💡 提示：越详细的描述，AI越能为你定制专属的学习内容
+          </p>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

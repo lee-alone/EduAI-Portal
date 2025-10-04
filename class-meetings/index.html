@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>厦门市第九中学 - 温馨班会记录助手</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="school-logo">厦门市第九中学</div>
+            <div class="school-subtitle">用心记录每一次成长时光</div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">
+                    <i class="fas fa-edit"></i>
+                    班会信息填写
+                </h2>
+                
+                <div class="form-group">
+                    <label class="form-label">时间</label>
+                    <input type="datetime-local" class="form-input" id="timeInput" placeholder="请选择时间">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">班级</label>
+                    <input type="text" class="form-input" id="classInput" placeholder="例如：高一(1)班">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">班主任</label>
+                    <input type="text" class="form-input" id="teacherInput" placeholder="请输入班主任姓名">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">主持人</label>
+                    <input type="text" class="form-input" id="hostInput" placeholder="请输入主持人姓名">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">主题</label>
+                    <textarea class="form-textarea" id="themeInput" placeholder="请输入班会主题，例如：安全教育、心理健康教育等"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">DeepSeek API密钥（可选）</label>
+                    <input type="password" class="form-input" id="apiKeyInput" placeholder="输入您的DeepSeek API密钥以获得更好的生成效果">
+                    <small style="color: #666; font-size: 0.9rem;">
+                        如果没有API密钥，系统将使用本地模板生成教案
+                        <span style="color: #999; margin-left: 10px;">如需帮助请联系管理员</span>
+                    </small>
+                </div>
+
+                <button class="generate-btn" id="generateBtn">
+                    <i class="fas fa-magic"></i>
+                    生成班会记录
+                </button>
+            </div>
+
+            <div class="output-section">
+                <h2 class="section-title">
+                    <i class="fas fa-lightbulb"></i>
+                    个性化定制
+                </h2>
+
+                <div class="form-group">
+                    <label class="form-label">特殊要求（可选）</label>
+                    <textarea class="form-textarea" id="customRequirements" placeholder="请输入您的特殊要求，例如：
+• 重点关注某个学生的表现
+• 增加互动环节的描述
+• 强调某个教育重点
+• 其他个性化需求..."></textarea>
+                </div>
+
+                <div class="loading" id="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>正在智能生成班会记录...</p>
+                </div>
+
+                <div class="action-buttons" id="actionButtons" style="display: none;">
+                    <button class="btn-secondary" id="copyBtn">
+                        <i class="fas fa-copy"></i>
+                        复制内容
+                    </button>
+                    <button class="btn-primary" id="downloadBtn">
+                        <i class="fas fa-download"></i>
+                        导出Word文档
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <h2 class="section-title">
+                <i class="fas fa-eye"></i>
+                班会记录预览
+            </h2>
+            
+            <table class="preview-table">
+                <thead>
+                    <tr>
+                        <th>项目</th>
+                        <th>内容</th>
+                    </tr>
+                </thead>
+                <tbody id="previewBody">
+                    <tr>
+                        <td>时间</td>
+                        <td id="previewTime">-</td>
+                    </tr>
+                    <tr>
+                        <td>班级</td>
+                        <td id="previewClass">-</td>
+                    </tr>
+                    <tr>
+                        <td>班主任</td>
+                        <td id="previewTeacher">-</td>
+                    </tr>
+                    <tr>
+                        <td>主持人</td>
+                        <td id="previewHost">-</td>
+                    </tr>
+                    <tr>
+                        <td>主题</td>
+                        <td id="previewTheme">-</td>
+                    </tr>
+                    <tr>
+                        <td>教育目标</td>
+                        <td id="previewGoals">-</td>
+                    </tr>
+                    <tr>
+                        <td>过程内容</td>
+                        <td id="previewProcess">-</td>
+                    </tr>
+                    <tr>
+                        <td>收获反思</td>
+                        <td id="previewReflection">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    
+    <script src="script.js"></script>
+</body>
+</html>

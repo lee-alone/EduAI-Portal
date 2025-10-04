@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学科融合教学设计助手</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <!-- 引入Marked.js用于Markdown渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 引入html-docx-js用于Word导出 -->
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <!-- 引入独立的PDF生成库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- 库加载检查 -->
+    <script>
+        // 检查PDF库是否加载成功
+        window.addEventListener('load', function() {
+            const checkLibraries = () => {
+                const jsPDFLoaded = typeof window.jsPDF !== 'undefined' || typeof jsPDF !== 'undefined';
+                const html2canvasLoaded = typeof html2canvas !== 'undefined';
+                
+                console.log('jsPDF loaded:', jsPDFLoaded);
+                console.log('html2canvas loaded:', html2canvasLoaded);
+                
+                if (!jsPDFLoaded || !html2canvasLoaded) {
+                    console.warn('PDF libraries not fully loaded, retrying...');
+                    setTimeout(checkLibraries, 1000);
+                }
+            };
+            checkLibraries();
+        });
+    </script>
+    <!-- 引入自定义样式 -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">学科融合教学设计助手</h1>
+                        <p class="text-xs text-gray-500">让学科融合教学设计更简单、更智能</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="help-btn" class="p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50" title="使用帮助">
+                        <i class="fas fa-question-circle text-lg"></i>
+                    </button>
+                    <button id="settings-toggle" class="p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50" title="设置">
+                        <i class="fas fa-cog text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 欢迎区域 -->
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">开始创建您的教学设计</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">只需简单几步，AI将为您生成专业的多学科融合教学方案</p>
+        </div>
+
+        <!-- 进度指示器 -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center space-x-4 mb-4">
+                <div class="flex items-center">
+                    <div id="step-1-indicator" class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                    <span class="ml-2 text-sm font-medium text-blue-600">基础信息</span>
+                </div>
+                <div class="w-16 h-1 bg-gray-200 rounded">
+                    <div id="progress-1-2" class="h-full bg-blue-500 rounded transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="flex items-center">
+                    <div id="step-2-indicator" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                    <span class="ml-2 text-sm font-medium text-gray-500">教学内容</span>
+                </div>
+                <div class="w-16 h-1 bg-gray-200 rounded">
+                    <div id="progress-2-3" class="h-full bg-gray-300 rounded transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="flex items-center">
+                    <div id="step-3-indicator" class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                    <span class="ml-2 text-sm font-medium text-gray-500">生成方案</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤内容 -->
+        <div class="max-w-4xl mx-auto">
+            <!-- 步骤1：基础信息 -->
+            <div id="step-1" class="step-content">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-info-circle text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">基础信息</h3>
+                            <p class="text-gray-600">请填写课程的基本信息</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="course-name" class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> 课程名称
+                            </label>
+                            <input type="text" id="course-name" class="modern-input" placeholder="例如：圆的面积计算">
+                            <p class="text-xs text-gray-500 mt-1">AI将根据课程名称自动识别学科信息</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="teacher" class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="text-red-500">*</span> 教师姓名
+                            </label>
+                            <input type="text" id="teacher" class="modern-input" placeholder="请输入您的姓名">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="grade-level" class="block text-sm font-medium text-gray-700 mb-2">
+                                年级段 <span class="text-gray-400">(可选)</span>
+                            </label>
+                            <select id="grade-level" class="modern-select">
+                                <option value="">AI自动判断</option>
+                                <option value="小学低年级">小学低年级 (1-2年级)</option>
+                                <option value="小学中年级">小学中年级 (3-4年级)</option>
+                                <option value="小学高年级">小学高年级 (5-6年级)</option>
+                                <option value="初中">初中 (7-9年级)</option>
+                                <option value="高中">高中 (10-12年级)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="class-hours" class="block text-sm font-medium text-gray-700 mb-2">
+                                课时数 <span class="text-gray-400">(可选)</span>
+                            </label>
+                            <input type="number" id="class-hours" class="modern-input" placeholder="例如：2" min="1" max="10">
+                            <p class="text-xs text-gray-500 mt-1">留空时AI将根据课程内容自动确定合适的课时数</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end mt-6">
+                        <button id="next-to-step-2" class="px-6 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            下一步：设计教学内容 <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤2：教学内容 -->
+            <div id="step-2" class="step-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-lightbulb text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">教学内容设计</h3>
+                            <p class="text-gray-600">设置学科融合和教学重点</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="form-group">
+                            <label for="fusion-subjects" class="block text-sm font-medium text-gray-700 mb-2">
+                                期望融合的学科 <span class="text-gray-400">(可选)</span>
+                            </label>
+                            <input type="text" id="fusion-subjects" class="modern-input" placeholder="例如：支持多个学科融合，数学+美术、语文+历史、物理+化学">
+                            <p class="text-xs text-gray-500 mt-1">留空时AI将自动推荐合适的融合学科</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fusion-approach" class="block text-sm font-medium text-gray-700 mb-2">
+                                教学方式 <span class="text-gray-400">(可选)</span>
+                            </label>
+                            <select id="fusion-approach" class="modern-select">
+                                <option value="">AI自动选择最佳方式</option>
+                                <option value="project-based">项目式学习</option>
+                                <option value="problem-based">问题导向学习</option>
+                                <option value="theme-based">主题式融合</option>
+                                <option value="case-study">案例研究</option>
+                                <option value="inquiry-based">探究式学习</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lesson-content" class="block text-sm font-medium text-gray-700 mb-2">
+                                教学重点 <span class="text-gray-400">(可选)</span>
+                            </label>
+                            <textarea id="lesson-content" class="modern-textarea" rows="3" placeholder="描述本节课的核心知识点和技能要求..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="real-world-context" class="block text-sm font-medium text-gray-700 mb-2">
+                                实际应用场景 <span class="text-gray-400">(可选)</span>
+                            </label>
+                            <textarea id="real-world-context" class="modern-textarea" rows="2" placeholder="描述如何将教学内容与现实生活相结合..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">学科融合比例 <span class="text-gray-400">(可选)</span></label>
+                            <div class="bg-gray-50 rounded-xl p-4 space-y-3">
+                                <p class="text-xs text-gray-600 mb-3">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    主学科将由AI根据课程名称自动识别，融合学科为您选择的辅助学科
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="fusion-ratio-option flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                                        <input type="radio" name="fusion-ratio" value="70:30" class="text-blue-500 focus:ring-blue-500" checked>
+                                        <div>
+                                            <span class="font-medium text-gray-900">主导型</span>
+                                            <p class="text-xs text-gray-500">主学科70% + 融合学科30%</p>
+                                        </div>
+                                    </label>
+                                    <label class="fusion-ratio-option flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                                        <input type="radio" name="fusion-ratio" value="60:40" class="text-blue-500 focus:ring-blue-500">
+                                        <div>
+                                            <span class="font-medium text-gray-900">偏重型</span>
+                                            <p class="text-xs text-gray-500">主学科60% + 融合学科40%</p>
+                                        </div>
+                                    </label>
+                                    <label class="fusion-ratio-option flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                                        <input type="radio" name="fusion-ratio" value="50:50" class="text-blue-500 focus:ring-blue-500">
+                                        <div>
+                                            <span class="font-medium text-gray-900">均衡型</span>
+                                            <p class="text-xs text-gray-500">主学科50% + 融合学科50%</p>
+                                        </div>
+                                    </label>
+                                    <label class="fusion-ratio-option flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
+                                        <input type="radio" name="fusion-ratio" value="custom" class="text-blue-500 focus:ring-blue-500">
+                                        <div>
+                                            <span class="font-medium text-gray-900">自定义</span>
+                                            <p class="text-xs text-gray-500">自定义比例分配</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div id="custom-ratio-container" class="hidden">
+                                    <label for="custom-ratio" class="block text-sm font-medium text-gray-700 mb-2">自定义比例</label>
+                                    <input type="text" id="custom-ratio" class="modern-input" placeholder="例如：数学50%+美术30%+信息技术20%">
+                                    <p class="text-xs text-gray-500 mt-1">请确保所有比例相加等于100%，主学科为AI识别的学科</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between mt-6">
+                        <button id="back-to-step-1" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i> 上一步
+                        </button>
+                        <button id="next-to-step-3" class="px-6 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors">
+                            下一步：生成教学方案 <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤3：生成方案 -->
+            <div id="step-3" class="step-content hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-6">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-magic text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">生成教学方案</h3>
+                            <p class="text-gray-600">确认信息并生成AI教学设计</p>
+                        </div>
+                    </div>
+
+                    <!-- 信息确认 -->
+                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                        <h4 class="font-medium text-gray-900 mb-4">请确认您的设置：</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-600">课程名称：</span>
+                                <span id="confirm-course-name" class="font-medium">-</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">教师姓名：</span>
+                                <span id="confirm-teacher" class="font-medium">-</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">年级段：</span>
+                                <span id="confirm-grade" class="font-medium">AI自动判断</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">课时数：</span>
+                                <span id="confirm-class-hours" class="font-medium">AI自动确定</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">融合学科：</span>
+                                <span id="confirm-subjects" class="font-medium">AI自动推荐</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">融合比例：</span>
+                                <span id="confirm-ratio" class="font-medium">主导型(70:30)</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">教学方式：</span>
+                                <span id="confirm-approach" class="font-medium">AI自动选择</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 高级设置 -->
+                    <div class="border border-gray-200 rounded-xl p-4 mb-6">
+                        <button id="advanced-toggle" class="w-full flex items-center justify-between text-left">
+                            <span class="font-medium text-gray-700">高级设置</span>
+                            <i id="advanced-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                        </button>
+                        <div id="advanced-content" class="hidden mt-4 space-y-4">
+                            <div class="form-group">
+                                <label for="ai-model" class="block text-sm font-medium text-gray-700 mb-2">AI模型</label>
+                                <select id="ai-model" class="modern-select">
+                                    <option value="deepseek-chat">DeepSeek Chat (推荐)</option>
+                                    <option value="deepseek-coder">DeepSeek Coder</option>
+                                    <option value="qwen-turbo">通义千问 Turbo</option>
+                                    <option value="baichuan2">百川2</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="api-key" class="block text-sm font-medium text-gray-700 mb-2">API密钥</label>
+                                <input type="password" id="api-key" class="modern-input" value="sk-0560c9a849694436a71c1ef4c053505a" placeholder="请输入API密钥">
+                            </div>
+                            <div class="form-group">
+                                <label for="custom-requirements" class="block text-sm font-medium text-gray-700 mb-2">特殊要求</label>
+                                <textarea id="custom-requirements" class="modern-textarea" rows="2" placeholder="输入对教案的特殊要求..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="streaming-mode" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" checked>
+                                    <span class="text-sm font-medium text-gray-700">启用实时串流模式</span>
+                                </label>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    串流模式可以实时显示AI生成的内容，减少等待时间，但可能消耗更多流量
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="flex justify-between items-center">
+                        <button id="back-to-step-2" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i> 上一步
+                        </button>
+                        <div class="flex space-x-3">
+                            <button id="clear-btn" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-refresh mr-2"></i> 重置
+                            </button>
+                            <button id="generate-btn" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg">
+                                <i class="fas fa-magic mr-2"></i> 生成教学方案
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 加载指示器 -->
+                    <div id="loading" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-6 text-center mt-6">
+                        <div class="flex items-center justify-center space-x-3">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                            <span class="text-blue-700 font-medium">AI正在生成您的教学设计方案，请稍候...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 结果预览区域 -->
+            <div id="result-section" class="hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-check-circle text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-900">教学设计方案</h3>
+                                <p class="text-gray-600">AI为您生成的专业教学方案</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button id="export-pdf-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fas fa-file-pdf mr-2"></i> 导出PDF
+                            </button>
+                            <button id="export-word-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fas fa-file-word mr-2"></i> 导出Word
+                            </button>
+                            <button id="restart-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-plus mr-2"></i> 新建方案
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="preview-content" class="prose prose-sm max-w-none bg-gray-50 rounded-xl p-6 min-h-[400px] overflow-y-auto border border-gray-200">
+                        <div class="text-center text-gray-500 py-20">
+                            <i class="fas fa-file-alt text-6xl mb-4 opacity-30"></i>
+                            <p class="text-lg">生成的教学方案将在这里显示</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 帮助模态框 -->
+    <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-gray-900">使用帮助</h3>
+                    <button id="close-help" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">🚀 快速开始</h4>
+                    <p class="text-gray-600 text-sm">只需填写课程名称和教师姓名，AI就能为您生成专业的教学设计方案。</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">📝 三步流程</h4>
+                    <ul class="text-gray-600 text-sm space-y-1">
+                        <li><strong>步骤1：</strong>填写基础信息（课程名称必填）</li>
+                        <li><strong>步骤2：</strong>设置教学内容（可选，AI会自动推荐）</li>
+                        <li><strong>步骤3：</strong>生成并导出教学方案</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">🤖 AI智能特性</h4>
+                    <ul class="text-gray-600 text-sm space-y-1">
+                        <li>• 根据课程名称自动识别学科和年级</li>
+                        <li>• 智能推荐融合学科和教学方式</li>
+                        <li>• 生成符合教育标准的教学设计</li>
+                        <li>• 支持多种AI模型选择</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">⌨️ 快捷键</h4>
+                    <ul class="text-gray-600 text-sm space-y-1">
+                        <li><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl+Enter</kbd> 生成教学方案</li>
+                        <li><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl+S</kbd> 导出Word文档</li>
+                        <li><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl+R</kbd> 重置表单</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript文件 -->
+    <script src="script-core.js"></script>
+    <script src="script-ai.js"></script>
+</body>
+</html>

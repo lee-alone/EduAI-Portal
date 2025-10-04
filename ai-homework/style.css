@@ -1,0 +1,729 @@
+    :root {
+      --primary-warm: #FF6B6B;
+      --secondary-warm: #4ECDC4;
+      --accent-warm: #FFE66D;
+      --success-warm: #51CF66;
+      --info-warm: #74C0FC;
+      --warning-warm: #FFD43B;
+      --text-primary: #2D3436;
+      --text-secondary: #636E72;
+      --bg-warm: linear-gradient(135deg, #FFE8E8 0%, #F8F9FF 100%);
+      --card-warm: rgba(255, 255, 255, 0.95);
+      --shadow-warm: 0 8px 32px rgba(255, 107, 107, 0.15);
+    }
+
+    body { 
+      background: var(--bg-warm); 
+      font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 107, 107, 0.03) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.05) 0%, transparent 50%),
+                  radial-gradient(circle at 20% 80%, rgba(255, 230, 109, 0.04) 0%, transparent 50%);
+      z-index: -1;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(30px, -30px) rotate(120deg); }
+      66% { transform: translate(-20px, 20px) rotate(240deg); }
+    }
+
+    .card { 
+      background: var(--card-warm); 
+      border-radius: 1.5rem; 
+      box-shadow: var(--shadow-warm); 
+      padding: 2.5rem; 
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-warm), var(--secondary-warm), var(--accent-warm));
+      border-radius: 1.5rem 1.5rem 0 0;
+    }
+
+    .btn { 
+      background: linear-gradient(135deg, var(--primary-warm) 0%, #FF5252 100%);
+      color: white; 
+      font-weight: 600; 
+      padding: 0.75rem 1.5rem; 
+      border-radius: 0.75rem; 
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success-warm) 0%, #40C057 100%);
+      box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+    }
+
+    .btn-success:hover {
+      box-shadow: 0 8px 25px rgba(81, 207, 102, 0.4);
+    }
+
+    .btn-info {
+      background: linear-gradient(135deg, var(--info-warm) 0%, #339AF0 100%);
+      box-shadow: 0 4px 15px rgba(116, 192, 252, 0.3);
+    }
+
+    .btn-info:hover {
+      box-shadow: 0 8px 25px rgba(116, 192, 252, 0.4);
+    }
+
+    #output { 
+      line-height: 1.8; 
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 107, 107, 0.1);
+    }
+
+    [contenteditable="true"]:hover { 
+      background: rgba(255, 230, 109, 0.1); 
+      outline: 2px dashed var(--accent-warm); 
+      border-radius: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid rgba(255, 107, 107, 0.2);
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-warm);
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+      background: white;
+    }
+
+    .form-group input::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    summary { 
+      cursor: pointer; 
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, var(--secondary-warm) 0%, #26D0CE 100%);
+      color: white;
+      border-radius: 0.75rem;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      border: none;
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    summary::before {
+      content: '✨';
+      margin-right: 0.5rem;
+    }
+
+    summary:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+    }
+
+    .advanced { 
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 255, 0.9) 100%); 
+      border: 1px solid rgba(78, 205, 196, 0.2); 
+      border-radius: 1rem; 
+      padding: 1.5rem; 
+      margin-top: 1rem; 
+      box-shadow: 0 4px 20px rgba(78, 205, 196, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .advanced label { 
+      color: var(--text-primary); 
+      font-weight: 600; 
+      margin-bottom: 0.8rem; 
+      display: block;
+    }
+
+    .advanced input, .advanced select, .advanced textarea { 
+      border: 2px solid rgba(78, 205, 196, 0.2); 
+      border-radius: 0.75rem; 
+      padding: 0.8rem 1rem; 
+      font-size: 1rem; 
+      transition: all 0.3s ease; 
+      background: rgba(255, 255, 255, 0.8);
+      width: 100%;
+    }
+
+    .advanced input:focus, .advanced select:focus, .advanced textarea:focus { 
+      outline: none; 
+      border-color: var(--secondary-warm); 
+      background: white; 
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1); 
+    }
+
+    /* Markdown 渲染样式 - 温暖教育风格 */
+    #output h1, #output h2, #output h3, #output h4, #output h5, #output h6 { 
+      color: var(--text-primary); 
+      margin: 1.5rem 0 1rem 0; 
+      font-weight: 600;
+      position: relative;
+    }
+    
+    #output h2 { 
+      font-size: 1.4rem; 
+      border-bottom: 3px solid var(--primary-warm); 
+      padding-bottom: 0.5rem;
+      position: relative;
+    }
+
+    #output h2::before {
+      content: '💡';
+      margin-right: 0.5rem;
+      font-size: 1.2rem;
+    }
+    
+    #output p, #output li { 
+      margin: 0.8rem 0; 
+      line-height: 1.8; 
+      color: var(--text-primary);
+    }
+    
+    #output strong { 
+      color: var(--primary-warm); 
+      font-weight: 700;
+    }
+    
+    #output code { 
+      background: rgba(255, 230, 109, 0.2); 
+      padding: 0.3rem 0.6rem; 
+      border-radius: 6px; 
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
+      font-size: 0.9rem; 
+      color: var(--primary-warm);
+      border: 1px solid rgba(255, 230, 109, 0.3);
+    }
+    
+    #output pre { 
+      background: linear-gradient(135deg, #2D3436 0%, #636E72 100%); 
+      color: #ECF0F1; 
+      padding: 1.5rem; 
+      border-radius: 1rem; 
+      overflow-x: auto; 
+      margin: 1.5rem 0;
+      box-shadow: 0 4px 15px rgba(45, 52, 54, 0.2);
+    }
+    
+    #output blockquote { 
+      border-left: 4px solid var(--secondary-warm); 
+      margin: 1rem 0; 
+      padding: 1rem 1.5rem; 
+      background: linear-gradient(135deg, rgba(78, 205, 196, 0.05) 0%, rgba(116, 192, 252, 0.05) 100%); 
+      border-radius: 0 1rem 1rem 0;
+      position: relative;
+      font-style: italic;
+    }
+
+    #output blockquote::before {
+      content: '"';
+      position: absolute;
+      top: -0.5rem;
+      left: 1rem;
+      font-size: 3rem;
+      color: var(--secondary-warm);
+      opacity: 0.3;
+    }
+
+    /* 试卷/题目样式 - 温暖教育风格 */
+    .paper-header { 
+      border: 2px solid var(--primary-warm); 
+      padding: 2rem; 
+      margin-bottom: 2rem; 
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 230, 109, 0.05) 100%);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-warm);
+    }
+    
+    .paper-title { 
+      text-align: center; 
+      font-size: 1.8rem; 
+      font-weight: 700; 
+      margin: 1.5rem 0; 
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    .paper-title::before {
+      content: '📚';
+      margin-right: 0.5rem;
+      font-size: 1.5rem;
+    }
+    
+    .solution-space { 
+      border: 2px dashed var(--accent-warm); 
+      min-height: 120px; 
+      margin: 1.5rem 0; 
+      padding: 1.5rem; 
+      background: linear-gradient(135deg, rgba(255, 230, 109, 0.1) 0%, rgba(255, 255, 255, 0.8) 100%); 
+      border-radius: 1rem;
+      position: relative;
+    }
+
+    .solution-space::before {
+      content: '✏️ 在这里写下你的答案';
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      opacity: 0.7;
+    }
+    
+    .question-item { 
+      margin-bottom: 2rem; 
+      padding: 1.5rem; 
+      border: 1px solid rgba(255, 107, 107, 0.2); 
+      border-radius: 1rem; 
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 230, 109, 0.05) 100%);
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .question-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 107, 107, 0.15);
+    }
+    
+    .question-title { 
+      font-weight: 700; 
+      font-size: 1.1rem; 
+      margin-bottom: 1rem; 
+      color: var(--text-primary);
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .question-title::before {
+      content: '🎯';
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 1.2rem;
+    }
+
+    /* 标签页样式 - 温暖教育风格 */
+    .content-tabs { 
+      margin-top: 2rem;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-warm);
+    }
+    
+    .tab-buttons { 
+      display: flex; 
+      border-bottom: 3px solid rgba(255, 107, 107, 0.2); 
+      margin-bottom: 2rem;
+      gap: 0.5rem;
+    }
+    
+    .tab-btn { 
+      background: rgba(255, 255, 255, 0.8); 
+      border: 2px solid rgba(255, 107, 107, 0.2); 
+      padding: 1rem 2rem; 
+      cursor: pointer; 
+      font-size: 1rem; 
+      font-weight: 600; 
+      color: var(--text-secondary); 
+      border-radius: 1rem 1rem 0 0; 
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 107, 107, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .tab-btn:hover::before {
+      left: 100%;
+    }
+    
+    .tab-btn:hover { 
+      background: rgba(255, 230, 109, 0.1); 
+      color: var(--primary-warm);
+      border-color: var(--accent-warm);
+      transform: translateY(-2px);
+    }
+    
+    .tab-btn.active { 
+      background: linear-gradient(135deg, var(--primary-warm) 0%, #FF5252 100%); 
+      color: white;
+      border-color: var(--primary-warm);
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .tab-content { 
+      display: none; 
+      padding: 2rem; 
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 255, 0.5) 100%); 
+      border-radius: 0 1rem 1rem 1rem; 
+      min-height: 300px;
+      border: 1px solid rgba(255, 107, 107, 0.1);
+    }
+    
+    .tab-content.active { 
+      display: block;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 加载动画 */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 107, 107, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-warm);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* 成功提示样式 */
+    .success-message {
+      background: linear-gradient(135deg, var(--success-warm) 0%, #40C057 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 1rem;
+      margin: 1rem 0;
+      box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
+      animation: slideInDown 0.5s ease-out;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 响应式设计优化 */
+    @media (max-width: 768px) {
+      .card {
+        padding: 1.5rem;
+        margin: 1rem;
+      }
+      
+      .grid-cols-1.md\:grid-cols-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      .grid-cols-1.md\:grid-cols-3 {
+        grid-template-columns: 1fr;
+      }
+      
+      .flex.flex-wrap.justify-center.gap-4 {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
+        margin: 0.5rem 0;
+      }
+      
+      .tab-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .tab-btn {
+        border-radius: 1rem;
+        text-align: center;
+      }
+      
+      .tab-content {
+        border-radius: 1rem;
+      }
+    }
+
+    /* 可访问性优化 */
+    .btn:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid var(--primary-warm);
+      outline-offset: 2px;
+    }
+
+    /* 高对比度模式支持 */
+    @media (prefers-contrast: high) {
+      :root {
+        --primary-warm: #CC0000;
+        --secondary-warm: #0066CC;
+        --text-primary: #000000;
+        --text-secondary: #333333;
+      }
+    }
+
+    /* 减少动画模式支持 */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* 打印样式优化 */
+    @media print {
+      body {
+        background: white !important;
+      }
+      
+      .card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+      }
+      
+      .btn,
+      details,
+      .success-message {
+        display: none !important;
+      }
+      
+      #output {
+        background: white !important;
+        border: none !important;
+      }
+    }
+
+    /* 深色模式支持 - 优化可读性 */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary-warm: #FF6B6B;
+        --secondary-warm: #4ECDC4;
+        --accent-warm: #FFE66D;
+        --success-warm: #51CF66;
+        --info-warm: #74C0FC;
+        --warning-warm: #FFD43B;
+        --text-primary: #FFFFFF;
+        --text-secondary: #E0E0E0;
+        --bg-warm: linear-gradient(135deg, #0F0F0F 0%, #1A1A1A 100%);
+        --card-warm: rgba(30, 30, 30, 0.98);
+        --shadow-warm: 0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+
+      body {
+        color: var(--text-primary);
+      }
+
+      .card {
+        background: var(--card-warm);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .form-group label {
+        color: var(--text-primary);
+      }
+
+      .form-group input, .form-group select {
+        background: rgba(40, 40, 40, 0.9);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text-primary);
+      }
+
+      .form-group input::placeholder {
+        color: #888888;
+      }
+
+      .form-group input:focus, .form-group select:focus {
+        background: rgba(50, 50, 50, 1);
+        border-color: var(--primary-warm);
+      }
+
+      .advanced {
+        background: linear-gradient(135deg, rgba(40, 40, 40, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .advanced input, .advanced select, .advanced textarea {
+        background: rgba(50, 50, 50, 0.8);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text-primary);
+      }
+
+      .advanced input:focus, .advanced select:focus, .advanced textarea:focus {
+        background: rgba(60, 60, 60, 1);
+        border-color: var(--secondary-warm);
+      }
+
+      #output {
+        background: rgba(40, 40, 40, 0.9);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+      }
+
+      .content-tabs {
+        background: rgba(35, 35, 35, 0.9);
+      }
+
+      .tab-btn {
+        background: rgba(50, 50, 50, 0.8);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text-secondary);
+      }
+
+      .tab-btn:hover {
+        background: rgba(60, 60, 60, 0.9);
+        color: var(--primary-warm);
+      }
+
+      .tab-content {
+        background: linear-gradient(135deg, rgba(45, 45, 45, 0.9) 0%, rgba(35, 35, 35, 0.9) 100%);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+      }
+
+      .question-item {
+        background: linear-gradient(135deg, rgba(45, 45, 45, 0.9) 0%, rgba(35, 35, 35, 0.9) 100%);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .solution-space {
+        background: linear-gradient(135deg, rgba(50, 50, 50, 0.8) 0%, rgba(40, 40, 40, 0.8) 100%);
+        border-color: var(--accent-warm);
+      }
+
+      .paper-header {
+        background: linear-gradient(135deg, rgba(45, 45, 45, 0.95) 0%, rgba(35, 35, 35, 0.95) 100%);
+        border-color: var(--primary-warm);
+      }
+
+      /* 确保所有文字在深色模式下可见 */
+      h1, h2, h3, h4, h5, h6, p, span, div, label, option {
+        color: var(--text-primary) !important;
+      }
+
+      .text-gray-600, .text-gray-500, .text-gray-700 {
+        color: var(--text-secondary) !important;
+      }
+
+      /* 输出区域的文字样式 */
+      #output h1, #output h2, #output h3, #output h4, #output h5, #output h6 {
+        color: var(--text-primary) !important;
+      }
+
+      #output p, #output li {
+        color: var(--text-primary) !important;
+      }
+
+      #output strong {
+        color: var(--primary-warm) !important;
+      }
+
+      #output code {
+        background: rgba(60, 60, 60, 0.8);
+        color: var(--accent-warm);
+        border-color: rgba(255, 230, 109, 0.3);
+      }
+
+      #output blockquote {
+        background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, rgba(116, 192, 252, 0.1) 100%);
+        color: var(--text-primary);
+      }
+    }
