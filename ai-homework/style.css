@@ -1,23 +1,43 @@
     :root {
+      /* 学习友好型现代配色方案 */
       --primary-warm: #FF6B6B;
+      --primary-modern: #3B82F6;
       --secondary-warm: #4ECDC4;
+      --secondary-modern: #8B5CF6;
       --accent-warm: #FFE66D;
+      --accent-modern: #F59E0B;
       --success-warm: #51CF66;
       --info-warm: #74C0FC;
       --warning-warm: #FFD43B;
       --text-primary: #2D3436;
       --text-secondary: #636E72;
+      --text-modern: #374151;
       --bg-warm: linear-gradient(135deg, #FFE8E8 0%, #F8F9FF 100%);
+      --bg-modern: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       --card-warm: rgba(255, 255, 255, 0.95);
+      --card-modern: rgba(255, 255, 255, 0.98);
       --shadow-warm: 0 8px 32px rgba(255, 107, 107, 0.15);
+      --shadow-modern: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      
+      /* 现代设计变量 */
+      --border-radius-sm: 0.375rem;
+      --border-radius-md: 0.5rem;
+      --border-radius-lg: 0.75rem;
+      --border-radius-xl: 1rem;
+      --border-radius-2xl: 1.5rem;
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body { 
-      background: var(--bg-warm); 
-      font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      background: var(--bg-modern); 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB";
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
+      line-height: 1.6;
+      color: var(--text-modern);
     }
 
     body::before {
@@ -41,15 +61,21 @@
     }
 
     .card { 
-      background: var(--card-warm); 
-      border-radius: 1.5rem; 
-      box-shadow: var(--shadow-warm); 
+      background: var(--card-modern); 
+      border-radius: var(--border-radius-2xl); 
+      box-shadow: var(--shadow-modern); 
       padding: 2.5rem; 
       -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.3);
       position: relative;
       overflow: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 
     .card::before {
@@ -60,16 +86,16 @@
       right: 0;
       height: 4px;
       background: linear-gradient(90deg, var(--primary-warm), var(--secondary-warm), var(--accent-warm));
-      border-radius: 1.5rem 1.5rem 0 0;
+      border-radius: var(--border-radius-2xl) var(--border-radius-2xl) 0 0;
     }
 
     .btn { 
-      background: linear-gradient(135deg, var(--primary-warm) 0%, #FF5252 100%);
+      background: linear-gradient(135deg, var(--primary-warm) 0%, var(--primary-modern) 100%);
       color: white; 
       font-weight: 600; 
       padding: 0.75rem 1.5rem; 
-      border-radius: 0.75rem; 
-      transition: all 0.3s ease;
+      border-radius: var(--border-radius-lg); 
+      transition: all var(--transition-normal);
       border: none;
       cursor: pointer;
       position: relative;
@@ -103,35 +129,38 @@
     }
 
     .btn-success {
-      background: linear-gradient(135deg, var(--success-warm) 0%, #40C057 100%);
+      background: linear-gradient(135deg, var(--success-warm) 0%, #10B981 100%);
       box-shadow: 0 4px 15px rgba(81, 207, 102, 0.3);
     }
 
     .btn-success:hover {
       box-shadow: 0 8px 25px rgba(81, 207, 102, 0.4);
+      transform: translateY(-2px);
     }
 
     .btn-info {
-      background: linear-gradient(135deg, var(--info-warm) 0%, #339AF0 100%);
+      background: linear-gradient(135deg, var(--info-warm) 0%, var(--primary-modern) 100%);
       box-shadow: 0 4px 15px rgba(116, 192, 252, 0.3);
     }
 
     .btn-info:hover {
       box-shadow: 0 8px 25px rgba(116, 192, 252, 0.4);
+      transform: translateY(-2px);
     }
 
     #output { 
       line-height: 1.8; 
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: var(--border-radius-xl);
       padding: 1.5rem;
       border: 1px solid rgba(255, 107, 107, 0.1);
+      transition: all var(--transition-normal);
     }
 
     [contenteditable="true"]:hover { 
       background: rgba(255, 230, 109, 0.1); 
       outline: 2px dashed var(--accent-warm); 
-      border-radius: 0.5rem;
+      border-radius: var(--border-radius-md);
     }
 
     .form-group {
@@ -151,9 +180,9 @@
       width: 100%;
       padding: 0.75rem 1rem;
       border: 2px solid rgba(255, 107, 107, 0.2);
-      border-radius: 0.75rem;
+      border-radius: var(--border-radius-lg);
       font-size: 1rem;
-      transition: all 0.3s ease;
+      transition: all var(--transition-normal);
       background: rgba(255, 255, 255, 0.9);
     }
 
@@ -162,6 +191,7 @@
       border-color: var(--primary-warm);
       box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
       background: white;
+      transform: translateY(-1px);
     }
 
     .form-group input::placeholder {
@@ -172,10 +202,10 @@
     summary { 
       cursor: pointer; 
       padding: 1rem 1.5rem;
-      background: linear-gradient(135deg, var(--secondary-warm) 0%, #26D0CE 100%);
+      background: linear-gradient(135deg, var(--secondary-warm) 0%, var(--secondary-modern) 100%);
       color: white;
-      border-radius: 0.75rem;
-      transition: all 0.3s ease;
+      border-radius: var(--border-radius-lg);
+      transition: all var(--transition-normal);
       font-weight: 600;
       border: none;
       outline: none;
@@ -196,7 +226,7 @@
     .advanced { 
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 255, 0.9) 100%); 
       border: 1px solid rgba(78, 205, 196, 0.2); 
-      border-radius: 1rem; 
+      border-radius: var(--border-radius-xl); 
       padding: 1.5rem; 
       margin-top: 1rem; 
       box-shadow: 0 4px 20px rgba(78, 205, 196, 0.1);
@@ -212,10 +242,10 @@
 
     .advanced input, .advanced select, .advanced textarea { 
       border: 2px solid rgba(78, 205, 196, 0.2); 
-      border-radius: 0.75rem; 
+      border-radius: var(--border-radius-lg); 
       padding: 0.8rem 1rem; 
       font-size: 1rem; 
-      transition: all 0.3s ease; 
+      transition: all var(--transition-normal); 
       background: rgba(255, 255, 255, 0.8);
       width: 100%;
     }
@@ -224,7 +254,8 @@
       outline: none; 
       border-color: var(--secondary-warm); 
       background: white; 
-      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1); 
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.1);
+      transform: translateY(-1px);
     }
 
     /* Markdown 渲染样式 - 温暖教育风格 */
@@ -498,6 +529,65 @@
       }
     }
 
+    /* 现代学习友好型样式增强 */
+    .learning-progress {
+      background: linear-gradient(135deg, rgba(255, 230, 109, 0.1) 0%, rgba(78, 205, 196, 0.1) 100%);
+      border: 2px dashed var(--accent-warm);
+      border-radius: var(--border-radius-xl);
+      padding: 1rem;
+      margin: 1rem 0;
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .learning-motivation {
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+      border-radius: var(--border-radius-lg);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-left: 4px solid var(--primary-warm);
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    .question-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-warm), #FFD43B);
+      color: var(--text-primary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius-lg);
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(255, 230, 109, 0.3);
+    }
+
+    .difficulty-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--border-radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .difficulty-basic {
+      background: linear-gradient(135deg, #51CF66, #40C057);
+      color: white;
+    }
+
+    .difficulty-advanced {
+      background: linear-gradient(135deg, #FF6B6B, #FF5252);
+      color: white;
+    }
+
+    .difficulty-expert {
+      background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+      color: white;
+    }
+
     /* 响应式设计优化 */
     @media (max-width: 768px) {
       .card {
@@ -590,6 +680,107 @@
         background: white !important;
         border: none !important;
       }
+    }
+
+    /* 答题界面样式 */
+    .answer-section {
+      transition: all var(--transition-normal);
+    }
+
+    .answer-section:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 230, 109, 0.2);
+    }
+
+    .answer-input label {
+      transition: all var(--transition-normal);
+    }
+
+    .answer-input label:hover {
+      background: rgba(255, 230, 109, 0.1) !important;
+      border-color: var(--accent-warm) !important;
+      transform: translateY(-1px);
+    }
+
+    .answer-input input[type="radio"]:checked + span {
+      background: linear-gradient(135deg, var(--primary-warm), #FF5252) !important;
+      color: white !important;
+      border-color: var(--primary-warm) !important;
+    }
+
+    .answer-input textarea:focus {
+      outline: none;
+      border-color: var(--primary-warm) !important;
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+      transform: translateY(-1px);
+    }
+
+    /* 选择题选项样式 */
+    .choice-option {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border: 2px solid rgba(255, 107, 107, 0.2);
+      border-radius: 0.5rem;
+      background: white;
+      transition: all 0.3s ease;
+      margin: 0.25rem;
+    }
+
+    .choice-option:hover {
+      background: rgba(255, 230, 109, 0.1);
+      border-color: var(--accent-warm);
+      transform: translateY(-1px);
+    }
+
+    .choice-option input[type="radio"]:checked + span {
+      background: linear-gradient(135deg, var(--primary-warm), #FF5252);
+      color: white;
+      border-color: var(--primary-warm);
+    }
+
+    /* 消息提示动画 */
+    @keyframes slideOutUp {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+    }
+
+    /* 消息类型样式 */
+    .message-success {
+      background: linear-gradient(135deg, var(--success-warm) 0%, #40C057 100%);
+    }
+
+    .message-warning {
+      background: linear-gradient(135deg, var(--warning-warm) 0%, #FFD43B 100%);
+    }
+
+    .message-error {
+      background: linear-gradient(135deg, var(--primary-warm) 0%, #FF5252 100%);
+    }
+
+    .message-info {
+      background: linear-gradient(135deg, var(--info-warm) 0%, #74C0FC 100%);
+    }
+
+    /* 结果展示样式 */
+    .results-container {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .result-item {
+      transition: all var(--transition-normal);
+    }
+
+    .result-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
     /* 深色模式支持 - 优化可读性 */

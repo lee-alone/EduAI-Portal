@@ -13,6 +13,8 @@ class ClassMeetingGenerator {
         this.themeInput = document.getElementById('themeInput');
         this.customRequirements = document.getElementById('customRequirements');
         this.apiKeyInput = document.getElementById('apiKeyInput');
+        this.aiModel = document.getElementById('ai-model');
+        this.temperature = document.getElementById('temperature');
         this.generateBtn = document.getElementById('generateBtn');
         this.loading = document.getElementById('loading');
         this.actionButtons = document.getElementById('actionButtons');
@@ -29,6 +31,16 @@ class ClassMeetingGenerator {
         this.previewProcess = document.getElementById('previewProcess');
         this.previewReflection = document.getElementById('previewReflection');
 
+        // 帮助模态框元素
+        this.helpBtn = document.getElementById('help-btn');
+        this.helpModal = document.getElementById('help-modal');
+        this.closeHelp = document.getElementById('close-help');
+
+        // 高级设置元素
+        this.advancedToggle = document.getElementById('advanced-toggle');
+        this.advancedContent = document.getElementById('advanced-content');
+        this.advancedIcon = document.getElementById('advanced-icon');
+
         // 设置默认API密钥
         this.setDefaultApiKey();
     }
@@ -37,6 +49,18 @@ class ClassMeetingGenerator {
         this.generateBtn.addEventListener('click', () => this.generateClassMeeting());
         this.copyBtn.addEventListener('click', () => this.copyContent());
         this.downloadBtn.addEventListener('click', () => this.downloadWordDocument());
+
+        // 帮助模态框事件
+        this.helpBtn.addEventListener('click', () => this.showHelpModal());
+        this.closeHelp.addEventListener('click', () => this.hideHelpModal());
+        this.helpModal.addEventListener('click', (e) => {
+            if (e.target === this.helpModal) {
+                this.hideHelpModal();
+            }
+        });
+
+        // 高级设置切换事件
+        this.advancedToggle.addEventListener('click', () => this.toggleAdvancedSettings());
 
         // 实时预览更新
         [this.timeInput, this.classInput, this.teacherInput, this.hostInput, this.themeInput].forEach(input => {
@@ -67,8 +91,8 @@ class ClassMeetingGenerator {
         if (!this.validateInputs()) return;
 
         this.generateBtn.disabled = true;
-        this.loading.style.display = 'block';
-        this.actionButtons.style.display = 'none';
+        this.loading.classList.remove('hidden');
+        this.actionButtons.classList.add('hidden');
 
         try {
             const formData = {
@@ -82,25 +106,33 @@ class ClassMeetingGenerator {
 
             // 获取API密钥（用户输入或使用默认值）
             const apiKey = this.apiKeyInput.value.trim() || this.defaultApiKey;
+            const selectedModel = this.aiModel.value;
+            const selectedTemperature = parseFloat(this.temperature.value);
             let generatedContent;
             
-            // 始终使用API生成（如果用户没有输入API密钥，使用默认值）
-            generatedContent = await this.callDeepSeekAPI(formData);
+            // 根据选择的模型调用相应的API
+            generatedContent = await this.callAIAPI(formData, selectedModel, apiKey, selectedTemperature);
             
             this.generatedContent = generatedContent;
             
             // 更新预览
             this.updatePreviewWithGeneratedContent(generatedContent);
             
+            // 显示预览区域
+            const previewSection = document.getElementById('preview-section');
+            if (previewSection) {
+                previewSection.classList.remove('hidden');
+            }
+            
             // 显示操作按钮
-            this.actionButtons.style.display = 'flex';
+            this.actionButtons.classList.remove('hidden');
 
         } catch (error) {
             alert('生成失败，请重试');
             console.error('生成错误:', error);
         } finally {
             this.generateBtn.disabled = false;
-            this.loading.style.display = 'none';
+            this.loading.classList.add('hidden');
         }
     }
 
@@ -260,21 +292,21 @@ class ClassMeetingGenerator {
         return '高一'; // 默认值
     }
 
-    async callDeepSeekAPI(formData) {
-        const apiKey = this.apiKeyInput.value.trim() || this.defaultApiKey;
-        
-        const apiUrl = 'https://api.deepseek.com/v1/chat/completions';
+    async callAIAPI(formData, model, apiKey, temperature) {
         const prompt = this.generateCozePrompt(formData);
         
+        // 根据模型选择API端点
+        const apiConfig = this.getAPIConfig(model);
+        
         try {
-            const response = await fetch(apiUrl, {
+            const response = await fetch(apiConfig.url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`
                 },
                 body: JSON.stringify({
-                    model: 'deepseek-chat',
+                    model: model,
                     messages: [
                         {
                             role: 'system',
@@ -285,7 +317,7 @@ class ClassMeetingGenerator {
                             content: prompt
                         }
                     ],
-                    temperature: 0.7,
+                    temperature: temperature,
                     max_tokens: 3000
                 })
             });
@@ -298,10 +330,33 @@ class ClassMeetingGenerator {
             return data.choices[0].message.content;
             
         } catch (error) {
-            console.error('DeepSeek API调用错误:', error);
+            console.error(`${model} API调用错误:`, error);
             // 如果API调用失败，回退到本地模板
             return this.generateLocalTemplate(formData);
         }
+    }
+
+    getAPIConfig(model) {
+        const configs = {
+            'deepseek-chat': {
+                url: 'https://api.deepseek.com/v1/chat/completions',
+                name: 'DeepSeek Chat'
+            },
+            'deepseek-coder': {
+                url: 'https://api.deepseek.com/v1/chat/completions',
+                name: 'DeepSeek Coder'
+            },
+            'qwen-turbo': {
+                url: 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation',
+                name: '通义千问 Turbo'
+            },
+            'glm-4': {
+                url: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
+                name: '智谱 GLM-4'
+            }
+        };
+        
+        return configs[model] || configs['deepseek-chat'];
     }
 
     generateCozePrompt(formData) {
@@ -605,6 +660,30 @@ ${htmlContent.substring(htmlContent.indexOf('<body>'))}
         } catch (error) {
             console.error('Word文档生成错误:', error);
             alert('Word文档生成出错，请重试');
+        }
+    }
+
+    // 帮助模态框方法
+    showHelpModal() {
+        this.helpModal.classList.remove('hidden');
+        this.helpModal.classList.add('flex');
+    }
+
+    hideHelpModal() {
+        this.helpModal.classList.add('hidden');
+        this.helpModal.classList.remove('flex');
+    }
+
+    // 高级设置切换方法
+    toggleAdvancedSettings() {
+        const isHidden = this.advancedContent.classList.contains('hidden');
+        
+        if (isHidden) {
+            this.advancedContent.classList.remove('hidden');
+            this.advancedIcon.style.transform = 'rotate(180deg)';
+        } else {
+            this.advancedContent.classList.add('hidden');
+            this.advancedIcon.style.transform = 'rotate(0deg)';
         }
     }
 }

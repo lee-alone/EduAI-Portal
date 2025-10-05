@@ -33,7 +33,7 @@
       <p class="text-lg text-gray-600 mb-4">
         每一次练习都是成长的足迹，每一次挑战都是智慧的积累
       </p>
-      <div class="inline-block bg-gradient-to-r from-pink-100 to-blue-100 px-4 py-2 rounded-full text-sm text-gray-700">
+      <div class="learning-motivation">
         ✨ 让AI成为你的学习伙伴，一起探索知识的海洋
       </div>
     </div>
@@ -76,9 +76,9 @@
           <span class="text-sm text-gray-500 font-normal">(选择适合的难度)</span>
         </label>
         <select id="difficulty" class="w-full border rounded p-2" aria-label="选择挑战等级">
-          <option>基础 - 夯实基础，稳步前进</option>
-          <option>提升 - 挑战自我，突破瓶颈</option>
-          <option>拓展 - 开拓视野，追求卓越</option>
+          <option value="基础">基础 - 夯实基础，稳步前进</option>
+          <option value="提升">提升 - 挑战自我，突破瓶颈</option>
+          <option value="拓展">拓展 - 开拓视野，追求卓越</option>
     </select>
       </div>
 
@@ -102,6 +102,12 @@
         <button id="exportAnswerBtn" class="btn btn-info text-lg px-6 py-3">
           🔍 查看解题秘籍
         </button>
+      </div>
+      <div class="learning-progress" style="display: none;" id="progressIndicator">
+        <div class="question-counter">
+          <span id="currentQuestion">0</span> / <span id="totalQuestions">0</span> 题已完成
+        </div>
+        <div class="mt-2 text-sm text-gray-600">继续加油，你正在进步！</div>
       </div>
     </div>
 

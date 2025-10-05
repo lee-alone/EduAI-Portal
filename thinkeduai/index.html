@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>榜中九思 教育思考助手</title>
 <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.4.1/dist/html-docx.min.js"></script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,64 +17,116 @@
   </div>
   
   <div class="app-container">
-    <!-- 返回首页按钮 -->
-    <div style="margin-bottom: 24px; text-align: left;">
-      <a href="../index.html" style="display: inline-flex; align-items: center; padding: 12px 16px; background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; text-decoration: none; border-radius: 8px; font-weight: 500; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 6px 8px rgba(0, 0, 0, 0.15)'; this.style.background='linear-gradient(135deg, #7c3aed, #db2777)'" onmouseout="this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)'; this.style.background='linear-gradient(135deg, #8b5cf6, #ec4899)'">
-        <svg style="width: 16px; height: 16px; margin-right: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+    <!-- 顶部导航栏 -->
+    <nav class="top-nav">
+      <a href="../index.html" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
         </svg>
         返回首页
       </a>
-    </div>
-    
-    <header class="header">
-  <h1>榜中九思 教育思考助手</h1>
-      <p class="subtitle">无论是课堂教学、教研设计，还是教育管理的思考，这里都是您灵感的起点。</p>
-    </header>
-
-    <div class="chat-container">
-      <div class="conversation-area">
-        <div id="response" class="response hidden">
-          <div id="responseContent" class="response-content"></div>
-        </div>
+      <div class="nav-title">
+        <h1>榜中九思 教育思考助手</h1>
+        <p>智能教育咨询与思考平台</p>
       </div>
+      <div class="nav-actions">
+        <button class="export-btn" onclick="exportConversation()" title="导出对话记录">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          导出
+        </button>
+        <button class="settings-btn" onclick="toggleAdvanced()" title="设置">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </button>
+      </div>
+    </nav>
 
-      <div class="input-area">
-        <div class="input-section">
-          <label for="userInput" class="input-label">🌱 请描述您想要探讨的教育问题</label>
-          <div class="input-wrapper">
-    <textarea id="userInput" placeholder="💬 请输入您的教育问题，例如：如何提高学生课堂参与度？"></textarea>
-            <div class="button-group">
-              <button class="primary-button" onclick="console.log('按钮被点击'); sendMessage();">
-                <span id="buttonText">🚀 发送</span>
-              </button>
+    <!-- 聊天主界面 -->
+    <div class="chat-main">
+      <!-- 对话区域 -->
+      <div class="chat-area">
+        <div id="chatContainer" class="chat-container">
+          <div class="welcome-message">
+            <div class="welcome-avatar">
+              <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+            </div>
+            <div class="welcome-content">
+              <h3>👋 欢迎使用教育思考助手</h3>
+              <p>我是您的AI教育顾问，可以帮助您：</p>
+              <ul>
+                <li>📚 分析教学问题和挑战</li>
+                <li>🎯 设计教学策略和方法</li>
+                <li>💡 提供创新教育理念</li>
+                <li>📊 优化教学效果评估</li>
+              </ul>
+              <p>请描述您想要探讨的教育问题，让我们开始对话吧！</p>
             </div>
           </div>
         </div>
       </div>
-  </div>
 
-  <div class="advanced-settings">
-      <button class="advanced-toggle" onclick="toggleAdvanced()">⚙️ 高级设置</button>
-    <div class="advanced-content" id="advancedContent">
-      <div class="advanced-field">
-          <label for="model" class="field-label">选择思考模型</label>
-        <select id="model">
-            <option value="deepseek-chat" selected>DeepSeek 教育模型</option>
-            <option value="glm-4">智谱 GLM 教育版</option>
-            <option value="qwen-turbo">通义千问 教研助手</option>
-        </select>
-      </div>
-      <div class="advanced-field">
-          <label for="apiKey" class="field-label">API Key（可选）</label>
-        <input type="password" id="apiKey" placeholder="如有专属 API，请在此输入" />
-      </div>
-      <div class="advanced-field">
-          <label for="customPrompt" class="field-label">个性化提示（可选）</label>
-        <input type="text" id="customPrompt" placeholder="例如：请以初中英语教师的角度回答" />
+      <!-- 输入区域 -->
+      <div class="input-area">
+        <div class="input-container">
+          <div class="input-wrapper">
+            <textarea id="userInput" placeholder="请输入您的教育问题..." rows="1"></textarea>
+            <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="input-footer">
+            <span class="input-hint">按 Ctrl+Enter 发送消息</span>
+            <button class="clear-btn" onclick="clearConversation()" title="清空对话">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              清空对话
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- 高级设置面板 -->
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-header">
+        <h3>高级设置</h3>
+        <button class="close-btn" onclick="toggleAdvanced()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="settings-content">
+        <div class="setting-group">
+          <label for="model" class="setting-label">AI模型选择</label>
+          <select id="model" class="modern-select">
+            <option value="deepseek-chat" selected>DeepSeek 教育模型</option>
+            <option value="glm-4">智谱 GLM 教育版</option>
+            <option value="qwen-turbo">通义千问 教研助手</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label for="apiKey" class="setting-label">API Key（可选）</label>
+          <input type="password" id="apiKey" class="modern-input" placeholder="如有专属 API，请在此输入" />
+        </div>
+        <div class="setting-group">
+          <label for="customPrompt" class="setting-label">个性化提示（可选）</label>
+          <input type="text" id="customPrompt" class="modern-input" placeholder="例如：请以初中英语教师的角度回答" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置遮罩 -->
+    <div class="settings-overlay" id="settingsOverlay" onclick="toggleAdvanced()"></div>
   </div>
 
   <script src="script.js"></script>

@@ -7,6 +7,11 @@
       console.log("Marked库已加载");
     }
     
+    // 检查导出库是否加载
+    if (typeof saveAs === 'undefined') {
+      console.warn("FileSaver库未加载，导出功能可能不可用");
+    }
+    
     const SYSTEM_PROMPT = `
 你是一位具有深厚教育专业背景教学专家。
 你的是厦门九中的AI老师。
@@ -36,9 +41,16 @@
     console.log("变量初始化完成");
 
     function displayUserMessage(message) {
-      const conversationContainer = document.getElementById("conversationContainer");
-      if (!conversationContainer) {
-        createConversationContainer();
+      const chatContainer = document.getElementById("chatContainer");
+      if (!chatContainer) {
+        console.error("找不到聊天容器");
+        return;
+      }
+      
+      // 隐藏欢迎消息
+      const welcomeMessage = chatContainer.querySelector(".welcome-message");
+      if (welcomeMessage) {
+        welcomeMessage.style.display = "none";
       }
       
       const messageDiv = document.createElement("div");
@@ -49,22 +61,34 @@
         </div>
       `;
       
-      document.getElementById("conversationContainer").appendChild(messageDiv);
+      chatContainer.appendChild(messageDiv);
       scrollToBottom();
     }
 
     function createAIMessageContainer() {
-      const conversationContainer = document.getElementById("conversationContainer");
+      const chatContainer = document.getElementById("chatContainer");
+      if (!chatContainer) {
+        console.error("找不到聊天容器");
+        return null;
+      }
+      
+      // 隐藏欢迎消息
+      const welcomeMessage = chatContainer.querySelector(".welcome-message");
+      if (welcomeMessage) {
+        welcomeMessage.style.display = "none";
+      }
+      
       const messageDiv = document.createElement("div");
       messageDiv.className = "message ai-message";
       messageDiv.innerHTML = `
         <div class="message-content">
+          <div class="ai-avatar">AI</div>
           <div class="message-text" id="aiMessage-${Date.now()}"></div>
           <button class="copy-message-btn" onclick="copyMessage(this)" title="复制此条消息">📋</button>
         </div>
       `;
       
-      conversationContainer.appendChild(messageDiv);
+      chatContainer.appendChild(messageDiv);
       scrollToBottom();
       return messageDiv;
     }
@@ -78,43 +102,53 @@
     }
 
     function displayErrorMessage(message) {
-      const conversationContainer = document.getElementById("conversationContainer");
+      const chatContainer = document.getElementById("chatContainer");
+      if (!chatContainer) {
+        console.error("找不到聊天容器");
+        return;
+      }
+      
+      // 隐藏欢迎消息
+      const welcomeMessage = chatContainer.querySelector(".welcome-message");
+      if (welcomeMessage) {
+        welcomeMessage.style.display = "none";
+      }
+      
       const messageDiv = document.createElement("div");
       messageDiv.className = "message error-message";
       messageDiv.innerHTML = `
         <div class="message-content">
-          <div class="message-text">${message}</div>
+          <div class="ai-avatar">!</div>
+          <div class="message-text" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">${message}</div>
         </div>
       `;
       
-      conversationContainer.appendChild(messageDiv);
+      chatContainer.appendChild(messageDiv);
       scrollToBottom();
       hideLoading();
     }
 
-    function createConversationContainer() {
-      const responseBox = document.getElementById("response");
-      responseBox.innerHTML = `
-        <div id="conversationContainer" class="conversation-container"></div>
-        <div class="conversation-actions">
-          <button class="clear-conversation-btn" onclick="clearConversation()" title="清空对话历史">🗑️ 清空对话</button>
-        </div>
-      `;
-      responseBox.classList.remove("hidden");
-    }
 
     function scrollToBottom() {
-      const container = document.getElementById("conversationContainer");
-      if (container) {
-        container.scrollTop = container.scrollHeight;
+      const chatContainer = document.getElementById("chatContainer");
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
       }
     }
 
     function clearConversation() {
       conversationHistory = [];
-      const conversationContainer = document.getElementById("conversationContainer");
-      if (conversationContainer) {
-        conversationContainer.innerHTML = "";
+      const chatContainer = document.getElementById("chatContainer");
+      if (chatContainer) {
+        // 清空所有消息，但保留欢迎消息
+        const messages = chatContainer.querySelectorAll(".message");
+        messages.forEach(message => message.remove());
+        
+        // 显示欢迎消息
+        const welcomeMessage = chatContainer.querySelector(".welcome-message");
+        if (welcomeMessage) {
+          welcomeMessage.style.display = "flex";
+        }
       }
     }
 
@@ -137,36 +171,26 @@
     }
 
     function toggleAdvanced() {
-      const content = document.getElementById("advancedContent");
-      const toggleBtn = document.querySelector(".advanced-toggle");
-      const settingsContainer = document.querySelector(".advanced-settings");
+      const settingsPanel = document.getElementById("settingsPanel");
+      const settingsOverlay = document.getElementById("settingsOverlay");
       
-      if (content.style.display === "none" || content.style.display === "") {
-        // 展开时设置容器宽度为100%
-        settingsContainer.style.width = "100%";
-        content.style.display = "block";
-        content.classList.add("show");
-        toggleBtn.textContent = "收起高级设置 ▴";
+      if (settingsPanel.classList.contains("active")) {
+        // 关闭设置面板
+        settingsPanel.classList.remove("active");
+        settingsOverlay.classList.remove("active");
       } else {
-        // 收起时恢复自动宽度
-        content.classList.remove("show");
-        setTimeout(() => {
-          content.style.display = "none";
-          settingsContainer.style.width = "auto";
-        }, 300);
-        toggleBtn.textContent = "展开高级设置 ▾";
+        // 打开设置面板
+        settingsPanel.classList.add("active");
+        settingsOverlay.classList.add("active");
       }
     }
 
     function showStreamingLoading(messageElement) {
-      const buttonText = document.getElementById("buttonText");
-      const button = document.querySelector(".primary-button");
+      const sendBtn = document.getElementById("sendBtn");
       
-      if (buttonText) {
-        buttonText.innerHTML = '<span class="loading"></span>🤔 AI正在思考...';
-      }
-      if (button) {
-        button.disabled = true;
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="loading"></span>';
       }
       
       // 在消息元素中显示思考动画
@@ -183,36 +207,27 @@
     function showLoading() {
       console.log("showLoading函数被调用");
       
-      const buttonText = document.getElementById("buttonText");
-      const responseBox = document.getElementById("response");
-      const responseContent = document.getElementById("responseContent");
-      const button = document.querySelector(".primary-button");
+      const sendBtn = document.getElementById("sendBtn");
       
-      console.log("找到的元素:", { buttonText, responseBox, responseContent, button });
-      
-      if (buttonText) {
-        buttonText.innerHTML = '<span class="loading"></span>🤔 正在思考...';
-      }
-      if (button) {
-        button.disabled = true;
-      }
-      if (responseBox) {
-        responseBox.classList.remove("hidden");
-      }
-      if (responseContent) {
-        responseContent.innerHTML = "<div class='warm-loading'>🌱 请稍候，AI 正在为您整理思路...</div>";
-        responseBox.classList.add("show");
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="loading"></span>';
       }
       
       console.log("showLoading完成");
     }
 
     function hideLoading() {
-      const buttonText = document.getElementById("buttonText");
-      const button = document.querySelector(".primary-button");
+      const sendBtn = document.getElementById("sendBtn");
       
-      buttonText.innerHTML = '🚀 发送';
-      button.disabled = false;
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = `
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+          </svg>
+        `;
+      }
     }
 
     // 处理流式响应
@@ -363,41 +378,6 @@
         });
     }
 
-    function copyResponse() {
-      const responseContent = document.getElementById("responseContent");
-      const copyButton = document.querySelector(".copy-button");
-      
-      // 获取纯文本内容
-      const textContent = responseContent.textContent || responseContent.innerText;
-      
-      // 复制到剪贴板
-      navigator.clipboard.writeText(textContent).then(() => {
-        copyButton.textContent = "✅ 已复制";
-        copyButton.classList.add("copied");
-        
-        setTimeout(() => {
-          copyButton.textContent = "📋 复制";
-          copyButton.classList.remove("copied");
-        }, 2000);
-      }).catch(err => {
-        console.error("复制失败:", err);
-        // 降级方案：使用传统方法
-        const textArea = document.createElement("textarea");
-        textArea.value = textContent;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-        
-        copyButton.textContent = "✅ 已复制";
-        copyButton.classList.add("copied");
-        
-        setTimeout(() => {
-          copyButton.textContent = "📋 复制";
-          copyButton.classList.remove("copied");
-        }, 2000);
-      });
-    }
 
     async function sendMessage() {
       console.log("sendMessage函数被调用");
@@ -405,8 +385,6 @@
       const userInput = document.getElementById("userInput").value.trim();
       console.log("用户输入:", userInput);
       
-      const responseBox = document.getElementById("response");
-      const responseContent = document.getElementById("responseContent");
       const model = document.getElementById("model").value;
       const apiKey = document.getElementById("apiKey").value || defaultApiKey;
       const customPrompt = document.getElementById("customPrompt").value.trim();
@@ -415,8 +393,7 @@
 
       if (!userInput) {
         console.log("用户输入为空");
-        responseBox.classList.remove("hidden");
-        responseContent.innerHTML = "<div class='gentle-reminder'>😊 请先输入您想要探讨的教育问题</div>";
+        alert("请先输入您想要探讨的教育问题");
         return;
       }
 
@@ -602,17 +579,13 @@
         userInput.addEventListener("keydown", function(event) {
           if (event.key === "Enter" && event.ctrlKey) {
             console.log("Ctrl+Enter被按下");
+            event.preventDefault();
+            sendMessage();
+          } else if (event.key === "Enter" && !event.shiftKey) {
+            // 单按Enter键也发送消息
+            event.preventDefault();
             sendMessage();
           }
-        });
-
-        // 添加输入框焦点效果
-        userInput.addEventListener("focus", function() {
-          this.parentElement.classList.add("focused");
-        });
-
-        userInput.addEventListener("blur", function() {
-          this.parentElement.classList.remove("focused");
         });
 
         // 自动调整textarea高度
@@ -626,6 +599,113 @@
         console.error("找不到userInput元素");
       }
     });
+    
+    // 导出对话记录功能
+    function exportConversation() {
+      const chatContainer = document.getElementById("chatContainer");
+      if (!chatContainer) {
+        console.error("找不到聊天容器");
+        return;
+      }
+      
+      const messages = chatContainer.querySelectorAll(".message");
+      if (messages.length === 0) {
+        alert("暂无对话记录可导出");
+        return;
+      }
+      
+      // 构建HTML内容
+      let htmlContent = `
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>教育思考助手对话记录</title>
+          <style>
+            body { font-family: "Microsoft YaHei", Arial, sans-serif; line-height: 1.6; margin: 40px; }
+            .message { margin-bottom: 20px; }
+            .user-message { text-align: right; }
+            .ai-message { text-align: left; }
+            .message-text { 
+              display: inline-block; 
+              max-width: 70%; 
+              padding: 10px 15px; 
+              border-radius: 10px; 
+              margin: 5px 0;
+            }
+            .user-message .message-text { 
+              background: #007bff; 
+              color: white; 
+            }
+            .ai-message .message-text { 
+              background: #f8f9fa; 
+              border: 1px solid #dee2e6; 
+            }
+            .message-time { 
+              font-size: 12px; 
+              color: #6c757d; 
+              margin: 5px 0;
+            }
+            h1 { color: #333; text-align: center; margin-bottom: 30px; }
+            .export-info { 
+              background: #e9ecef; 
+              padding: 15px; 
+              border-radius: 5px; 
+              margin-bottom: 30px; 
+              font-size: 14px;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>教育思考助手对话记录</h1>
+          <div class="export-info">
+            <strong>导出时间：</strong>${new Date().toLocaleString('zh-CN')}<br>
+            <strong>对话条数：</strong>${messages.length}条
+          </div>
+      `;
+      
+      messages.forEach((message, index) => {
+        const messageText = message.querySelector(".message-text");
+        const isUserMessage = message.classList.contains("user-message");
+        const content = messageText ? messageText.textContent.trim() : "";
+        
+        if (content) {
+          const timestamp = new Date().toLocaleString('zh-CN');
+          htmlContent += `
+            <div class="message ${isUserMessage ? 'user-message' : 'ai-message'}">
+              <div class="message-time">${timestamp}</div>
+              <div class="message-text">${content.replace(/\n/g, '<br>')}</div>
+            </div>
+          `;
+        }
+      });
+      
+      htmlContent += `
+        </body>
+        </html>
+      `;
+      
+      // 使用html-docx-js转换为Word文档
+      if (typeof htmlDocx !== 'undefined') {
+        try {
+          const docx = htmlDocx.asBlob(htmlContent);
+          const fileName = `教育思考助手对话记录_${new Date().toISOString().slice(0, 10)}.docx`;
+          saveAs(docx, fileName);
+        } catch (error) {
+          console.error("导出Word文档失败:", error);
+          // 降级到HTML格式
+          exportAsHTML(htmlContent);
+        }
+      } else {
+        // 降级到HTML格式
+        exportAsHTML(htmlContent);
+      }
+    }
+    
+    function exportAsHTML(htmlContent) {
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const fileName = `教育思考助手对话记录_${new Date().toISOString().slice(0, 10)}.html`;
+      saveAs(blob, fileName);
+    }
     
     // 测试函数
     window.testFunction = function() {

@@ -4,158 +4,295 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>厦门市第九中学 - 温馨班会记录助手</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <!-- 引入html-docx-js用于Word导出 -->
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <!-- 引入独立的PDF生成库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- 引入自定义样式 -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="container">
-        <!-- 返回首页按钮 -->
-        <div class="mb-4">
-            <a href="../index.html" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg">
-                <i class="fas fa-home mr-2"></i>
-                返回首页
-            </a>
-        </div>
-        
-        <div class="header">
-            <div class="school-logo">厦门市第九中学</div>
-            <div class="school-subtitle">用心记录每一次成长时光</div>
-        </div>
-
-        <div class="main-content">
-            <div class="input-section">
-                <h2 class="section-title">
-                    <i class="fas fa-edit"></i>
-                    班会信息填写
-                </h2>
-                
-                <div class="form-group">
-                    <label class="form-label">时间</label>
-                    <input type="date" class="form-input" id="timeInput" placeholder="请选择日期">
+<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-users text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">温馨班会记录助手</h1>
+                        <p class="text-xs text-gray-500">用心记录每一次成长时光</p>
+                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">班级</label>
-                    <input type="text" class="form-input" id="classInput" placeholder="例如：高一(1)班">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg">
+                        <i class="fas fa-home mr-2"></i>
+                        返回首页
+                    </a>
+                    <button id="help-btn" class="p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50" title="使用帮助">
+                        <i class="fas fa-question-circle text-lg"></i>
+                    </button>
+                    <button id="settings-toggle" class="p-2 text-gray-600 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50" title="高级设置">
+                        <i class="fas fa-cog text-lg"></i>
+                    </button>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">班主任</label>
-                    <input type="text" class="form-input" id="teacherInput" placeholder="请输入班主任姓名">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">主持人</label>
-                    <input type="text" class="form-input" id="hostInput" placeholder="请输入主持人姓名">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">主题</label>
-                    <textarea class="form-textarea" id="themeInput" placeholder="请输入班会主题，例如：安全教育、心理健康教育等"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">DeepSeek API密钥（可选）</label>
-                    <input type="password" class="form-input" id="apiKeyInput" placeholder="输入您的DeepSeek API密钥以获得更好的生成效果">
-                    <small style="color: #666; font-size: 0.9rem;">
-                        如果没有API密钥，系统将使用本地模板生成教案
-                        <span style="color: #999; margin-left: 10px;">如需帮助请联系管理员</span>
-                    </small>
-                </div>
-
-                <button class="generate-btn" id="generateBtn">
-                    <i class="fas fa-magic"></i>
-                    生成班会记录
-                </button>
             </div>
+        </div>
+    </nav>
 
-            <div class="output-section">
-                <h2 class="section-title">
-                    <i class="fas fa-lightbulb"></i>
-                    个性化定制
-                </h2>
+    <!-- 主要内容区域 -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 欢迎区域 -->
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">开始创建您的班会记录</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">只需简单几步，AI将为您生成专业的班会记录文档</p>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="max-w-4xl mx-auto">
+            <!-- 基础信息卡片 -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-6">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-edit text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">班会信息填写</h3>
+                        <p class="text-gray-600">请填写班会的基本信息</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label for="timeInput" class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="text-red-500">*</span> 时间
+                        </label>
+                        <input type="date" id="timeInput" class="modern-input" placeholder="请选择日期">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="classInput" class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="text-red-500">*</span> 班级
+                        </label>
+                        <input type="text" id="classInput" class="modern-input" placeholder="例如：高一(1)班">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label for="teacherInput" class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="text-red-500">*</span> 班主任
+                        </label>
+                        <input type="text" id="teacherInput" class="modern-input" placeholder="请输入班主任姓名">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hostInput" class="block text-sm font-medium text-gray-700 mb-2">
+                            <span class="text-red-500">*</span> 主持人
+                        </label>
+                        <input type="text" id="hostInput" class="modern-input" placeholder="请输入主持人姓名">
+                    </div>
+                </div>
 
                 <div class="form-group">
-                    <label class="form-label">特殊要求（可选）</label>
-                    <textarea class="form-textarea" id="customRequirements" placeholder="请输入您的特殊要求，例如：
+                    <label for="themeInput" class="block text-sm font-medium text-gray-700 mb-2">
+                        <span class="text-red-500">*</span> 主题
+                    </label>
+                    <textarea id="themeInput" class="modern-textarea" rows="3" placeholder="请输入班会主题，例如：安全教育、心理健康教育等"></textarea>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="customRequirements" class="block text-sm font-medium text-gray-700 mb-2">
+                        特殊要求 <span class="text-gray-400">(可选)</span>
+                    </label>
+                    <textarea id="customRequirements" class="modern-textarea" rows="3" placeholder="请输入您的特殊要求，例如：
 • 重点关注某个学生的表现
 • 增加互动环节的描述
 • 强调某个教育重点
 • 其他个性化需求..."></textarea>
                 </div>
 
-                <div class="loading" id="loading">
-                    <i class="fas fa-spinner"></i>
-                    <p>正在智能生成班会记录...</p>
+                <!-- 高级设置 -->
+                <div class="border border-gray-200 rounded-xl p-4 mb-6">
+                    <button id="advanced-toggle" class="w-full flex items-center justify-between text-left">
+                        <span class="font-medium text-gray-700">高级设置</span>
+                        <i id="advanced-icon" class="fas fa-chevron-down text-gray-400 transition-transform"></i>
+                    </button>
+                    <div id="advanced-content" class="hidden mt-4 space-y-4">
+                        <div class="form-group">
+                            <label for="ai-model" class="block text-sm font-medium text-gray-700 mb-2">AI模型</label>
+                            <select id="ai-model" class="modern-select">
+                                <option value="deepseek-chat">DeepSeek Chat (推荐)</option>
+                                <option value="deepseek-coder">DeepSeek Coder</option>
+                                <option value="qwen-turbo">通义千问 Turbo</option>
+                                <option value="glm-4">智谱 GLM-4</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="apiKeyInput" class="block text-sm font-medium text-gray-700 mb-2">
+                                API密钥 <span class="text-gray-400">(可选)</span>
+                            </label>
+                            <input type="password" id="apiKeyInput" class="modern-input" placeholder="输入您的API密钥以获得更好的生成效果">
+                            <p class="text-xs text-gray-500 mt-1">
+                                如果没有API密钥，系统将使用默认配置
+                            </p>
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature" class="block text-sm font-medium text-gray-700 mb-2">
+                                创造性程度
+                            </label>
+                            <select id="temperature" class="modern-select">
+                                <option value="0.7">平衡 (推荐)</option>
+                                <option value="0.5">保守</option>
+                                <option value="0.9">创新</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">
+                                控制AI生成的创造性和多样性
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="action-buttons" id="actionButtons" style="display: none;">
-                    <button class="btn-secondary" id="copyBtn">
-                        <i class="fas fa-copy"></i>
-                        复制内容
+                <div class="flex justify-end mt-6">
+                    <button id="generateBtn" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-magic mr-2"></i> 生成班会记录
                     </button>
-                    <button class="btn-primary" id="downloadBtn">
-                        <i class="fas fa-download"></i>
-                        导出Word文档
+                </div>
+
+                <!-- 加载指示器 -->
+                <div id="loading" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-6 text-center mt-6">
+                    <div class="flex items-center justify-center space-x-3">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        <span class="text-blue-700 font-medium">AI正在生成您的班会记录，请稍候...</span>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div id="actionButtons" class="hidden flex justify-center space-x-4 mt-6">
+                    <button id="copyBtn" class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-copy mr-2"></i> 复制内容
+                    </button>
+                    <button id="downloadBtn" class="px-6 py-3 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 transition-colors">
+                        <i class="fas fa-download mr-2"></i> 导出Word文档
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="preview-section">
-            <h2 class="section-title">
-                <i class="fas fa-eye"></i>
-                班会记录预览
-            </h2>
-            
-            <table class="preview-table">
-                <thead>
-                    <tr>
-                        <th>项目</th>
-                        <th>内容</th>
-                    </tr>
-                </thead>
-                <tbody id="previewBody">
-                    <tr>
-                        <td>时间</td>
-                        <td id="previewTime">-</td>
-                    </tr>
-                    <tr>
-                        <td>班级</td>
-                        <td id="previewClass">-</td>
-                    </tr>
-                    <tr>
-                        <td>班主任</td>
-                        <td id="previewTeacher">-</td>
-                    </tr>
-                    <tr>
-                        <td>主持人</td>
-                        <td id="previewHost">-</td>
-                    </tr>
-                    <tr>
-                        <td>主题</td>
-                        <td id="previewTheme">-</td>
-                    </tr>
-                    <tr>
-                        <td>教育目标</td>
-                        <td id="previewGoals">-</td>
-                    </tr>
-                    <tr>
-                        <td>过程内容</td>
-                        <td id="previewProcess">-</td>
-                    </tr>
-                    <tr>
-                        <td>收获反思</td>
-                        <td id="previewReflection">-</td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- 预览区域 -->
+        <div id="preview-section" class="hidden">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-eye text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">班会记录预览</h3>
+                            <p class="text-gray-600">AI为您生成的班会记录预览</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-6 min-h-[400px] overflow-y-auto border border-gray-200">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="bg-blue-500 text-white p-4 text-left font-semibold rounded-tl-lg">项目</th>
+                                <th class="bg-blue-500 text-white p-4 text-left font-semibold rounded-tr-lg">内容</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewBody" class="bg-white">
+                            <tr class="border-b border-gray-200">
+                                <td class="p-4 font-medium text-gray-700">时间</td>
+                                <td id="previewTime" class="p-4 text-gray-900">-</td>
+                            </tr>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <td class="p-4 font-medium text-gray-700">班级</td>
+                                <td id="previewClass" class="p-4 text-gray-900">-</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="p-4 font-medium text-gray-700">班主任</td>
+                                <td id="previewTeacher" class="p-4 text-gray-900">-</td>
+                            </tr>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <td class="p-4 font-medium text-gray-700">主持人</td>
+                                <td id="previewHost" class="p-4 text-gray-900">-</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="p-4 font-medium text-gray-700">主题</td>
+                                <td id="previewTheme" class="p-4 text-gray-900">-</td>
+                            </tr>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <td class="p-4 font-medium text-gray-700">教育目标</td>
+                                <td id="previewGoals" class="p-4 text-gray-900">-</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="p-4 font-medium text-gray-700">过程内容</td>
+                                <td id="previewProcess" class="p-4 text-gray-900">-</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="p-4 font-medium text-gray-700 rounded-bl-lg">收获反思</td>
+                                <td id="previewReflection" class="p-4 text-gray-900 rounded-br-lg">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- 帮助模态框 -->
+    <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-gray-900">使用帮助</h3>
+                    <button id="close-help" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">🚀 快速开始</h4>
+                    <p class="text-gray-600 text-sm">只需填写时间、班级、班主任、主持人和主题，AI就能为您生成专业的班会记录。</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">📝 使用流程</h4>
+                    <ul class="text-gray-600 text-sm space-y-1">
+                        <li><strong>步骤1：</strong>填写班会基本信息（必填项已标注）</li>
+                        <li><strong>步骤2：</strong>添加特殊要求（可选）</li>
+                        <li><strong>步骤3：</strong>生成并导出班会记录</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">🤖 AI智能特性</h4>
+                    <ul class="text-gray-600 text-sm space-y-1">
+                        <li>• 根据班会主题智能生成教育目标</li>
+                        <li>• 自动设计班会流程和活动内容</li>
+                        <li>• 生成符合教育标准的反思总结</li>
+                        <li>• 支持个性化定制要求</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">⌨️ 快捷键</h4>
+                    <ul class="text-gray-600 text-sm space-y-1">
+                        <li><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl+Enter</kbd> 生成班会记录</li>
+                        <li><kbd class="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl+S</kbd> 导出Word文档</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    
     <script src="script.js"></script>
 </body>
 </html>
