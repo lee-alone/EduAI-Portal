@@ -169,7 +169,7 @@ D. 选项内容
       const difficulty = document.getElementById("difficulty").value;
       const num = document.getElementById("num").value;
       const model = document.getElementById("model").value;
-      const apiKey = document.getElementById("apiKey").value.trim() || "DEMO-KEY";
+      const apiKey = document.getElementById("apiKey").value.trim() || "sk-0560c9a849694436a71c1ef4c053505a";
       const customPrompt = document.getElementById("customPrompt").value.trim();
 
       if (!topic) {

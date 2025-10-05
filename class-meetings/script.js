@@ -80,17 +80,12 @@ class ClassMeetingGenerator {
                 customRequirements: this.customRequirements.value
             };
 
-            // 检查是否有API密钥
-            const apiKey = this.apiKeyInput.value.trim();
+            // 获取API密钥（用户输入或使用默认值）
+            const apiKey = this.apiKeyInput.value.trim() || this.defaultApiKey;
             let generatedContent;
             
-            if (apiKey) {
-                // 使用API生成
-                generatedContent = await this.callDeepSeekAPI(formData);
-            } else {
-                // 使用本地模板生成
-                generatedContent = this.generateLocalTemplate(formData);
-            }
+            // 始终使用API生成（如果用户没有输入API密钥，使用默认值）
+            generatedContent = await this.callDeepSeekAPI(formData);
             
             this.generatedContent = generatedContent;
             
@@ -266,11 +261,7 @@ class ClassMeetingGenerator {
     }
 
     async callDeepSeekAPI(formData) {
-        const apiKey = this.apiKeyInput.value.trim();
-        
-        if (!apiKey) {
-            throw new Error('请输入API密钥');
-        }
+        const apiKey = this.apiKeyInput.value.trim() || this.defaultApiKey;
         
         const apiUrl = 'https://api.deepseek.com/v1/chat/completions';
         const prompt = this.generateCozePrompt(formData);
@@ -439,12 +430,10 @@ Word 转换兼容性要求：
 
     formatDateTime(dateTimeString) {
         const date = new Date(dateTimeString);
-        return date.toLocaleString('zh-CN', {
+        return date.toLocaleDateString('zh-CN', {
             year: 'numeric',
             month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
+            day: '2-digit'
         });
     }
 
@@ -454,21 +443,9 @@ Word 转换兼容性要求：
     }
 
     setDefaultApiKey() {
-        // 从外部文件读取默认API密钥（如果存在）
-        fetch('ds密钥.txt')
-            .then(response => response.text())
-            .then(apiKey => {
-                if (this.apiKeyInput && !this.apiKeyInput.value && apiKey.trim()) {
-                    this.apiKeyInput.value = apiKey.trim();
-                }
-            })
-            .catch(() => {
-                // 如果文件不存在或读取失败，使用默认值
-                const defaultApiKey = 'sk-0560c9a849694436a71c1ef4c053505a';
-                if (this.apiKeyInput && !this.apiKeyInput.value) {
-                    this.apiKeyInput.value = defaultApiKey;
-                }
-            });
+        // 不再在页面中设置API密钥值，保持输入框空白
+        // 默认API密钥将在代码中自动使用
+        this.defaultApiKey = 'sk-0560c9a849694436a71c1ef4c053505a';
     }
 
     updatePreview() {

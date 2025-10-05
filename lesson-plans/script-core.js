@@ -457,13 +457,8 @@ class LessonPlanCore {
 
         // 所有可折叠模块默认收起（除了必填的课程信息）
 
-        // 设置默认API密钥和模型
-        const apiKeyInput = document.getElementById('api-key');
+        // 设置默认模型
         const modelSelect = document.getElementById('ai-model');
-        
-        if (apiKeyInput && !apiKeyInput.value) {
-            apiKeyInput.value = 'sk-0560c9a849694436a71c1ef4c053505a';
-        }
         
         if (modelSelect && !modelSelect.value) {
             modelSelect.value = 'deepseek-chat';
@@ -723,7 +718,7 @@ class LessonPlanCore {
             realWorldContext: document.getElementById('real-world-context')?.value?.trim() || '',
             customRequirements: document.getElementById('custom-requirements')?.value?.trim() || '',
             aiModel: document.getElementById('ai-model')?.value || 'deepseek-chat',
-            apiKey: document.getElementById('api-key')?.value?.trim() || ''
+            apiKey: document.getElementById('api-key')?.value?.trim() || 'sk-0560c9a849694436a71c1ef4c053505a'
         };
     }
 
