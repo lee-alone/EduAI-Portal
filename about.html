@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>关于我们 - 厦门市第九中学AI实验室</title>
+
+  <!-- 外部依赖 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  
+  <style>
+    /* 关于我们页面专用样式 */
+    .about-hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 120px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .about-hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 25px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .about-section {
+      padding: 80px 0;
+    }
+    
+    .about-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .about-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .about-card h3 {
+      color: #2c3e50;
+      font-weight: 600;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    
+    .about-card p {
+      color: #5a6c7d;
+      line-height: 1.8;
+      font-size: 1.1rem;
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+    
+    .feature-item {
+      text-align: center;
+      padding: 30px 20px;
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 12px;
+      transition: transform 0.3s ease;
+    }
+    
+    .feature-item:hover {
+      transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 24px;
+      color: #fff;
+    }
+    
+    .stats-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 60px 0;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: block;
+    }
+    
+    .stat-label {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    .team-section {
+      background: #f8f9fa;
+      padding: 80px 0;
+    }
+    
+    .team-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease;
+    }
+    
+    .team-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .team-avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+      .about-hero {
+        padding: 100px 0 60px;
+      }
+      
+      .back-btn {
+        position: relative;
+        top: auto;
+        left: auto;
+        margin-bottom: 30px;
+        display: inline-block;
+      }
+      
+      .about-card {
+        padding: 30px 20px;
+      }
+      
+      .feature-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== Header / Navbar ===== -->
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark py-3" id="navbar">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">
+          <span class="brand-line-1">厦门市第九中学</span>
+          <span class="brand-line-2">AI实验室</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="切换导航">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="index.html">首页</a></li>
+            <li class="nav-item"><a class="nav-link active" href="about.html">关于我们</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ===== About Hero Section ===== -->
+  <section class="about-hero">
+    <a href="index.html" class="back-btn">
+      ← 返回首页
+    </a>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 text-center about-hero-content">
+          <h1 class="animate__animated animate__fadeInUp">关于我们</h1>
+          <p class="lead animate__animated animate__fadeInUp animate__delay-1s">
+            探索AI教育的无限可能，引领未来教育新方向
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 学校介绍 ===== -->
+  <section class="about-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <div class="about-card animate__animated animate__fadeInUp">
+            <h3>厦门市第九中学</h3>
+            <p>
+              厦门市第九中学是一所具有深厚文化底蕴和现代化教育理念的学校。学校秉承"借智臻美，行远和鸣"的办学理念，
+              致力于培养具有创新精神和实践能力的新时代人才。在数字化教育浪潮中，我们积极探索AI技术与教育教学的深度融合，
+              为学生提供更加个性化、智能化的学习体验。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== AI实验室介绍 ===== -->
+  <section class="about-section bg-light">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-10 mx-auto">
+          <div class="about-card animate__animated animate__fadeInUp">
+            <h3>AI实验室</h3>
+            <p>
+              我们的AI实验室是学校创新教育的重要平台，专注于将人工智能技术应用于教育教学的各个环节。
+              通过"智备"、"智练"、"智会"、"智囊"四大核心模块，我们构建了完整的AI教育生态系统，
+              为教师提供智能化的教学工具，为学生创造个性化的学习环境。
+            </p>
+            
+            <div class="feature-grid">
+              <div class="feature-item">
+                <div class="feature-icon">📚</div>
+                <h5>智备</h5>
+                <p>智能生成跨学科教案，提升教学效率</p>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">✏️</div>
+                <h5>智练</h5>
+                <p>个性化习题定制，因材施教</p>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">👥</div>
+                <h5>智会</h5>
+                <p>智能生成标准班会记录</p>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">💡</div>
+                <h5>智囊</h5>
+                <p>教育智慧咨询与思考</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 数据统计 ===== -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-item">
+            <span class="stat-number">500+</span>
+            <span class="stat-label">智能教案生成</span>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-item">
+            <span class="stat-number">1000+</span>
+            <span class="stat-label">个性化习题</span>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-item">
+            <span class="stat-number">50+</span>
+            <span class="stat-label">教师用户</span>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="stat-item">
+            <span class="stat-number">95%</span>
+            <span class="stat-label">用户满意度</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 团队介绍 ===== -->
+  <section class="team-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mx-auto text-center mb-5">
+          <h2 class="mb-4">我们的团队</h2>
+          <p class="lead">由教育专家、技术工程师和AI研究人员组成的专业团队</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="team-card">
+            <div class="team-avatar">教</div>
+            <h5>教育专家团队</h5>
+            <p>资深教师和教育研究者，负责课程设计和教学理念指导</p>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="team-card">
+            <div class="team-avatar">技</div>
+            <h5>技术开发团队</h5>
+            <p>专业的技术工程师，负责AI算法开发和系统维护</p>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+          <div class="team-card">
+            <div class="team-avatar">研</div>
+            <h5>研究创新团队</h5>
+            <p>AI研究人员，专注于教育AI技术的前沿探索</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 愿景使命 ===== -->
+  <section class="about-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 mb-4">
+          <div class="about-card">
+            <h3>我们的愿景</h3>
+            <p>
+              成为国内领先的AI教育创新平台，通过人工智能技术赋能教育，
+              让每一个学生都能享受到个性化、智能化的优质教育服务，
+              培养面向未来的创新型人才。
+            </p>
+          </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+          <div class="about-card">
+            <h3>我们的使命</h3>
+            <p>
+              致力于将最前沿的AI技术与教育教学深度融合，
+              为教师提供智能化的教学工具，为学生创造个性化的学习体验，
+              推动教育公平，提升教育质量，让教育更加智慧、高效、人性化。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <p>&copy; 2025 厦门市第九中学AI实验室 | <a href="#">隐私政策</a> | <a href="#">联系我们</a></p>
+  </footer>
+
+  <!-- ===== JS脚本 ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // 滚动动画
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+        }
+      });
+    }, observerOptions);
+
+    // 观察所有卡片元素
+    document.querySelectorAll('.about-card, .feature-item, .team-card').forEach(el => {
+      observer.observe(el);
+    });
+
+    // 导航栏滚动效果
+    window.addEventListener('scroll', function() {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+  </script>
+</body>
+</html>
