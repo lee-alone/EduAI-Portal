@@ -328,8 +328,16 @@ button:disabled {
 }
 
 .overflow-y-auto {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+  }
 }
 
 /* ===== 预览内容区域优化 ===== */
@@ -423,8 +431,8 @@ button:disabled {
 
 /* ===== 帮助模态框样式 ===== */
 #help-modal {
-  backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }
 
 #help-modal .bg-white {
@@ -467,7 +475,7 @@ input[type="radio"]:checked + div .font-medium {
   
   .progress-indicator {
     flex-direction: column;
-    space-y: 1rem;
+    gap: 1rem;
   }
   
   .progress-indicator .w-16 {
@@ -488,8 +496,12 @@ input[type="radio"]:checked + div .font-medium {
   
   .flex.space-x-3 {
     flex-direction: column;
-    space-x: 0;
     gap: 0.75rem;
+  }
+
+  /* Remove horizontal spacing that may have been applied by a "space-x" utility */
+  .flex.space-x-3 > * + * {
+    margin-left: 0;
   }
 }
 

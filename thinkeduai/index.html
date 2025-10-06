@@ -76,7 +76,7 @@
         <div class="input-container">
           <div class="input-wrapper">
             <textarea id="userInput" placeholder="请输入您的教育问题..." rows="1"></textarea>
-            <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+            <button class="send-btn" onclick="sendMessage()" id="sendBtn" title="发送消息" aria-label="发送消息">
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
               </svg>
@@ -99,7 +99,7 @@
     <div class="settings-panel" id="settingsPanel">
       <div class="settings-header">
         <h3>高级设置</h3>
-        <button class="close-btn" onclick="toggleAdvanced()">
+        <button class="close-btn" onclick="toggleAdvanced()" title="关闭设置面板">
           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>

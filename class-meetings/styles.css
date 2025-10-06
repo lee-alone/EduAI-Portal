@@ -155,8 +155,8 @@ button:disabled {
 
 /* ===== 帮助模态框样式 ===== */
 #help-modal {
-  backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
 }
 
 #help-modal .bg-white {
@@ -252,8 +252,20 @@ button:disabled {
 }
 
 .overflow-y-auto {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  overflow-y: auto;
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
 }
 
 /* ===== 预览内容区域优化 ===== */

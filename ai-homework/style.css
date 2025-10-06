@@ -230,6 +230,7 @@
       padding: 1.5rem; 
       margin-top: 1rem; 
       box-shadow: 0 4px 20px rgba(78, 205, 196, 0.1);
+      -webkit-backdrop-filter: blur(10px);
       backdrop-filter: blur(10px);
     }
 
