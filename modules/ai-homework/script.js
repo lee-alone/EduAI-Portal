@@ -374,23 +374,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function evaluateSubjective(questionInfo, studentAnswer, standardAnswer, apiKey) {
         const isWriting = questionInfo.type.includes('写作');
-        const prompt = `
-        你是一位严格而富有洞察力的AI教师。请根据以下信息，以循循善诱的口吻评判学生的答案。
+        
+        // 构建结构化的用户消息，将指令和数据分离
+        const userPrompt = `
+        请根据以下题目和要求，对稍后提供的学生答案进行评判。
         【题目】: ${questionInfo.question_text}
         【${isWriting ? '写作要求' : '标准答案参考'}】: ${standardAnswer}
-        【学生答案】: ${studentAnswer}
 
         请严格按照以下JSON格式返回，不要添加任何额外描述：
         {
           "isCorrect": false, 
           "score": <0-100之间的整数得分>,
-          "feedback": "(简短反馈，${isWriting ? '从文章结构、逻辑、语法等角度总结核心问题' : '直接指出学生回答中知识点的不足或缺失之处'}",
+          "feedback": "(简短反馈，${isWriting ? '从文章结构、逻辑、语法等角度总结核心问题' : '直接指出学生回答中知识点的不足或缺失之处'})",
           "explanation": "(详细解析，${isWriting ? '分点说明文章的优点和缺点，并提供改进建议' : '首先总结一个优秀答案应包含的答题要点，然后再对学生的答案进行详细分析和指导'}"
         }`;
+
+        const studentAnswerPrompt = `这是学生的答案，请开始批改：\n\n${studentAnswer}`;
+
         try {
             const model = getElem("model").value;
             const apiConfig = getApiConfig(model);
-            const payload = { model, messages: [{ role: "system", content: "You are an AI teacher." }, { role: "user", content: prompt }], temperature: 0.3 };
+            
+            // 使用分离的、结构化的消息数组
+            const payload = { 
+                model, 
+                messages: [
+                    { role: "system", content: "你是一位严格而富有洞察力的AI教师。" },
+                    { role: "user", content: userPrompt },
+                    { role: "user", content: studentAnswerPrompt }
+                ], 
+                temperature: 0.3 
+            };
+
             const data = await safeApiCall(apiConfig.url, apiKey, payload);
             const result = extractJsonFromText(data.choices?.[0]?.message?.content?.trim() || '');
             return result || { isCorrect: false, score: 0, feedback: "AI批改失败", explanation: "AI返回格式错误。" };
