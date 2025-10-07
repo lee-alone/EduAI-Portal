@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             difficulty: getElem("difficulty").value,
             num: getElem("num").value,
             model: getElem("model").value,
-            apiKey: getElem("apiKey").value.trim() || "sk-0560c9a849694436a71c1ef4c053505a",
+            apiKey: getElem("apiKey").value.trim() || getSharedApiKey(),
             customPrompt: getElem("customPrompt").value.trim(),
             creativity: getElem("creativity").value
         };
@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function evaluateStructuredAnswers() {
         const results = [];
-        const apiKey = getElem("apiKey").value.trim() || "sk-0560c9a849694436a71c1ef4c053505a";
+        const apiKey = getElem("apiKey").value.trim() || getSharedApiKey();
 
         for (const solution of AppState.solutions) {
             const questionInfo = AppState.questions.find(q => q.question_number === solution.question_number);

@@ -33,7 +33,7 @@
 | 实验法 | 技能训练 | 实践性强 | 安全第一 |
     `;
 
-    const defaultApiKey = "sk-0560c9a849694436a71c1ef4c053505a";
+    const defaultApiKey = getSharedApiKey();
     
     // 对话历史管理
     let conversationHistory = [];

@@ -500,7 +500,7 @@ Word 转换兼容性要求：
     setDefaultApiKey() {
         // 不再在页面中设置API密钥值，保持输入框空白
         // 默认API密钥将在代码中自动使用
-        this.defaultApiKey = 'sk-0560c9a849694436a71c1ef4c053505a';
+        this.defaultApiKey = getSharedApiKey();
     }
 
     updatePreview() {

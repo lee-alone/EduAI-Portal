@@ -718,7 +718,7 @@ class LessonPlanCore {
             realWorldContext: document.getElementById('real-world-context')?.value?.trim() || '',
             customRequirements: document.getElementById('custom-requirements')?.value?.trim() || '',
             aiModel: document.getElementById('ai-model')?.value || 'deepseek-chat',
-            apiKey: document.getElementById('api-key')?.value?.trim() || 'sk-0560c9a849694436a71c1ef4c053505a'
+            apiKey: document.getElementById('api-key')?.value?.trim() || getSharedApiKey()
         };
     }
 
