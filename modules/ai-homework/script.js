@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
           "solutions": [
             {
               "question_number": <题号>,
-              "answer": "<正确答案>", // 完形填空为数组
+              "answer": "<正确答案。对于选择题，请只提供正确选项的字母，例如：A>", // 完形填空为数组
               "explanation": "<详细解析>"
             }
           ]
@@ -351,6 +351,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (['写作', '简答题', '阅读理解', '作图题', '实验与探究题', '非选择题'].some(t => questionType.includes(t))) {
                     result = await evaluateSubjective(questionInfo, studentAnswer, solution.answer, apiKey);
+                    // For subjective questions, consider a score of 60+ as 'correct' for statistical purposes.
+                    result.isCorrect = (result.score || 0) >= 60;
                 } else {
                     const isCorrect = studentAnswer.trim().toUpperCase() === (solution.answer || '').trim().toUpperCase();
                     result = {
@@ -422,12 +424,40 @@ document.addEventListener('DOMContentLoaded', () => {
         return textInput ? textInput.value.trim() : "";
     }
 
+    function getGradedFeedback(score, questionType) {
+        score = score || 0;
+
+        // Objective questions have a binary outcome
+        if (['选择题', '判断题', '填空题', '完形填空'].some(t => questionType.includes(t))) {
+            const isCorrect = score === 100;
+            return {
+                text: isCorrect ? '回答正确' : '回答错误',
+                icon: isCorrect ? '✓' : '✗',
+                colorClass: isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+            };
+        }
+
+        // Subjective questions get graded feedback
+        if (score >= 90) {
+            return { text: '表现优秀', icon: '🌟', colorClass: 'border-green-200 bg-green-50' };
+        } else if (score >= 75) {
+            return { text: '良好', icon: '👍', colorClass: 'border-blue-200 bg-blue-50' };
+        } else if (score >= 60) {
+            return { text: '合格', icon: '✓', colorClass: 'border-yellow-200 bg-yellow-50' };
+        } else {
+            return { text: '有待改进', icon: '✗', colorClass: 'border-red-200 bg-red-50' };
+        }
+    }
+
     function displayResults(results) {
         let totalScore = 0;
         let clozePassageExplanation = '';
 
         results.forEach(res => {
             totalScore += res.score || 0;
+            const questionInfo = AppState.questions.find(q => q.question_number == res.questionIndex.toString().split('_')[0]);
+            const questionType = questionInfo ? (questionInfo.type || '') : '';
+
             const inputElement = document.querySelector(`[name="answer_${res.questionIndex}"]`);
             if (!inputElement) return;
 
@@ -435,8 +465,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!questionContainer) return;
 
             const resultBlock = document.createElement('div');
+            const feedback = getGradedFeedback(res.score, questionType);
             const scoreColor = (res.score || 0) >= 80 ? 'green' : (res.score || 0) >= 60 ? 'orange' : 'red';
-            resultBlock.className = `result-feedback mt-3 p-3 border-t ${res.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`;
+            
+            resultBlock.className = `result-feedback mt-3 p-3 border-t ${feedback.colorClass}`;
             
             let explanationHtml = '';
             if (res.questionIndex.toString().includes('_')) {
@@ -446,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             resultBlock.innerHTML = `
-                <div class="flex justify-between items-center font-bold"><span>${res.isCorrect ? '✓ 回答正确' : '✗ 回答错误'}</span><span style="color: ${scoreColor}">本题得分: ${res.score || 0} / 100</span></div>
+                <div class="flex justify-between items-center font-bold"><span>${feedback.icon} ${feedback.text}</span><span style="color: ${scoreColor}">本题得分: ${res.score || 0} / 100</span></div>
                 <p><strong>你的答案:</strong> ${res.studentAnswer || '未作答'}</p>
                 <p><strong>AI反馈:</strong> ${res.feedback}</p>
                 ${explanationHtml}`;
