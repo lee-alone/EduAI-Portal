@@ -83,8 +83,10 @@
       messageDiv.innerHTML = `
         <div class="message-content">
           <div class="ai-avatar">AI</div>
-          <div class="message-text" id="aiMessage-${Date.now()}"></div>
-          <button class="copy-message-btn" onclick="copyMessage(this)" title="复制此条消息">📋</button>
+          <div class="message-text">
+            <div class="text-content" id="aiMessage-${Date.now()}"></div>
+            <button class="copy-message-btn" onclick="copyMessage(this)" title="复制此条消息">📋</button>
+          </div>
         </div>
       `;
       
@@ -153,8 +155,9 @@
     }
 
     function copyMessage(button) {
-      const messageText = button.parentElement.querySelector(".message-text");
-      const textContent = messageText.textContent || messageText.innerText;
+      const messageTextContainer = button.parentElement;
+      const textElement = messageTextContainer.querySelector(".text-content");
+      const textContent = textElement.textContent || textElement.innerText;
       
       navigator.clipboard.writeText(textContent).then(() => {
         button.textContent = "✅";
@@ -666,14 +669,14 @@
       messages.forEach((message, index) => {
         const messageText = message.querySelector(".message-text");
         const isUserMessage = message.classList.contains("user-message");
-        const content = messageText ? messageText.textContent.trim() : "";
+        const content = messageText ? messageText.innerHTML.trim() : "";
         
         if (content) {
           const timestamp = new Date().toLocaleString('zh-CN');
           htmlContent += `
             <div class="message ${isUserMessage ? 'user-message' : 'ai-message'}">
               <div class="message-time">${timestamp}</div>
-              <div class="message-text">${content.replace(/\n/g, '<br>')}</div>
+              <div class="message-text">${content}</div>
             </div>
           `;
         }

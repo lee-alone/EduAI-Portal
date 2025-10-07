@@ -64,6 +64,8 @@
           <option>完形填空 - 综合语言运用</option>
           <option>写作 - 培养表达和创造力</option>
           <option>简答题 - 培养逻辑表达能力</option>
+          <option>阅读理解 - 提升文本分析能力</option>
+          <option>综合卷 - 多种题型混合测试</option>
     </select>
       </div>
 
@@ -130,17 +132,17 @@
         ✨ 个性化学习设置 - 让AI更懂你
       </summary>
       <div class="advanced">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label class="block mb-3 font-semibold">
               🤖 选择你的AI学习伙伴：
             </label>
-        <select id="model" class="w-full border rounded p-2 mb-4">
+            <select id="model" class="w-full border rounded p-2 mb-4">
               <option value="deepseek-chat" selected>DeepSeek 教育专家 - 专业教学</option>
               <option value="deepseek-reasoner">DeepSeek 推理大师 - 逻辑思维</option>
               <option value="glm-4">智谱 GLM 教育版 - 全面覆盖</option>
               <option value="qwen-turbo">通义千问 教研助手 - 智能辅导</option>
-        </select>
+            </select>
           </div>
 
           <div>
@@ -150,6 +152,18 @@
             </label>
             <input id="apiKey" type="password" placeholder="输入你的API密钥..." 
                class="w-full border rounded p-2 mb-4"/>
+          </div>
+
+          <div>
+            <label class="block mb-3 font-semibold">
+              🎨 AI创新度：
+              <span class="text-sm text-gray-500 font-normal">更高的创新度会带来更多样化的题目</span>
+            </label>
+            <select id="creativity" class="w-full border rounded p-2 mb-4">
+              <option value="0.4">保守</option>
+              <option value="0.7" selected>均衡</option>
+              <option value="0.9">创新</option>
+            </select>
           </div>
         </div>
 
@@ -169,6 +183,7 @@
     </details>
   </div>
 
+  <button id="backToTopBtn" class="back-to-top-btn" title="返回顶部">⬆️</button>
   <script src="script.js"></script>
 </body>
 </html>
