@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课堂互动平台 - 模块化版本</title>
+    
+    <!-- 样式文件 -->
+    <link rel="stylesheet" href="../../css/style.css"> <!-- Global styles -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css"> <!-- 模块化样式 -->
+    
+    <!-- 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    
+    <!-- 图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Excel处理库 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <div id="header-container"></div>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <!-- 标签切换 -->
+        <div class="tabs-container">
+            <button class="tab-button active" data-tab="live-interaction">实时互动</button>
+            <button class="tab-button" data-tab="ai-analysis">AI学情分析</button>
+        </div>
+
+        <!-- 实时互动标签页 -->
+        <div id="live-interaction" class="tab-content active">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">实时课堂互动</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 点名系统区域 -->
+                <div id="rollcall-container"></div>
+                
+                <!-- 加分系统区域 -->
+                <div id="points-container"></div>
+                
+                <!-- 积分榜区域 -->
+                <div id="leaderboard-container"></div>
+            </div>
+        </div>
+
+        <!-- AI学情分析标签页 -->
+        <div id="ai-analysis" class="tab-content">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">
+                <i class="fas fa-robot mr-2"></i>AI学情分析与报告
+            </h2>
+            <div class="module-section">
+                <div class="form-group">
+                    <label for="activity-excel-upload" class="block text-gray-700 text-sm font-bold mb-2">上传课堂活动Excel:</label>
+                    <input type="file" id="activity-excel-upload" class="modern-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                <div class="form-group">
+                    <label for="roster-excel-upload" class="block text-gray-700 text-sm font-bold mb-2">上传学生名单Excel (座号-姓名对照):</label>
+                    <input type="file" id="roster-excel-upload" class="modern-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                <div class="form-group">
+                    <label for="ai-model-input" class="block text-gray-700 text-sm font-bold mb-2">AI模型 (例如: deepseek-chat, glm-4):</label>
+                    <input type="text" id="ai-model-input" class="modern-input" value="deepseek-chat">
+                </div>
+                <div class="form-group">
+                    <label for="custom-prompt-textarea" class="block text-gray-700 text-sm font-bold mb-2">自定义AI提示词:</label>
+                    <textarea id="custom-prompt-textarea" rows="6" class="modern-textarea" placeholder="例如：请以班主任的口吻，对学生的课堂表现进行总结和鼓励。"></textarea>
+                </div>
+                <button id="generate-ai-report-btn" class="btn btn-success w-full">
+                    <i class="fas fa-robot mr-2"></i>生成AI学情报告
+                </button>
+                <div id="ai-report-output" class="card mt-6">
+                    <p class="text-gray-700">AI生成的学情报告将显示在这里。</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 模态框容器 -->
+    <div id="modals-container"></div>
+
+    <!-- 脚本文件 -->
+    <script type="module" src="../../js/config.js"></script> <!-- Global config -->
+    <script type="module" src="js/main.js"></script> <!-- 模块化主脚本 -->
+</body>
+</html>

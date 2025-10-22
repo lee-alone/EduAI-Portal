@@ -1,0 +1,133 @@
+<!-- 点名系统组件 -->
+<div class="module-section">
+    <h3 class="text-lg font-semibold mb-3 text-gray-700">
+        <i class="fas fa-user-check mr-2"></i>点名系统
+    </h3>
+    
+    <!-- 学科选择 -->
+    <div class="form-group">
+        <label for="subject-input" class="block text-gray-700 text-sm font-bold mb-2">
+            学科: <span class="text-red-500">*</span>
+        </label>
+        <div class="flex gap-2">
+            <select id="subject-select" class="modern-input flex-1">
+                <option value="">请选择学科</option>
+                <option value="数学">数学</option>
+                <option value="语文">语文</option>
+                <option value="英语">英语</option>
+                <option value="物理">物理</option>
+                <option value="化学">化学</option>
+                <option value="生物">生物</option>
+                <option value="历史">历史</option>
+                <option value="地理">地理</option>
+                <option value="政治">政治</option>
+                <option value="体育">体育</option>
+                <option value="美术">美术</option>
+                <option value="音乐">音乐</option>
+                <option value="信息技术">信息技术</option>
+                <option value="其他">其他</option>
+            </select>
+            <button type="button" id="subject-custom-btn" class="btn btn-outline px-3">
+                <i class="fas fa-edit"></i>
+            </button>
+        </div>
+        <input type="text" id="subject-input" class="modern-input mt-2" 
+               placeholder="或直接输入学科名称" style="display: none;">
+    </div>
+    
+    <!-- 课题输入 -->
+    <div class="form-group">
+        <label for="topic-input" class="block text-gray-700 text-sm font-bold mb-2">课题:</label>
+        <input type="text" id="topic-input" class="modern-input" placeholder="例如：勾股定理">
+    </div>
+    
+    <!-- 日期显示 -->
+    <div class="form-group">
+        <label class="block text-gray-700 text-sm font-bold mb-2">日期:</label>
+        <span id="date-display" class="block text-gray-800 text-lg font-medium"></span>
+    </div>
+
+    <!-- 单人点名 -->
+    <div class="card-section">
+        <h4 class="font-medium mb-2 text-gray-700">单人点名</h4>
+        <button id="random-call-btn" class="btn btn-primary w-full mb-2">
+            <i class="fas fa-random mr-2"></i>随机点一名学生
+        </button>
+        <div class="keyboard-hint">快捷键：Ctrl + Enter</div>
+        <div id="single-call-result" class="modern-input text-center text-gray-700 min-h-[40px] flex items-center justify-center">
+            点名结果将显示在这里
+        </div>
+    </div>
+
+    <!-- 多人点名 -->
+    <div class="card-section">
+        <h4 class="font-medium mb-2 text-gray-700">多人点名</h4>
+        <div class="form-group">
+            <label for="multi-call-num" class="block text-gray-700 text-sm font-bold mb-2">点名人数:</label>
+            <input type="number" id="multi-call-num" class="modern-input" value="3" min="1">
+        </div>
+        <button id="multi-call-btn" class="btn btn-warning w-full mb-2">
+            <i class="fas fa-users mr-2"></i>点名
+        </button>
+        <div class="keyboard-hint">快捷键：Ctrl + Shift + Enter</div>
+        <div id="multi-call-result" class="modern-input text-center text-gray-700 min-h-[40px] flex items-center justify-center">
+            点名结果将显示在这里
+        </div>
+    </div>
+
+    <!-- 已点名学生 -->
+    <div class="card-section">
+        <h4 class="font-medium mb-2 text-gray-700">已点名学生</h4>
+        <ul id="called-students-list" class="list-none text-gray-700 min-h-[80px] border p-2 rounded bg-gray-50 overflow-y-auto">
+            <!-- 已点名学生列表 -->
+        </ul>
+        <button id="reset-call-btn" class="btn btn-danger w-full mt-3">
+            <i class="fas fa-undo mr-2"></i>重置
+        </button>
+    </div>
+
+    <!-- 快速评分区域 -->
+    <div class="card-section quick-scoring-card" id="quick-scoring-section" style="display: none;">
+        <h4 class="font-medium mb-2 text-gray-700">
+            <i class="fas fa-star mr-2"></i>快速评分
+        </h4>
+        <div id="current-student-info" class="student-info-card">
+            <div class="text-center">
+                <div class="text-lg font-semibold" id="current-student-name">学生姓名</div>
+                <div class="text-sm opacity-90" id="current-student-id">座号</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="block text-gray-700 text-sm font-bold mb-2">答题表现:</label>
+            <div class="quick-scoring-buttons">
+                <button id="correct-answer-btn" class="btn btn-success performance-btn">
+                    <i class="fas fa-check mr-2"></i>回答正确
+                </button>
+                <button id="incorrect-answer-btn" class="btn btn-danger performance-btn">
+                    <i class="fas fa-times mr-2"></i>回答错误
+                </button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="quick-points" class="block text-gray-700 text-sm font-bold mb-2">加分值:</label>
+            <select id="quick-points" class="quick-points-select">
+                <option value="1">1分 (优秀)</option>
+                <option value="0.5" selected>0.5分 (良好)</option>
+                <option value="0">0分 (错误)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="quick-reason" class="block text-gray-700 text-sm font-bold mb-2">评分原因:</label>
+            <input type="text" id="quick-reason" class="quick-reason-input" 
+                   placeholder="例如：回答正确，思路清晰">
+        </div>
+        <div class="flex gap-2">
+            <button id="confirm-scoring-btn" class="btn btn-primary flex-1">
+                <i class="fas fa-award mr-2"></i>确认评分
+            </button>
+            <button id="skip-scoring-btn" class="btn btn-secondary">
+                <i class="fas fa-forward mr-2"></i>跳过
+            </button>
+        </div>
+    </div>
+</div>
