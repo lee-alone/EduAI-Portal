@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课堂互动平台</title>
+    <link rel="stylesheet" href="../../css/style.css"> <!-- Global styles -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> <!-- Module-specific styles -->
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+<body>
+    <nav class="header-nav">
+        <div class="container">
+            <h1>课堂互动平台</h1>
+            <a href="../../index.html" class="back-home-btn">
+                <i class="fas fa-home mr-2"></i>
+                返回首页
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+            <div class="tabs-container">
+                <button class="tab-button active" data-tab="live-interaction">实时互动</button>
+                <button class="tab-button" data-tab="ai-analysis">AI学情分析</button>
+            </div>
+
+            <div id="live-interaction" class="tab-content active">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">实时课堂互动</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- 点名系统 -->
+                    <div class="module-section">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-700"><i class="fas fa-user-check mr-2"></i>点名系统</h3>
+                        <div class="form-group">
+                            <label for="subject-input" class="block text-gray-700 text-sm font-bold mb-2">学科:</label>
+                            <input type="text" id="subject-input" class="modern-input" placeholder="例如：数学">
+                        </div>
+                        <div class="form-group">
+                            <label for="topic-input" class="block text-gray-700 text-sm font-bold mb-2">课题:</label>
+                            <input type="text" id="topic-input" class="modern-input" placeholder="例如：勾股定理">
+                        </div>
+                        <div class="form-group">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">日期:</label>
+                            <span id="date-display" class="block text-gray-800 text-lg font-medium"></span>
+                        </div>
+
+                        <div class="card-section">
+                            <h4 class="font-medium mb-2 text-gray-700">单人点名</h4>
+                            <button id="random-call-btn" class="btn btn-primary w-full mb-2"><i class="fas fa-random mr-2"></i>随机点一名学生</button>
+                            <div id="single-call-result" class="modern-input text-center text-gray-700 min-h-[40px] flex items-center justify-center">点名结果将显示在这里</div>
+                        </div>
+
+                        <div class="card-section">
+                            <h4 class="font-medium mb-2 text-gray-700">多人点名</h4>
+                            <div class="form-group">
+                                <label for="multi-call-num" class="block text-gray-700 text-sm font-bold mb-2">点名人数:</label>
+                                <input type="number" id="multi-call-num" class="modern-input" value="3" min="1">
+                            </div>
+                            <button id="multi-call-btn" class="btn btn-warning w-full mb-2"><i class="fas fa-users mr-2"></i>点名</button>
+                            <div id="multi-call-result" class="modern-input text-center text-gray-700 min-h-[40px] flex items-center justify-center">点名结果将显示在这里</div>
+                        </div>
+
+                        <div class="card-section">
+                            <h4 class="font-medium mb-2 text-gray-700">已点名学生</h4>
+                            <ul id="called-students-list" class="list-none text-gray-700 min-h-[80px] border p-2 rounded bg-gray-50 overflow-y-auto">
+                                <!-- 已点名学生列表 -->
+                            </ul>
+                            <button id="reset-call-btn" class="btn btn-danger w-full mt-3"><i class="fas fa-undo mr-2"></i>重置</button>
+                        </div>
+                    </div>
+
+                    <!-- 加分系统 -->
+                    <div class="module-section">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-700"><i class="fas fa-plus-circle mr-2"></i>加分系统</h3>
+                        <div class="card-section">
+                            <h4 class="font-medium mb-2 text-gray-700">个人加分</h4>
+                            <div class="form-group">
+                                <label for="individual-student-id" class="block text-gray-700 text-sm font-bold mb-2">学生座号:</label>
+                                <input type="number" id="individual-student-id" class="modern-input" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="individual-points" class="block text-gray-700 text-sm font-bold mb-2">加分值 (最低0.5分):</label>
+                                <input type="number" id="individual-points" class="modern-input" value="0.5" step="0.5" min="0.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="individual-reason" class="block text-gray-700 text-sm font-bold mb-2">加分原因:</label>
+                                <input type="text" id="individual-reason" class="modern-input" placeholder="例如：回答问题正确">
+                            </div>
+                            <button id="add-individual-points-btn" class="btn btn-success w-full"><i class="fas fa-award mr-2"></i>为该学生加分</button>
+                        </div>
+
+                        <div class="card-section">
+                            <h4 class="font-medium mb-2 text-gray-700">小组加分</h4>
+                            <div class="form-group">
+                                <span class="block text-gray-700 text-sm font-bold mb-2">选择学生座号:</span>
+                                <div id="group-student-selection" class="grid grid-cols-6 gap-2 mb-3 max-h-48 overflow-y-auto border p-2 rounded bg-gray-50">
+                                    <!-- 学生座号复选框将在这里生成 -->
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="group-points" class="block text-gray-700 text-sm font-bold mb-2">加分值 (最低0.5分):</label>
+                                <input type="number" id="group-points" class="modern-input" value="0.5" step="0.5" min="0.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="group-reason" class="block text-gray-700 text-sm font-bold mb-2">加分原因:</label>
+                                <input type="text" id="group-reason" class="modern-input" placeholder="例如：小组讨论表现优秀">
+                            </div>
+                            <button id="add-group-points-btn" class="btn btn-warning w-full"><i class="fas fa-users-cog mr-2"></i>为选中学生加分</button>
+                        </div>
+                    </div>
+
+                    <!-- 积分榜 -->
+                    <div class="module-section">
+                        <h3 class="text-lg font-semibold mb-3 text-gray-700"><i class="fas fa-trophy mr-2"></i>积分榜</h3>
+                        <div class="card-section">
+                            <h4 class="font-medium mb-2 text-gray-700">今日之星</h4>
+                            <ul id="top-students-list" class="list-none text-gray-700 min-h-[100px]">
+                                <!-- 今日之星列表 -->
+                            </ul>
+                        </div>
+
+                        <div class="card-section">
+                            <h4 class="font-medium mb-2 text-gray-700">积分分布</h4>
+                            <div id="points-distribution-chart" class="w-full h-48 bg-gray-50 border rounded flex items-center justify-center text-gray-500">
+                                <i class="fas fa-chart-bar mr-2"></i>图表功能待实现
+                            </div>
+                        </div>
+
+                        <div class="card-section">
+                            <h4 class="font-medium mb-2 text-gray-700">最近加分记录</h4>
+                            <ul id="recent-points-log" class="list-none text-gray-700 min-h-[150px] overflow-y-auto border p-2 rounded bg-gray-50">
+                                <!-- 最近加分记录将显示在这里 -->
+                            </ul>
+                        </div>
+                        <button id="export-data-btn" class="btn btn-primary w-full mt-4"><i class="fas fa-file-export mr-2"></i>导出课堂数据</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ai-analysis" class="tab-content">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800"><i class="fas fa-robot mr-2"></i>AI学情分析与报告</h2>
+                <div class="module-section">
+                        <div class="form-group">
+                            <label for="activity-excel-upload" class="block text-gray-700 text-sm font-bold mb-2">上传课堂活动Excel:</label>
+                            <input type="file" id="activity-excel-upload" class="modern-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        </div>
+                        <div class="form-group">
+                            <label for="roster-excel-upload" class="block text-gray-700 text-sm font-bold mb-2">上传学生名单Excel (座号-姓名对照):</label>
+                            <input type="file" id="roster-excel-upload" class="modern-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        </div>
+                        <div class="form-group">
+                            <label for="ai-model-input" class="block text-gray-700 text-sm font-bold mb-2">AI模型 (例如: deepseek-chat, glm-4):</label>
+                            <input type="text" id="ai-model-input" class="modern-input" value="deepseek-chat">
+                        </div>
+                        <div class="form-group">
+                            <label for="custom-prompt-textarea" class="block text-gray-700 text-sm font-bold mb-2">自定义AI提示词:</label>
+                            <textarea id="custom-prompt-textarea" rows="6" class="modern-textarea" placeholder="例如：请以班主任的口吻，对学生的课堂表现进行总结和鼓励。"></textarea>
+                        </div>
+                        <button id="generate-ai-report-btn" class="btn btn-success w-full"><i class="fas fa-robot mr-2"></i>生成AI学情报告</button>
+                        <div id="ai-report-output" class="card mt-6">
+                            <p class="text-gray-700">AI生成的学情报告将显示在这里。</p>
+                        </div>
+                </div>
+            </div>
+    </main>
+
+    <script src="../../js/config.js"></script> <!-- Global config -->
+    <script src="script.js"></script> <!-- Module-specific script -->
+</body>
+</html>
