@@ -33,7 +33,7 @@
 
             <div id="live-interaction" class="tab-content active">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">实时课堂互动</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 equal-height-grid">
                     <!-- 点名系统 -->
                     <div class="module-section">
                         <h3 class="text-lg font-semibold mb-3 text-gray-700"><i class="fas fa-user-check mr-2"></i>点名系统</h3>
@@ -62,10 +62,6 @@
                                 </button>
                             </div>
                             <input type="text" id="subject-input" class="modern-input mt-2" placeholder="或直接输入学科名称" style="display: none;">
-                        </div>
-                        <div class="form-group">
-                            <label for="topic-input" class="block text-gray-700 text-sm font-bold mb-2">课题:</label>
-                            <input type="text" id="topic-input" class="modern-input" placeholder="例如：勾股定理">
                         </div>
                         <div class="form-group">
                             <label class="block text-gray-700 text-sm font-bold mb-2">日期:</label>
@@ -156,7 +152,19 @@
                             </div>
                             <div class="form-group">
                                 <label for="individual-reason" class="block text-gray-700 text-sm font-bold mb-2">加分原因:</label>
-                                <input type="text" id="individual-reason" class="modern-input" placeholder="例如：回答问题正确">
+                                <select id="individual-reason-select" class="modern-input mb-2">
+                                    <option value="">请选择评价类型</option>
+                                    <option value="回答问题正确">回答问题正确</option>
+                                    <option value="思路清晰，表达准确">思路清晰，表达准确</option>
+                                    <option value="积极参与讨论">积极参与讨论</option>
+                                    <option value="创新思维，见解独到">创新思维，见解独到</option>
+                                    <option value="帮助同学解答问题">帮助同学解答问题</option>
+                                    <option value="课堂表现优秀">课堂表现优秀</option>
+                                    <option value="作业完成质量高">作业完成质量高</option>
+                                    <option value="学习态度认真">学习态度认真</option>
+                                    <option value="custom">自定义评价</option>
+                                </select>
+                                <input type="text" id="individual-reason" class="modern-input" placeholder="自定义评价内容" style="display: none;">
                             </div>
                             <button id="add-individual-points-btn" class="btn btn-success w-full"><i class="fas fa-award mr-2"></i>为该学生加分</button>
                         </div>
@@ -168,20 +176,27 @@
                             <div class="form-group">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">选择方式:</label>
                                 <div class="flex gap-2 mb-3">
-                                    <button id="range-selection-btn" class="btn btn-primary flex-1 selection-mode-btn active">
-                                        <i class="fas fa-arrows-alt-h mr-2"></i>范围选择
-                                    </button>
-                                    <button id="template-selection-btn" class="btn btn-secondary flex-1 selection-mode-btn">
-                                        <i class="fas fa-layer-group mr-2"></i>模板选择
-                                    </button>
-                                    <button id="manual-selection-btn" class="btn btn-secondary flex-1 selection-mode-btn">
+                                    <button id="manual-selection-btn" class="btn btn-primary flex-1 selection-mode-btn active">
                                         <i class="fas fa-hand-pointer mr-2"></i>手动选择
+                                    </button>
+                                    <button id="range-selection-btn" class="btn btn-secondary flex-1 selection-mode-btn">
+                                        <i class="fas fa-arrows-alt-h mr-2"></i>范围选择
                                     </button>
                                 </div>
                             </div>
 
+                            <!-- 手动选择方式 -->
+                            <div id="manual-selection-mode" class="selection-mode">
+                                <div class="form-group">
+                                    <span class="block text-gray-700 text-sm font-bold mb-2">选择学生座号:</span>
+                                    <div id="group-student-selection" class="grid grid-cols-8 gap-1 mb-3 max-h-48 overflow-y-auto border p-2 rounded bg-gray-50">
+                                        <!-- 学生座号复选框将在这里生成 -->
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- 范围选择方式 -->
-                            <div id="range-selection-mode" class="selection-mode">
+                            <div id="range-selection-mode" class="selection-mode" style="display: none;">
                                 <div class="form-group">
                                     <label class="block text-gray-700 text-sm font-bold mb-2">选择范围:</label>
                                     <div class="flex gap-4 items-center">
@@ -210,43 +225,6 @@
                                 </div>
                             </div>
 
-                            <!-- 模板选择方式 -->
-                            <div id="template-selection-mode" class="selection-mode" style="display: none;">
-                                <div class="form-group">
-                                    <label class="block text-gray-700 text-sm font-bold mb-2">快速模板:</label>
-                                    <div class="grid grid-cols-2 gap-2 mb-3">
-                                        <button class="template-btn btn btn-outline" data-template="front-row">
-                                            <i class="fas fa-chair mr-2"></i>前排 (1-10号)
-                                        </button>
-                                        <button class="template-btn btn btn-outline" data-template="back-row">
-                                            <i class="fas fa-chair mr-2"></i>后排 (46-55号)
-                                        </button>
-                                        <button class="template-btn btn btn-outline" data-template="left-side">
-                                            <i class="fas fa-arrow-left mr-2"></i>左侧 (1,6,11,16...)
-                                        </button>
-                                        <button class="template-btn btn btn-outline" data-template="right-side">
-                                            <i class="fas fa-arrow-right mr-2"></i>右侧 (5,10,15,20...)
-                                        </button>
-                                        <button class="template-btn btn btn-outline" data-template="odd-numbers">
-                                            <i class="fas fa-sort-numeric-up mr-2"></i>奇数号
-                                        </button>
-                                        <button class="template-btn btn btn-outline" data-template="even-numbers">
-                                            <i class="fas fa-sort-numeric-down mr-2"></i>偶数号
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 手动选择方式 -->
-                            <div id="manual-selection-mode" class="selection-mode" style="display: none;">
-                                <div class="form-group">
-                                    <span class="block text-gray-700 text-sm font-bold mb-2">选择学生座号:</span>
-                                    <div id="group-student-selection" class="grid grid-cols-8 gap-1 mb-3 max-h-48 overflow-y-auto border p-2 rounded bg-gray-50">
-                                        <!-- 学生座号复选框将在这里生成 -->
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- 选择结果显示 -->
                             <div id="selection-result" class="form-group" style="display: none;">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">已选择学生:</label>
@@ -269,7 +247,19 @@
                             </div>
                             <div class="form-group">
                                 <label for="group-reason" class="block text-gray-700 text-sm font-bold mb-2">加分原因:</label>
-                                <input type="text" id="group-reason" class="modern-input" placeholder="例如：小组讨论表现优秀">
+                                <select id="group-reason-select" class="modern-input mb-2">
+                                    <option value="">请选择评价类型</option>
+                                    <option value="小组讨论积极">小组讨论积极</option>
+                                    <option value="合作完成学习任务">合作完成学习任务</option>
+                                    <option value="小组展示表现优秀">小组展示表现优秀</option>
+                                    <option value="团队协作能力强">团队协作能力强</option>
+                                    <option value="小组创新思维突出">小组创新思维突出</option>
+                                    <option value="小组学习氛围良好">小组学习氛围良好</option>
+                                    <option value="小组作业完成质量高">小组作业完成质量高</option>
+                                    <option value="小组互助学习效果好">小组互助学习效果好</option>
+                                    <option value="custom">自定义评价</option>
+                                </select>
+                                <input type="text" id="group-reason" class="modern-input" placeholder="自定义评价内容" style="display: none;">
                             </div>
                             <button id="add-group-points-btn" class="btn btn-warning w-full"><i class="fas fa-users-cog mr-2"></i>为选中学生加分</button>
                         </div>
@@ -393,10 +383,6 @@
                                 <label class="block text-gray-700 text-sm font-bold mb-2">导出选项:</label>
                                 <div class="space-y-2">
                                     <label class="flex items-center">
-                                        <input type="checkbox" id="include-student-names" class="form-checkbox text-blue-600 mr-2" checked>
-                                        <span class="text-gray-700">包含学生姓名（需要上传学生名单）</span>
-                                    </label>
-                                    <label class="flex items-center">
                                         <input type="checkbox" id="include-detailed-log" class="form-checkbox text-blue-600 mr-2" checked>
                                         <span class="text-gray-700">包含详细加分记录</span>
                                     </label>
@@ -512,7 +498,19 @@
                 </div>
                 <div class="form-group">
                     <label for="modal-quick-reason" class="block text-gray-700 text-sm font-bold mb-2">评分原因:</label>
-                    <input type="text" id="modal-quick-reason" class="quick-reason-input" placeholder="例如：回答正确，思路清晰">
+                    <select id="modal-quick-reason-select" class="quick-reason-input mb-2">
+                        <option value="">请选择评价类型</option>
+                        <option value="回答问题正确">回答问题正确</option>
+                        <option value="思路清晰，表达准确">思路清晰，表达准确</option>
+                        <option value="积极参与讨论">积极参与讨论</option>
+                        <option value="创新思维，见解独到">创新思维，见解独到</option>
+                        <option value="帮助同学解答问题">帮助同学解答问题</option>
+                        <option value="课堂表现优秀">课堂表现优秀</option>
+                        <option value="作业完成质量高">作业完成质量高</option>
+                        <option value="学习态度认真">学习态度认真</option>
+                        <option value="custom">自定义评价</option>
+                    </select>
+                    <input type="text" id="modal-quick-reason" class="quick-reason-input" placeholder="自定义评价内容" style="display: none;">
                 </div>
                 <div class="modal-actions">
                     <button id="modal-confirm-scoring-btn" class="btn btn-primary">
@@ -569,7 +567,19 @@
                 </div>
                 <div class="form-group">
                     <label for="modal-group-quick-reason" class="block text-gray-700 text-sm font-bold mb-2">评分原因:</label>
-                    <input type="text" id="modal-group-quick-reason" class="quick-reason-input" placeholder="例如：小组讨论积极，答案正确">
+                    <select id="modal-group-quick-reason-select" class="quick-reason-input mb-2">
+                        <option value="">请选择评价类型</option>
+                        <option value="小组讨论积极">小组讨论积极</option>
+                        <option value="合作完成学习任务">合作完成学习任务</option>
+                        <option value="小组展示表现优秀">小组展示表现优秀</option>
+                        <option value="团队协作能力强">团队协作能力强</option>
+                        <option value="小组创新思维突出">小组创新思维突出</option>
+                        <option value="小组学习氛围良好">小组学习氛围良好</option>
+                        <option value="小组作业完成质量高">小组作业完成质量高</option>
+                        <option value="小组互助学习效果好">小组互助学习效果好</option>
+                        <option value="custom">自定义评价</option>
+                    </select>
+                    <input type="text" id="modal-group-quick-reason" class="quick-reason-input" placeholder="自定义评价内容" style="display: none;">
                 </div>
                 <div class="modal-actions">
                     <button id="modal-confirm-group-scoring-btn" class="btn btn-primary">

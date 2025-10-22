@@ -1411,4 +1411,23 @@ body.modal-open .main-content {
 .modal-body .form-group:nth-child(4) { animation-delay: 0.3s; }
 .modal-body .form-group:nth-child(5) { animation-delay: 0.4s; }
 
+/* 等高网格布局 */
+.equal-height-grid {
+    display: grid;
+    grid-template-rows: 1fr; /* 确保所有行高度一致 */
+    align-items: stretch; /* 拉伸子元素填满容器 */
+}
+
+.equal-height-grid > .module-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* 填满父容器高度 */
+}
+
+.equal-height-grid .module-section .card-section:last-child {
+    flex-grow: 1; /* 让最后一个卡片区域自动填充剩余空间 */
+    display: flex;
+    flex-direction: column;
+}
+
 

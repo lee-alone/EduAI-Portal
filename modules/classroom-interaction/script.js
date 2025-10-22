@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 小组选择相关变量
     let selectedStudents = []; // 当前选中的学生ID列表
-    let currentSelectionMode = 'range'; // 当前选择模式：range, template, manual
+    let currentSelectionMode = 'manual'; // 当前选择模式：manual, range
     
     // 模态框相关变量
     let currentModalStudents = []; // 当前模态框中显示的学生
@@ -200,10 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 小组选择相关DOM元素
     const rangeSelectionBtn = document.getElementById('range-selection-btn');
-    const templateSelectionBtn = document.getElementById('template-selection-btn');
     const manualSelectionBtn = document.getElementById('manual-selection-btn');
     const rangeSelectionMode = document.getElementById('range-selection-mode');
-    const templateSelectionMode = document.getElementById('template-selection-mode');
     const manualSelectionMode = document.getElementById('manual-selection-mode');
     const rangeStartInput = document.getElementById('range-start');
     const rangeEndInput = document.getElementById('range-end');
@@ -318,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
         groupStudentSelection.innerHTML = students.map(s => `
             <label for="group-student-${s.id}" class="inline-flex items-center">
                 <input type="checkbox" id="group-student-${s.id}" name="group-student-selection" class="form-checkbox text-blue-600" value="${s.id}">
-                <span class="ml-2 text-gray-700">${s.id}号 ${s.name}</span>
+                <span class="ml-2 text-gray-700">${s.id}</span>
             </label>
         `).join('');
     }
@@ -354,10 +352,30 @@ document.addEventListener('DOMContentLoaded', () => {
         // 更新统计信息
         const leaderboardStats = document.getElementById('leaderboard-stats');
         if (leaderboardStats) {
+            // 计算所有有积分学生的统计数据
+            const allStudentsWithPoints = Object.entries(studentPoints)
+                .map(([id, points]) => ({ id: parseInt(id), name: getStudentName(parseInt(id)), points }))
+                .filter(student => student.points > 0);
+            
             const totalStudents = Object.keys(studentPoints).length;
-            const studentsWithPoints = sortedStudents.length;
-            const totalPoints = sortedStudents.reduce((sum, s) => sum + s.points, 0);
+            const studentsWithPoints = allStudentsWithPoints.length;
+            const totalPoints = allStudentsWithPoints.reduce((sum, s) => sum + s.points, 0);
             const avgPoints = studentsWithPoints > 0 ? (totalPoints / studentsWithPoints).toFixed(1) : 0;
+            
+            // 计算最早时间
+            let timeRangeText = '暂无记录';
+            if (pointsLog.length > 0) {
+                const sortedLogs = pointsLog.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                const earliestLog = sortedLogs[0];
+                const earliestDate = new Date(earliestLog.timestamp);
+                const earliestTime = earliestDate.toLocaleDateString('zh-CN', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                timeRangeText = `自${earliestTime}起`;
+            }
             
             leaderboardStats.innerHTML = `
                 <span>
@@ -368,6 +386,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 </span>
                 <span>
                     <i class="fas fa-trophy mr-1"></i>总计${totalPoints}分
+                </span>
+                <span>
+                    <i class="fas fa-clock mr-1"></i>${timeRangeText}
                 </span>
             `;
         }
@@ -701,7 +722,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 隐藏所有模式
         rangeSelectionMode.style.display = 'none';
-        templateSelectionMode.style.display = 'none';
         manualSelectionMode.style.display = 'none';
         
         // 更新按钮状态
@@ -717,11 +737,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 rangeSelectionMode.style.display = 'block';
                 rangeSelectionBtn.classList.add('active', 'btn-primary');
                 rangeSelectionBtn.classList.remove('btn-secondary');
-                break;
-            case 'template':
-                templateSelectionMode.style.display = 'block';
-                templateSelectionBtn.classList.add('active', 'btn-primary');
-                templateSelectionBtn.classList.remove('btn-secondary');
                 break;
             case 'manual':
                 manualSelectionMode.style.display = 'block';
@@ -747,33 +762,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return students;
     }
     
-    // 模板选择功能
-    function generateTemplateSelection(template) {
-        const students = [];
-        
-        switch(template) {
-            case 'front-row':
-                for (let i = 1; i <= 10; i++) students.push(i);
-                break;
-            case 'back-row':
-                for (let i = 46; i <= 55; i++) students.push(i);
-                break;
-            case 'left-side':
-                for (let i = 1; i <= 55; i += 5) students.push(i);
-                break;
-            case 'right-side':
-                for (let i = 5; i <= 55; i += 5) students.push(i);
-                break;
-            case 'odd-numbers':
-                for (let i = 1; i <= 55; i += 2) students.push(i);
-                break;
-            case 'even-numbers':
-                for (let i = 2; i <= 55; i += 2) students.push(i);
-                break;
-        }
-        
-        return students;
-    }
     
     // 更新选择结果显示
     function updateSelectionDisplay() {
@@ -786,7 +774,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedStudentsDisplay.innerHTML = selectedStudents.map(id => `
             <span class="student-tag">
                 学生${id}号
-                <button class="remove-btn" onclick="removeStudent(${id})">×</button>
+                <button class="remove-btn" data-student-id="${id}" title="删除学生${id}号">×</button>
             </span>
         `).join('');
     }
@@ -804,9 +792,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 从选择列表中移除学生
     function removeStudent(studentId) {
+        console.log('删除学生:', studentId);
+        console.log('删除前选择的学生:', selectedStudents);
         selectedStudents = selectedStudents.filter(id => id !== studentId);
+        console.log('删除后选择的学生:', selectedStudents);
         updateSelectionDisplay();
+        showMessage(`已删除学生${studentId}号`, 'info');
     }
+    
+    // 将removeStudent函数添加到全局作用域，以便onclick可以访问
+    window.removeStudent = removeStudent;
+    
+    // 添加事件委托来处理删除按钮点击
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const studentId = parseInt(e.target.getAttribute('data-student-id'));
+            removeStudent(studentId);
+        }
+    });
     
     // 清空选择
     function clearSelection() {
@@ -879,7 +884,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeSubjectInput();
 
     // 初始化小组选择模式
-    switchSelectionMode('range');
+    switchSelectionMode('manual');
 
     // 添加键盘快捷键支持
     document.addEventListener('keydown', (e) => {
@@ -1002,24 +1007,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     case 'range':
                         switchSelectionMode('manual');
                         break;
-                    case 'template':
-                        switchSelectionMode('range');
-                        break;
                     case 'manual':
-                        switchSelectionMode('template');
+                        switchSelectionMode('range');
                         break;
                 }
             } else {
                 // 向左滑动，切换到下一个模式
                 switch(currentSelectionMode) {
-                    case 'range':
-                        switchSelectionMode('template');
-                        break;
-                    case 'template':
-                        switchSelectionMode('manual');
-                        break;
                     case 'manual':
                         switchSelectionMode('range');
+                        break;
+                    case 'range':
+                        switchSelectionMode('manual');
                         break;
                 }
             }
@@ -1031,27 +1030,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         const currentTime = new Date().getTime();
         if (currentTime - lastClickTime < 300) {
-            // 双击事件
-            if (e.target.classList.contains('template-btn')) {
-                const template = e.target.dataset.template;
-                const students = generateTemplateSelection(template);
-                addStudentsToSelection(students);
-                showMessage(`双击快速选择：已选择 ${students.length} 名学生`, 'success');
-            }
+            // 双击事件（已移除模板选择功能）
         }
         lastClickTime = currentTime;
     });
     
-    // 长按显示详细信息
+    // 长按显示详细信息（已移除模板选择功能）
     let longPressTimer = null;
     document.addEventListener('touchstart', (e) => {
-        if (e.target.classList.contains('template-btn')) {
-            longPressTimer = setTimeout(() => {
-                const template = e.target.dataset.template;
-                const students = generateTemplateSelection(template);
-                showMessage(`模板预览：将选择 ${students.length} 名学生 (${students.join('、')})`, 'info');
-            }, 1000);
-        }
+        // 模板选择功能已移除
     });
     
     document.addEventListener('touchend', () => {
@@ -1289,9 +1276,6 @@ document.addEventListener('DOMContentLoaded', () => {
         rangeSelectionBtn.addEventListener('click', () => switchSelectionMode('range'));
     }
     
-    if (templateSelectionBtn) {
-        templateSelectionBtn.addEventListener('click', () => switchSelectionMode('template'));
-    }
     
     if (manualSelectionBtn) {
         manualSelectionBtn.addEventListener('click', () => switchSelectionMode('manual'));
@@ -1310,15 +1294,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // 模板选择
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('template-btn')) {
-            const template = e.target.dataset.template;
-            const students = generateTemplateSelection(template);
-            addStudentsToSelection(students);
-            showMessage(`已选择 ${students.length} 名学生`, 'success');
-        }
-    });
     
     // 清空选择
     if (clearSelectionBtn) {
@@ -1352,6 +1327,78 @@ document.addEventListener('DOMContentLoaded', () => {
     const individualStudentIdInput = document.getElementById('individual-student-id');
     const individualPointsInput = document.getElementById('individual-points');
     const individualReasonInput = document.getElementById('individual-reason');
+    const individualReasonSelect = document.getElementById('individual-reason-select');
+    const groupReasonSelect = document.getElementById('group-reason-select');
+    const modalQuickReasonSelect = document.getElementById('modal-quick-reason-select');
+    const modalGroupQuickReasonSelect = document.getElementById('modal-group-quick-reason-select');
+
+    // 处理个人加分原因选择
+    if (individualReasonSelect) {
+        individualReasonSelect.addEventListener('change', () => {
+            const selectedValue = individualReasonSelect.value;
+            if (selectedValue === 'custom') {
+                individualReasonInput.style.display = 'block';
+                individualReasonInput.focus();
+            } else if (selectedValue) {
+                individualReasonInput.style.display = 'none';
+                individualReasonInput.value = selectedValue;
+            } else {
+                individualReasonInput.style.display = 'none';
+                individualReasonInput.value = '';
+            }
+        });
+    }
+
+    // 处理小组加分原因选择
+    if (groupReasonSelect) {
+        groupReasonSelect.addEventListener('change', () => {
+            const selectedValue = groupReasonSelect.value;
+            if (selectedValue === 'custom') {
+                document.getElementById('group-reason').style.display = 'block';
+                document.getElementById('group-reason').focus();
+            } else if (selectedValue) {
+                document.getElementById('group-reason').style.display = 'none';
+                document.getElementById('group-reason').value = selectedValue;
+            } else {
+                document.getElementById('group-reason').style.display = 'none';
+                document.getElementById('group-reason').value = '';
+            }
+        });
+    }
+
+    // 处理模态框个人评分原因选择
+    if (modalQuickReasonSelect) {
+        modalQuickReasonSelect.addEventListener('change', () => {
+            const selectedValue = modalQuickReasonSelect.value;
+            if (selectedValue === 'custom') {
+                document.getElementById('modal-quick-reason').style.display = 'block';
+                document.getElementById('modal-quick-reason').focus();
+            } else if (selectedValue) {
+                document.getElementById('modal-quick-reason').style.display = 'none';
+                document.getElementById('modal-quick-reason').value = selectedValue;
+            } else {
+                document.getElementById('modal-quick-reason').style.display = 'none';
+                document.getElementById('modal-quick-reason').value = '';
+            }
+        });
+    }
+
+    // 处理模态框小组评分原因选择
+    if (modalGroupQuickReasonSelect) {
+        modalGroupQuickReasonSelect.addEventListener('change', () => {
+            const selectedValue = modalGroupQuickReasonSelect.value;
+            if (selectedValue === 'custom') {
+                document.getElementById('modal-group-quick-reason').style.display = 'block';
+                document.getElementById('modal-group-quick-reason').focus();
+            } else if (selectedValue) {
+                document.getElementById('modal-group-quick-reason').style.display = 'none';
+                document.getElementById('modal-group-quick-reason').value = selectedValue;
+            } else {
+                document.getElementById('modal-group-quick-reason').style.display = 'none';
+                document.getElementById('modal-group-quick-reason').value = '';
+            }
+        });
+    }
 
     // 添加座号输入验证
     if (individualStudentIdInput) {
@@ -1408,7 +1455,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const studentId = parseInt(individualStudentIdInput.value);
             const points = parseFloat(individualPointsInput.value);
-            const reason = individualReasonInput.value.trim();
+            
+            // 获取评分原因（优先使用选择的值，如果没有则使用自定义输入）
+            let reason = '';
+            if (individualReasonSelect.value === 'custom') {
+                reason = individualReasonInput.value.trim();
+            } else if (individualReasonSelect.value) {
+                reason = individualReasonSelect.value;
+            } else {
+                reason = individualReasonInput.value.trim();
+            }
 
             // 验证座号
             if (isNaN(studentId) || studentId <= 0 || studentId > TOTAL_STUDENTS) {
@@ -1474,6 +1530,8 @@ document.addEventListener('DOMContentLoaded', () => {
             individualStudentIdInput.value = '';
             individualPointsInput.value = '0.5';
             individualReasonInput.value = '';
+            individualReasonSelect.value = '';
+            individualReasonInput.style.display = 'none';
         });
     }
 
@@ -1485,7 +1543,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const points = parseFloat(groupPointsInput.value);
-            const reason = groupReasonInput.value.trim();
+            
+            // 获取评分原因（优先使用选择的值，如果没有则使用自定义输入）
+            let reason = '';
+            if (groupReasonSelect.value === 'custom') {
+                reason = document.getElementById('group-reason').value.trim();
+            } else if (groupReasonSelect.value) {
+                reason = groupReasonSelect.value;
+            } else {
+                reason = document.getElementById('group-reason').value.trim();
+            }
 
             // 验证选择的学生
             if (selectedStudents.length === 0) {
@@ -1556,12 +1623,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // 清空选择
             clearSelection();
             groupPointsInput.value = '0.5';
-            groupReasonInput.value = '';
+            document.getElementById('group-reason').value = '';
+            groupReasonSelect.value = '';
+            document.getElementById('group-reason').style.display = 'none';
         });
     }
 
     // --- Data Export Logic ---
-    const topicInput = document.getElementById('topic-input');
     // dateDisplay is already declared globally
 
     // 旧的导出功能已移除，新的导出功能在文件末尾
@@ -1650,13 +1718,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const customPrompt = customPromptTextarea.value.trim();
 
             const subject = document.getElementById('subject-input').value.trim();
-            const topic = document.getElementById('topic-input').value.trim();
             const date = document.getElementById('date-display').textContent.trim();
 
-            let prompt = `你是一位资深班主任，请根据以下课堂活动数据，为班级生成一份详细的学情报告。报告应包含对整体表现的总结，对表现突出学生的表扬，以及对需要改进学生的建议。请结合学科、课题和日期信息，使报告更具针对性。`;
+            let prompt = `你是一位资深班主任，请根据以下课堂活动数据，为班级生成一份详细的学情报告。报告应包含对整体表现的总结，对表现突出学生的表扬，以及对需要改进学生的建议。请结合学科和日期信息，使报告更具针对性。`;
 
             if (subject) prompt += `\n学科: ${subject}`;
-            if (topic) prompt += `\n课题: ${topic}`;
             if (date) prompt += `\n日期: ${date}`;
             prompt += `\n\n课堂活动数据:\n`;
 
@@ -1802,19 +1868,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // 获取学生姓名（支持隐私保护）
+    // 获取学生姓名（导出时使用座号格式）
     function getStudentNameForExport(studentId) {
-        const includeNames = document.getElementById('include-student-names')?.checked;
-        if (includeNames && Object.keys(studentRoster).length > 0) {
-            return studentRoster[studentId] || `学生${studentId}`;
-        }
         return `学生${studentId}`;
     }
     
     // 生成导出数据
     function generateExportData() {
         const subject = getCurrentSubject() || '未指定学科';
-        const topic = document.getElementById('topic-input').value.trim() || '未指定课题';
         const includeDetailedLog = document.getElementById('include-detailed-log')?.checked;
         const includeStatistics = document.getElementById('include-statistics')?.checked;
         
@@ -1825,7 +1886,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const exportData = {
             basicInfo: {
                 subject: subject,
-                topic: topic,
                 exportTime: new Date().toLocaleString(),
                 timeRange: currentExportTimeRange,
                 startDate: exportStartDate?.toLocaleDateString() || '',
@@ -1881,7 +1941,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ['课堂数据导出报告'],
             [''],
             ['学科', exportData.basicInfo.subject],
-            ['课题', exportData.basicInfo.topic],
             ['导出时间', exportData.basicInfo.exportTime],
             ['时间范围', exportData.basicInfo.timeRange],
             ['开始日期', exportData.basicInfo.startDate],
@@ -1964,23 +2023,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // 验证必要信息
                 const subject = getCurrentSubject();
-                const topic = document.getElementById('topic-input').value.trim();
                 
-                console.log('Subject:', subject, 'Topic:', topic);
+                console.log('Subject:', subject);
                 
                 if (!subject) {
                     showMessage('请先选择或输入学科，以便导出完整数据！', 'warning');
                     return;
                 }
                 
-                // 检查学生名单（如果启用姓名显示）
-                const includeNames = document.getElementById('include-student-names')?.checked;
-                console.log('Include names:', includeNames, 'Roster length:', Object.keys(studentRoster).length);
-                
-                if (includeNames && Object.keys(studentRoster).length === 0) {
-                    const proceed = confirm('未上传学生名单，将使用"学生X号"格式导出。是否继续？');
-                    if (!proceed) return;
-                }
+                // 课堂数据导出使用座号格式，无需检查学生名单
                 
                 console.log('Generating export data...');
                 
@@ -2003,7 +2054,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // 生成文件名
                 const dateStr = exportData.basicInfo.startDate || new Date().toLocaleDateString('zh-CN');
-                const filename = `${dateStr}_${subject}_${topic}_课堂数据.xlsx`;
+                const filename = `${dateStr}_${subject}_课堂数据.xlsx`;
                 
                 console.log('Filename:', filename);
                 console.log('Writing file...');
@@ -2142,7 +2193,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!currentScoringStudent) return;
             
             const points = parseFloat(modalQuickPoints.value);
-            const reason = modalQuickReason.value.trim() || '快速评分';
+            
+            // 获取评分原因（优先使用选择的值，如果没有则使用自定义输入）
+            let reason = '';
+            if (modalQuickReasonSelect.value === 'custom') {
+                reason = modalQuickReason.value.trim() || '快速评分';
+            } else if (modalQuickReasonSelect.value) {
+                reason = modalQuickReasonSelect.value;
+            } else {
+                reason = modalQuickReason.value.trim() || '快速评分';
+            }
             
             if (points > 0) {
                 studentPoints[currentScoringStudent] = (studentPoints[currentScoringStudent] || 0) + points;
@@ -2173,7 +2233,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!currentScoringGroup || currentScoringGroup.length === 0) return;
             
             const points = parseFloat(modalGroupQuickPoints.value);
-            const reason = modalGroupQuickReason.value.trim() || '小组快速评分';
+            
+            // 获取评分原因（优先使用选择的值，如果没有则使用自定义输入）
+            let reason = '';
+            if (modalGroupQuickReasonSelect.value === 'custom') {
+                reason = modalGroupQuickReason.value.trim() || '小组快速评分';
+            } else if (modalGroupQuickReasonSelect.value) {
+                reason = modalGroupQuickReasonSelect.value;
+            } else {
+                reason = modalGroupQuickReason.value.trim() || '小组快速评分';
+            }
             
             const subject = getCurrentSubject() || '未指定学科';
             currentScoringGroup.forEach(studentId => {

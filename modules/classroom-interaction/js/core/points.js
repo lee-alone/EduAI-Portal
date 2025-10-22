@@ -156,3 +156,4 @@ export class PointsManager {
         this.classroom.saveState();
     }
 }
+
