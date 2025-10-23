@@ -28,6 +28,44 @@ document.addEventListener('DOMContentLoaded', () => {
         dateDisplay.textContent = today.toLocaleDateString('zh-CN', options);
     }
 
+    // 导出功能折叠切换
+    const exportToggleHeader = document.getElementById('export-toggle-header');
+    const exportContent = document.getElementById('export-content');
+    const exportChevron = document.getElementById('export-chevron');
+    
+    if (exportToggleHeader && exportContent && exportChevron) {
+        exportToggleHeader.addEventListener('click', () => {
+            const isHidden = exportContent.style.display === 'none';
+            
+            if (isHidden) {
+                exportContent.style.display = 'block';
+                exportChevron.style.transform = 'rotate(180deg)';
+            } else {
+                exportContent.style.display = 'none';
+                exportChevron.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
+
+    // 最近加分记录折叠切换
+    const recentLogToggleHeader = document.getElementById('recent-log-toggle-header');
+    const recentLogContent = document.getElementById('recent-log-content');
+    const recentLogChevron = document.getElementById('recent-log-chevron');
+    
+    if (recentLogToggleHeader && recentLogContent && recentLogChevron) {
+        recentLogToggleHeader.addEventListener('click', () => {
+            const isHidden = recentLogContent.style.display === 'none';
+            
+            if (isHidden) {
+                recentLogContent.style.display = 'block';
+                recentLogChevron.style.transform = 'rotate(180deg)';
+            } else {
+                recentLogContent.style.display = 'none';
+                recentLogChevron.style.transform = 'rotate(0deg)';
+            }
+        });
+    }
+
     // 导出功能相关变量
     let currentExportTimeRange = 'today'; // 当前选择的时间范围
     let exportStartDate = null;
@@ -108,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Classroom Interaction Logic ---
-    const TOTAL_STUDENTS = 55; // 假设班级总人数
+    let TOTAL_STUDENTS = 55; // 班级总人数（可配置）
     let students = []; // { id: 1, name: '学生1' }
     let studentPoints = {}; // { 1: 0, 2: 10, ... }
     let calledStudents = []; // [1, 5, 10]
@@ -173,6 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const subjectSelect = document.getElementById('subject-select');
     const subjectInput = document.getElementById('subject-input');
     const subjectCustomBtn = document.getElementById('subject-custom-btn');
+    
+    // 班级人数设置相关元素
+    const classSizeInput = document.getElementById('class-size-input');
+    const applyClassSizeBtn = document.getElementById('apply-class-size-btn');
 
     // 快速评分相关DOM元素
     const quickScoringSection = document.getElementById('quick-scoring-section');
@@ -244,11 +286,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeClassroom() {
         console.log('initializeClassroom: 开始初始化课堂...');
-        // Initialize students array
-        for (let i = 1; i <= TOTAL_STUDENTS; i++) {
-            students.push({ id: i, name: getStudentName(i) });
-            studentPoints[i] = 0;
+        // 从本地存储加载班级人数设置
+        const savedClassSize = localStorage.getItem('classSize');
+        if (savedClassSize) {
+            TOTAL_STUDENTS = parseInt(savedClassSize);
+            if (classSizeInput) {
+                classSizeInput.value = TOTAL_STUDENTS;
+            }
         }
+        
+        // Initialize students array
+        initializeStudents();
+        
         // Load state from localStorage if available
         loadState();
         // Initial render
@@ -263,6 +312,213 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('initializeClassroom: 渲染最近加分记录...');
         renderPointsLog();
         console.log('initializeClassroom: 课堂初始化完成。');
+    }
+    
+    // 初始化学生数组
+    function initializeStudents() {
+        students = [];
+        studentPoints = {};
+        for (let i = 1; i <= TOTAL_STUDENTS; i++) {
+            students.push({ id: i, name: getStudentName(i) });
+            studentPoints[i] = 0;
+        }
+    }
+    
+    // 应用班级人数设置
+    function applyClassSize() {
+        const newSize = parseInt(classSizeInput.value);
+        if (isNaN(newSize) || newSize < 1 || newSize > 100) {
+            showMessage('请输入有效的班级人数（1-100）！', 'warning');
+            return;
+        }
+        
+        if (newSize === TOTAL_STUDENTS) {
+            showMessage('班级人数未发生变化', 'info');
+            return;
+        }
+        
+        // 检查是否有重要数据
+        const hasImportantData = calledStudents.length > 0 || pointsLog.length > 0;
+        
+        if (hasImportantData) {
+            // 显示确认对话框
+            showClassSizeChangeDialog(newSize);
+        } else {
+            // 没有重要数据，直接应用
+            confirmClassSizeChange(newSize);
+        }
+    }
+    
+    // 显示班级人数变更确认对话框
+    function showClassSizeChangeDialog(newSize) {
+        const currentData = {
+            calledStudents: calledStudents.length,
+            pointsLog: pointsLog.length,
+            totalPoints: Object.values(studentPoints).reduce((sum, points) => sum + points, 0)
+        };
+        
+        const dialogHtml = `
+            <div class="modal-overlay" id="class-size-dialog" style="display: flex;">
+                <div class="modal-container" style="max-width: 500px;">
+                    <div class="modal-header">
+                        <h3 class="modal-title">
+                            <i class="fas fa-exclamation-triangle mr-2 text-yellow-500"></i>
+                            确认更改班级人数
+                        </h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-info-circle text-yellow-600 mr-2"></i>
+                                <span class="font-semibold text-yellow-800">当前课堂数据</span>
+                            </div>
+                            <ul class="text-sm text-yellow-700 space-y-1">
+                                <li>• 已点名学生：${currentData.calledStudents} 人</li>
+                                <li>• 加分记录：${currentData.pointsLog} 条</li>
+                                <li>• 总积分：${currentData.totalPoints} 分</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-exclamation-circle text-red-600 mr-2"></i>
+                                <span class="font-semibold text-red-800">警告</span>
+                            </div>
+                            <p class="text-sm text-red-700">
+                                更改班级人数将清空所有课堂数据，包括点名记录和加分记录！
+                            </p>
+                        </div>
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-lightbulb text-blue-600 mr-2"></i>
+                                <span class="font-semibold text-blue-800">建议</span>
+                            </div>
+                            <p class="text-sm text-blue-700">
+                                建议先导出当前数据，然后再更改班级人数。
+                            </p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="confirm-data-loss" class="form-checkbox text-red-600 mr-2">
+                                <span class="text-sm text-gray-700">我已了解数据将丢失，确认继续</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="cancel-class-size-change" class="btn btn-secondary">
+                            <i class="fas fa-times mr-2"></i>取消
+                        </button>
+                        <button id="export-then-change" class="btn btn-info">
+                            <i class="fas fa-download mr-2"></i>先导出数据
+                        </button>
+                        <button id="confirm-class-size-change" class="btn btn-danger" disabled>
+                            <i class="fas fa-exclamation-triangle mr-2"></i>确认更改
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 添加到页面
+        document.body.insertAdjacentHTML('beforeend', dialogHtml);
+        const dialog = document.getElementById('class-size-dialog');
+        
+        // 绑定事件
+        const confirmCheckbox = document.getElementById('confirm-data-loss');
+        const confirmBtn = document.getElementById('confirm-class-size-change');
+        const cancelBtn = document.getElementById('cancel-class-size-change');
+        const exportBtn = document.getElementById('export-then-change');
+        
+        // 确认复选框变化
+        confirmCheckbox.addEventListener('change', () => {
+            confirmBtn.disabled = !confirmCheckbox.checked;
+        });
+        
+        // 取消按钮
+        cancelBtn.addEventListener('click', () => {
+            document.body.removeChild(dialog);
+        });
+        
+        // 先导出数据
+        exportBtn.addEventListener('click', () => {
+            // 触发导出
+            const exportBtn = document.getElementById('export-data-btn');
+            if (exportBtn) {
+                exportBtn.click();
+            }
+            showMessage('数据已导出，请确认后再更改班级人数', 'success');
+            document.body.removeChild(dialog);
+        });
+        
+        // 确认更改
+        confirmBtn.addEventListener('click', () => {
+            document.body.removeChild(dialog);
+            confirmClassSizeChange(parseInt(classSizeInput.value));
+        });
+        
+        // 背景点击关闭
+        dialog.addEventListener('click', (e) => {
+            if (e.target === dialog) {
+                document.body.removeChild(dialog);
+            }
+        });
+    }
+    
+    // 确认班级人数变更
+    function confirmClassSizeChange(newSize) {
+        // 保存设置到本地存储
+        localStorage.setItem('classSize', newSize);
+        
+        // 数据迁移：保留有效范围内的数据
+        const oldSize = TOTAL_STUDENTS;
+        const oldCalledStudents = [...calledStudents];
+        const oldPointsLog = [...pointsLog];
+        const oldStudentPoints = {...studentPoints};
+        
+        // 更新班级人数
+        TOTAL_STUDENTS = newSize;
+        
+        // 重新初始化学生数组
+        initializeStudents();
+        
+        // 数据迁移逻辑
+        if (newSize > oldSize) {
+            // 人数增加：保留所有原数据
+            calledStudents = oldCalledStudents;
+            pointsLog = oldPointsLog;
+            studentPoints = oldStudentPoints;
+            showMessage(`班级人数已更新为 ${TOTAL_STUDENTS} 人，原数据已保留`, 'success');
+        } else {
+            // 人数减少：只保留有效范围内的数据
+            calledStudents = oldCalledStudents.filter(id => id <= newSize);
+            pointsLog = oldPointsLog.filter(log => log.studentId <= newSize);
+            
+            // 重新构建学生积分
+            studentPoints = {};
+            for (let i = 1; i <= newSize; i++) {
+                studentPoints[i] = oldStudentPoints[i] || 0;
+            }
+            
+            const lostStudents = oldCalledStudents.filter(id => id > newSize);
+            const lostPoints = oldPointsLog.filter(log => log.studentId > newSize);
+            
+            if (lostStudents.length > 0 || lostPoints.length > 0) {
+                showMessage(`班级人数已更新为 ${TOTAL_STUDENTS} 人，${lostStudents.length} 名学生的数据已移除`, 'warning');
+            } else {
+                showMessage(`班级人数已更新为 ${TOTAL_STUDENTS} 人，数据已保留`, 'success');
+            }
+        }
+        
+        // 重新渲染界面
+        renderGroupStudentSelection();
+        renderCalledStudents();
+        renderTopStudents();
+        renderPointsDistributionChart();
+        renderPointsLog();
+        
+        console.log(`班级人数已更新为: ${TOTAL_STUDENTS}`);
     }
     
     // 学科输入切换功能
@@ -598,8 +854,8 @@ document.addEventListener('DOMContentLoaded', () => {
             recentPointsLog.innerHTML = '<li class="text-gray-500">暂无加分记录</li>';
             return;
         }
-        // Display last 3 entries
-        const displayLog = pointsLog.slice(-3).reverse(); 
+        // Display last 5 entries
+        const displayLog = pointsLog.slice(-5).reverse(); 
         recentPointsLog.innerHTML = displayLog.map(log => `
             <li class="py-2 border-b last:border-b-0 text-sm text-gray-700">
                 <div class="flex items-center justify-between">
@@ -2353,80 +2609,84 @@ document.addEventListener('DOMContentLoaded', () => {
         return exportData;
     }
     
-    // 创建Excel工作簿
+    // 创建Excel工作簿 - 优化版本（三个工作表结构）
     function createExcelWorkbook(exportData) {
         const wb = XLSX.utils.book_new();
         
-        // 1. 基础信息工作表
-        const basicInfoData = [
-            ['课堂数据导出报告'],
-            [''],
-            ['学科', exportData.basicInfo.subject],
-            ['导出时间', exportData.basicInfo.exportTime],
-            ['时间范围', exportData.basicInfo.timeRange],
-            ['开始日期', exportData.basicInfo.startDate],
-            ['结束日期', exportData.basicInfo.endDate],
-            ['']
+        // Sheet 1: 详细加分记录（主要数据表）
+        const detailedLogData = [
+            ['学号', '姓名', '时间', '学科', '加分值', '评价原因', '参与方式']
         ];
         
-        if (exportData.statistics && Object.keys(exportData.statistics).length > 0) {
-            basicInfoData.push(['统计信息']);
-            basicInfoData.push(['总学生数', exportData.statistics.totalStudents]);
-            basicInfoData.push(['有积分学生数', exportData.statistics.studentsWithPoints]);
-            basicInfoData.push(['总积分', exportData.statistics.totalPoints]);
-            basicInfoData.push(['平均积分', exportData.statistics.averagePoints]);
-            basicInfoData.push(['被点名学生数', exportData.statistics.calledStudents]);
-            basicInfoData.push(['参与率', exportData.statistics.participationRate]);
-        }
+        exportData.pointsLog.forEach(log => {
+            const studentName = getStudentNameForExport(log.studentId);
+            const participationMode = calledStudents.includes(log.studentId) ? '被点名' : '主动参与';
+            
+            detailedLogData.push([
+                log.studentId,
+                studentName,
+                log.timestamp,
+                log.subject,
+                log.points,
+                log.reason,
+                participationMode
+            ]);
+        });
         
-        const ws1 = XLSX.utils.aoa_to_sheet(basicInfoData);
-        XLSX.utils.book_append_sheet(wb, ws1, '基础信息');
+        const ws1 = XLSX.utils.aoa_to_sheet(detailedLogData);
+        XLSX.utils.book_append_sheet(wb, ws1, '详细加分记录');
         
-        // 2. 学生积分汇总工作表
+        // Sheet 2: 学生积分汇总（个人统计）
         const studentSummaryData = [
-            ['座号', '姓名', '总积分', '被点名次数', '加分次数', '最后加分时间']
+            ['学号', '姓名', '统计时间段', '总积分', '参与次数', '平均加分', '最后参与时间']
         ];
         
         exportData.students.forEach(student => {
-            const lastPointsTime = student.pointsLog.length > 0 
-                ? student.pointsLog[student.pointsLog.length - 1].timestamp 
-                : '无';
+            const studentLogs = exportData.pointsLog.filter(log => log.studentId === student.id);
+            const lastParticipation = studentLogs.length > 0 ? 
+                studentLogs[studentLogs.length - 1].timestamp : '无';
+            const avgPoints = studentLogs.length > 0 ? 
+                (student.totalPoints / studentLogs.length).toFixed(2) : 0;
             
             studentSummaryData.push([
                 student.id,
                 student.name,
+                exportData.basicInfo.startDate + ' 至 ' + exportData.basicInfo.endDate,
                 student.totalPoints,
-                student.calledCount,
-                student.pointsLog.length,
-                lastPointsTime
+                studentLogs.length,
+                avgPoints,
+                lastParticipation
             ]);
         });
         
         const ws2 = XLSX.utils.aoa_to_sheet(studentSummaryData);
         XLSX.utils.book_append_sheet(wb, ws2, '学生积分汇总');
         
-        // 3. 详细加分记录工作表（如果启用）
-        if (document.getElementById('include-detailed-log')?.checked) {
-            const detailedLogData = [
-                ['时间', '座号', '姓名', '学科', '加分值', '加分原因']
-            ];
-            
-            exportData.pointsLog.forEach(log => {
-                detailedLogData.push([
-                    log.timestamp,
-                    log.studentId,
-                    getStudentNameForExport(log.studentId),
-                    log.subject || '未指定',
-                    log.points,
-                    log.reason
-                ]);
-            });
-            
-            const ws3 = XLSX.utils.aoa_to_sheet(detailedLogData);
-            XLSX.utils.book_append_sheet(wb, ws3, '详细加分记录');
-        }
+        // Sheet 3: 班级概况数据（整体统计）
+        const classOverviewData = [
+            ['项目', '数值', '说明'],
+            ['学科', exportData.basicInfo.subject, '当前课程'],
+            ['统计日期', exportData.basicInfo.exportTime.split(' ')[0], '数据日期'],
+            ['班级人数', exportData.statistics.totalStudents, '总学生数'],
+            ['参与学生数', exportData.statistics.studentsWithPoints, '有加分记录的学生'],
+            ['参与率', (exportData.statistics.participationRate * 100).toFixed(1) + '%', '参与学生/总学生'],
+            ['总加分次数', exportData.pointsLog.length, '所有加分记录总数'],
+            ['总积分', exportData.statistics.totalPoints, '所有学生积分总和'],
+            ['平均积分', exportData.statistics.averagePoints, '总积分/参与学生数'],
+            ['课堂活跃度', getActivityLevel(exportData.statistics.participationRate), '基于参与率评估']
+        ];
+        
+        const ws3 = XLSX.utils.aoa_to_sheet(classOverviewData);
+        XLSX.utils.book_append_sheet(wb, ws3, '班级概况数据');
         
         return wb;
+    }
+    
+    // 辅助函数：评估课堂活跃度
+    function getActivityLevel(participationRate) {
+        if (participationRate >= 0.3) return '高';
+        if (participationRate >= 0.15) return '中等';
+        return '低';
     }
 
     // 导出按钮事件
@@ -2447,6 +2707,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // 初始化导出时间范围
     initializeExportTimeRange();
     
+    // 班级人数设置事件监听器
+    if (applyClassSizeBtn) {
+        applyClassSizeBtn.addEventListener('click', () => {
+            applyClassSize();
+        });
+    }
+    
+    // 班级人数输入框回车事件
+    if (classSizeInput) {
+        classSizeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                applyClassSize();
+            }
+        });
+    }
+    
     // ==================== 新加分系统事件监听器 ====================
     
     // 个人加分按钮
@@ -2455,6 +2731,12 @@ document.addEventListener('DOMContentLoaded', () => {
         individualScoringBtn.addEventListener('click', (e) => {
             console.log('个人加分按钮被点击');
             e.preventDefault();
+            
+            // 验证学科是否已填写
+            if (!validateSubject()) {
+                return;
+            }
+            
             showNewIndividualScoringModal();
         });
     } else {
@@ -2467,6 +2749,12 @@ document.addEventListener('DOMContentLoaded', () => {
         groupScoringBtn.addEventListener('click', (e) => {
             console.log('集体加分按钮被点击');
             e.preventDefault();
+            
+            // 验证学科是否已填写
+            if (!validateSubject()) {
+                return;
+            }
+            
             showNewGroupScoringModal();
         });
     } else {

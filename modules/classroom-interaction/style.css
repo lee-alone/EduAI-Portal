@@ -1511,4 +1511,53 @@ body.modal-open .main-content {
     flex-direction: column;
 }
 
+/* 导出功能折叠样式 */
+#export-toggle-header {
+    transition: background-color var(--transition-fast);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-md);
+}
+
+#export-toggle-header:hover {
+    background-color: var(--color-gray-50);
+}
+
+#export-chevron {
+    transition: transform var(--transition-normal);
+}
+
+#export-content {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* 最近加分记录折叠样式 */
+#recent-log-toggle-header {
+    transition: background-color var(--transition-fast);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-md);
+}
+
+#recent-log-toggle-header:hover {
+    background-color: var(--color-gray-50);
+}
+
+#recent-log-chevron {
+    transition: transform var(--transition-normal);
+}
+
+#recent-log-content {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 

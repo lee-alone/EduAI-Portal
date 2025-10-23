@@ -54,6 +54,7 @@
                                     <option value="美术">美术</option>
                                     <option value="音乐">音乐</option>
                                     <option value="信息技术">信息技术</option>
+                                    <option value="班会">班会</option>
                                     <option value="其他">其他</option>
                                 </select>
                                 <button type="button" id="subject-custom-btn" class="btn btn-outline px-3">
@@ -62,6 +63,7 @@
                             </div>
                             <input type="text" id="subject-input" class="modern-input mt-2" placeholder="或直接输入学科名称" style="display: none;">
                         </div>
+                        
                         <div class="form-group">
                             <label class="block text-gray-700 text-sm font-bold mb-2">日期:</label>
                             <span id="date-display" class="block text-gray-800 text-lg font-medium"></span>
@@ -292,66 +294,100 @@
                         </div>
 
                         <div class="card-section">
-                            <h4 class="font-medium mb-2 text-gray-700">最近加分记录</h4>
-                            <ul id="recent-points-log" class="list-none text-gray-700 min-h-[120px] overflow-y-auto border p-2 rounded bg-gray-50">
-                                <!-- 最近加分记录将显示在这里 -->
-                            </ul>
-                        </div>
-                        <!-- 导出功能区域 -->
-                        <div class="card-section">
-                            <h4 class="font-medium mb-3 text-gray-700"><i class="fas fa-download mr-2"></i>数据导出</h4>
+                            <div class="flex items-center justify-between cursor-pointer" id="recent-log-toggle-header">
+                                <h4 class="font-medium text-gray-700"><i class="fas fa-history mr-2"></i>最近加分记录</h4>
+                                <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200" id="recent-log-chevron"></i>
+                            </div>
                             
-                            <!-- 时间范围选择 -->
-                            <div class="form-group">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">导出时间范围:</label>
-                                <div class="grid grid-cols-2 gap-2 mb-3">
-                                    <button id="export-today-btn" class="btn btn-outline export-time-btn active">
-                                        <i class="fas fa-calendar-day mr-2"></i>今天
-                                    </button>
-                                    <button id="export-week-btn" class="btn btn-outline export-time-btn">
-                                        <i class="fas fa-calendar-week mr-2"></i>本周
-                                    </button>
-                                    <button id="export-month-btn" class="btn btn-outline export-time-btn">
-                                        <i class="fas fa-calendar mr-2"></i>本月
-                                    </button>
-                                    <button id="export-custom-btn" class="btn btn-outline export-time-btn">
-                                        <i class="fas fa-calendar-alt mr-2"></i>自定义
-                                    </button>
-                                </div>
+                            <!-- 折叠内容区域 -->
+                            <div id="recent-log-content" class="mt-4" style="display: none;">
+                                <ul id="recent-points-log" class="list-none text-gray-700 min-h-[120px] overflow-y-auto border p-2 rounded bg-gray-50">
+                                    <!-- 最近加分记录将显示在这里 -->
+                                </ul>
                             </div>
-
-                            <!-- 自定义时间范围 -->
-                            <div id="custom-date-range" class="form-group" style="display: none;">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="export-start-date" class="block text-gray-700 text-sm font-bold mb-2">开始日期:</label>
-                                        <input type="date" id="export-start-date" class="modern-input">
+                        </div>
+                        <!-- 导出功能区域 - 折叠式设计 -->
+                        <div class="card-section">
+                            <div class="flex items-center justify-between cursor-pointer" id="export-toggle-header">
+                                <h4 class="font-medium text-gray-700"><i class="fas fa-download mr-2"></i>数据导出</h4>
+                                <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200" id="export-chevron"></i>
+                            </div>
+                            
+                            <!-- 折叠内容区域 -->
+                            <div id="export-content" class="mt-4" style="display: none;">
+                                <!-- 时间范围选择 -->
+                                <div class="form-group">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">导出时间范围:</label>
+                                    <div class="grid grid-cols-2 gap-2 mb-3">
+                                        <button id="export-today-btn" class="btn btn-outline export-time-btn active">
+                                            <i class="fas fa-calendar-day mr-2"></i>今天
+                                        </button>
+                                        <button id="export-week-btn" class="btn btn-outline export-time-btn">
+                                            <i class="fas fa-calendar-week mr-2"></i>本周
+                                        </button>
+                                        <button id="export-month-btn" class="btn btn-outline export-time-btn">
+                                            <i class="fas fa-calendar mr-2"></i>本月
+                                        </button>
+                                        <button id="export-custom-btn" class="btn btn-outline export-time-btn">
+                                            <i class="fas fa-calendar-alt mr-2"></i>自定义
+                                        </button>
                                     </div>
-                                    <div>
-                                        <label for="export-end-date" class="block text-gray-700 text-sm font-bold mb-2">结束日期:</label>
-                                        <input type="date" id="export-end-date" class="modern-input">
+                                </div>
+
+                                <!-- 自定义时间范围 -->
+                                <div id="custom-date-range" class="form-group" style="display: none;">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="export-start-date" class="block text-gray-700 text-sm font-bold mb-2">开始日期:</label>
+                                            <input type="date" id="export-start-date" class="modern-input">
+                                        </div>
+                                        <div>
+                                            <label for="export-end-date" class="block text-gray-700 text-sm font-bold mb-2">结束日期:</label>
+                                            <input type="date" id="export-end-date" class="modern-input">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- 导出选项 -->
-                            <div class="form-group">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">导出选项:</label>
-                                <div class="space-y-2">
-                                    <label class="flex items-center">
-                                        <input type="checkbox" id="include-detailed-log" class="form-checkbox text-blue-600 mr-2" checked>
-                                        <span class="text-gray-700">包含详细加分记录</span>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="checkbox" id="include-statistics" class="form-checkbox text-blue-600 mr-2" checked>
-                                        <span class="text-gray-700">包含统计信息</span>
-                                    </label>
+                                <!-- 导出选项 -->
+                                <div class="form-group">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">导出选项:</label>
+                                    <div class="space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="include-detailed-log" class="form-checkbox text-blue-600 mr-2" checked>
+                                            <span class="text-gray-700">包含详细加分记录</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="checkbox" id="include-statistics" class="form-checkbox text-blue-600 mr-2" checked>
+                                            <span class="text-gray-700">包含统计信息</span>
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <button id="export-data-btn" class="btn btn-primary w-full mt-4">
-                                <i class="fas fa-file-export mr-2"></i>导出课堂数据
-                            </button>
+                                <!-- 高级设置 -->
+                                <div class="form-group border-t pt-4 mt-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-3">
+                                        <i class="fas fa-cog mr-2"></i>高级设置
+                                    </label>
+                                    
+                                    <!-- 班级人数设置 -->
+                                    <div class="form-group">
+                                        <label for="class-size-input" class="block text-gray-700 text-sm font-bold mb-2">班级人数:</label>
+                                        <div class="flex gap-2 items-center">
+                                            <input type="number" id="class-size-input" class="modern-input flex-1" value="55" min="1" max="100">
+                                            <button type="button" id="apply-class-size-btn" class="btn btn-primary">
+                                                <i class="fas fa-save mr-2"></i>应用设置
+                                            </button>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            设置班级总人数，影响学生座号范围和统计计算
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button id="export-data-btn" class="btn btn-primary w-full mt-4">
+                                    <i class="fas fa-file-export mr-2"></i>导出课堂数据
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
