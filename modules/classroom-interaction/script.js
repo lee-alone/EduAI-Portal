@@ -133,8 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const getStudentName = (id) => studentRoster[id] || `学生${id}`;
 
     // DOM Elements for Live Interaction
-    const singleCallResult = document.getElementById('single-call-result');
-    const multiCallResult = document.getElementById('multi-call-result');
+    const callResult = document.getElementById('call-result');
     const calledStudentsList = document.getElementById('called-students-list');
     const groupStudentSelection = document.getElementById('group-student-selection');
     const topStudentsList = document.getElementById('top-students-list');
@@ -430,14 +429,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const chartNoData = document.getElementById('chart-no-data');
         
         if (!chartCanvas) return;
+
+        const subjectPoints = {};
+        pointsLog.forEach(log => {
+            if (log.points > 0) {
+                subjectPoints[log.subject] = (subjectPoints[log.subject] || 0) + log.points;
+            }
+        });
+
+        const sortedSubjects = Object.entries(subjectPoints)
+            .sort(([, a], [, b]) => b - a);
         
-        // 获取有积分的学生数据
-        const studentsWithPoints = Object.entries(studentPoints)
-            .map(([id, points]) => ({ id: parseInt(id), name: getStudentName(parseInt(id)), points }))
-            .filter(student => student.points > 0)
-            .sort((a, b) => b.points - a.points);
-        
-        if (studentsWithPoints.length === 0) {
+        if (sortedSubjects.length === 0) {
             chartCanvas.style.display = 'none';
             chartNoData.style.display = 'flex';
             return;
@@ -446,16 +449,13 @@ document.addEventListener('DOMContentLoaded', () => {
         chartCanvas.style.display = 'block';
         chartNoData.style.display = 'none';
         
-        // 销毁现有图表
         if (pointsChart) {
             pointsChart.destroy();
         }
         
-        // 准备图表数据
-        const labels = studentsWithPoints.slice(0, 10).map(s => `学生${s.id}号`);
-        const data = studentsWithPoints.slice(0, 10).map(s => s.points);
+        const labels = sortedSubjects.map(([subject]) => subject);
+        const data = sortedSubjects.map(([, points]) => points);
         
-        // 创建图表
         const ctx = chartCanvas.getContext('2d');
         pointsChart = new Chart(ctx, {
             type: 'bar',
@@ -465,26 +465,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     label: '积分',
                     data: data,
                     backgroundColor: [
-                        'rgba(255, 215, 0, 0.8)',   // 金色
-                        'rgba(192, 192, 192, 0.8)', // 银色
-                        'rgba(205, 127, 50, 0.8)',  // 铜色
                         'rgba(59, 130, 246, 0.8)',  // 蓝色
                         'rgba(16, 185, 129, 0.8)', // 绿色
                         'rgba(245, 158, 11, 0.8)', // 橙色
                         'rgba(139, 92, 246, 0.8)', // 紫色
                         'rgba(239, 68, 68, 0.8)',  // 红色
+                        'rgba(255, 215, 0, 0.8)',   // 金色
+                        'rgba(192, 192, 192, 0.8)', // 银色
+                        'rgba(205, 127, 50, 0.8)',  // 铜色
                         'rgba(107, 114, 128, 0.8)', // 灰色
                         'rgba(34, 197, 94, 0.8)'   // 绿色
                     ],
                     borderColor: [
-                        'rgba(255, 215, 0, 1)',
-                        'rgba(192, 192, 192, 1)',
-                        'rgba(205, 127, 50, 1)',
                         'rgba(59, 130, 246, 1)',
                         'rgba(16, 185, 129, 1)',
                         'rgba(245, 158, 11, 1)',
                         'rgba(139, 92, 246, 1)',
                         'rgba(239, 68, 68, 1)',
+                        'rgba(255, 215, 0, 1)',
+                        'rgba(192, 192, 192, 1)',
+                        'rgba(205, 127, 50, 1)',
                         'rgba(107, 114, 128, 1)',
                         'rgba(34, 197, 94, 1)'
                     ],
@@ -499,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: {
                     title: {
                         display: true,
-                        text: '学生积分排行榜',
+                        text: '学科积分分布',
                         font: {
                             size: 16,
                             weight: 'bold'
@@ -888,97 +888,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 添加键盘快捷键支持
     document.addEventListener('keydown', (e) => {
-        // Ctrl + Enter: 随机点名（仅点名，不自动评分）
+        // Ctrl + Enter: 随机点名
         if (e.ctrlKey && e.key === 'Enter') {
             e.preventDefault();
-            // 验证学科是否已填写
-            if (!validateSubject()) {
-                return;
-            }
-            
-            const uncalledStudents = students.filter(s => !calledStudents.includes(s.id));
-            if (uncalledStudents.length === 0) {
-                singleCallResult.textContent = '所有学生都已被点名！';
-                showMessage('所有学生都已被点名！', 'info');
-                return;
-            }
-            const randomIndex = Math.floor(Math.random() * uncalledStudents.length);
-            const selectedStudent = uncalledStudents[randomIndex];
-
-            calledStudents.push(selectedStudent.id);
-            singleCallResult.textContent = `学生${selectedStudent.id}号 被点到！`;
-            renderCalledStudents();
-            saveState();
-            showMessage(`学生${selectedStudent.id}号 被成功点名！`, 'success');
-            
-            // 显示点名结果模态框
-            showNamingModal([selectedStudent], false);
+            randomCallBtn.click();
         }
-        // Ctrl + Shift + Enter: 多人点名（仅点名，不自动评分）
+        // Ctrl + Shift + Enter: 多人点名
         if (e.ctrlKey && e.shiftKey && e.key === 'Enter') {
             e.preventDefault();
-            // 验证学科是否已填写
-            if (!validateSubject()) {
-                return;
-            }
-            
-            const numToCall = parseInt(multiCallNumInput.value);
-            if (isNaN(numToCall) || numToCall <= 0) {
-                multiCallResult.textContent = '请输入有效的点名人数！';
-                showMessage('请输入有效的点名人数！', 'warning');
-                return;
-            }
-
-            let uncalledStudents = students.filter(s => !calledStudents.includes(s.id));
-            if (uncalledStudents.length === 0) {
-                multiCallResult.textContent = '所有学生都已被点名！';
-                showMessage('所有学生都已被点名！', 'info');
-                return;
-            }
-
-            // 修正逻辑：使用实际可点名人数
-            const actualNumToCall = Math.min(numToCall, uncalledStudents.length);
-            if (actualNumToCall < numToCall) {
-                showMessage(`剩余未点名学生不足${numToCall}人，将点名${actualNumToCall}人。`, 'warning');
-            }
-
-            const selectedStudents = [];
-            const studentsToChoose = [...uncalledStudents]; // 创建副本避免修改原数组
-            
-            for (let i = 0; i < actualNumToCall; i++) {
-                const randomIndex = Math.floor(Math.random() * studentsToChoose.length);
-                const selectedStudent = studentsToChoose[randomIndex];
-                selectedStudents.push(selectedStudent);
-                calledStudents.push(selectedStudent.id);
-                studentsToChoose.splice(randomIndex, 1); // 从副本中移除，避免重复选择
-            }
-
-            const resultText = selectedStudents.map(s => `学生${s.id}号`).join('、');
-            multiCallResult.textContent = `${resultText} 被点到！`;
-            renderCalledStudents();
-            saveState();
-            showMessage(`成功点名 ${actualNumToCall} 名学生！`, 'success');
-            
-            // 显示点名结果模态框
-            showNamingModal(selectedStudents, true);
-        }
-        // Enter: 确认评分（在快速评分界面）
-        if (e.key === 'Enter' && (quickScoringSection.style.display !== 'none' || groupQuickScoringSection.style.display !== 'none')) {
-            e.preventDefault();
-            if (quickScoringSection.style.display !== 'none' && confirmScoringBtn) {
-                confirmScoringBtn.click();
-            } else if (groupQuickScoringSection.style.display !== 'none' && confirmGroupScoringBtn) {
-                confirmGroupScoringBtn.click();
-            }
-        }
-        // Escape: 跳过评分
-        if (e.key === 'Escape' && (quickScoringSection.style.display !== 'none' || groupQuickScoringSection.style.display !== 'none')) {
-            e.preventDefault();
-            if (quickScoringSection.style.display !== 'none' && skipScoringBtn) {
-                skipScoringBtn.click();
-            } else if (groupQuickScoringSection.style.display !== 'none' && skipGroupScoringBtn) {
-                skipGroupScoringBtn.click();
-            }
+            multiCallBtn.click();
         }
     });
 
@@ -1085,7 +1003,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const uncalledStudents = students.filter(s => !calledStudents.includes(s.id));
             if (uncalledStudents.length === 0) {
-                singleCallResult.textContent = '所有学生都已被点名！';
+                callResult.textContent = '所有学生都已被点名！';
                 showMessage('所有学生都已被点名！', 'info');
                 return;
             }
@@ -1093,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedStudent = uncalledStudents[randomIndex];
 
             calledStudents.push(selectedStudent.id);
-            singleCallResult.textContent = `学生${selectedStudent.id}号 被点到！`;
+            callResult.textContent = `学生${selectedStudent.id}号 被点到！`;
             renderCalledStudents();
             saveState();
             showMessage(`学生${selectedStudent.id}号 被成功点名！`, 'success');
@@ -1112,14 +1030,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const numToCall = parseInt(multiCallNumInput.value);
             if (isNaN(numToCall) || numToCall <= 0) {
-                multiCallResult.textContent = '请输入有效的点名人数！';
+                callResult.textContent = '请输入有效的点名人数！';
                 showMessage('请输入有效的点名人数！', 'warning');
                 return;
             }
 
             let uncalledStudents = students.filter(s => !calledStudents.includes(s.id));
             if (uncalledStudents.length === 0) {
-                multiCallResult.textContent = '所有学生都已被点名！';
+                callResult.textContent = '所有学生都已被点名！';
                 showMessage('所有学生都已被点名！', 'info');
                 return;
             }
@@ -1142,7 +1060,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const resultText = selectedStudents.map(s => `学生${s.id}号`).join('、');
-            multiCallResult.textContent = `${resultText} 被点到！`;
+            callResult.textContent = `${resultText} 被点到！`;
             renderCalledStudents();
             saveState();
             showMessage(`成功点名 ${actualNumToCall} 名学生！`, 'success');
@@ -1155,8 +1073,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resetCallBtn) {
         resetCallBtn.addEventListener('click', () => {
             calledStudents = [];
-            singleCallResult.textContent = '点名结果将显示在这里';
-            multiCallResult.textContent = '点名结果将显示在这里';
+            callResult.textContent = '点名结果将显示在这里';
             renderCalledStudents();
             saveState();
             hideQuickScoring(); // 隐藏快速评分界面
@@ -1813,7 +1730,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'week':
                 startDate = new Date(today);
-                startDate.setDate(today.getDate() - today.getDay()); // 本周一
+                startDate.setDate(today.getDay() === 0 ? today.getDate() - 6 : today.getDate() - today.getDay()); // 本周一
                 endDate = new Date(today);
                 customDateRange.style.display = 'none';
                 break;
@@ -2007,298 +1924,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         return wb;
     }
-    
-    // 导出数据按钮事件
+
+    // 导出按钮事件
     const exportDataBtn = document.getElementById('export-data-btn');
-    console.log('Export button found:', exportDataBtn);
     if (exportDataBtn) {
-        console.log('Adding click event listener to export button');
-        exportDataBtn.addEventListener('click', (e) => {
-            console.log('Export button clicked!', e);
-            e.preventDefault();
-            e.stopPropagation();
-            
-            try {
-                console.log('Starting export process...');
-                
-                // 验证必要信息
-                const subject = getCurrentSubject();
-                
-                console.log('Subject:', subject);
-                
-                if (!subject) {
-                    showMessage('请先选择或输入学科，以便导出完整数据！', 'warning');
-                    return;
-                }
-                
-                // 课堂数据导出使用座号格式，无需检查学生名单
-                
-                console.log('Generating export data...');
-                
-                // 生成导出数据
-                const exportData = generateExportData();
-                
-                console.log('Export data generated:', exportData);
-                
-                // 检查XLSX库
-                if (typeof XLSX === 'undefined') {
-                    throw new Error('XLSX库未加载，请刷新页面重试！');
-                }
-                
-                console.log('Creating Excel workbook...');
-                
-                // 创建Excel工作簿
-                const wb = createExcelWorkbook(exportData);
-                
-                console.log('Workbook created:', wb);
-                
-                // 生成文件名
-                const dateStr = exportData.basicInfo.startDate || new Date().toLocaleDateString('zh-CN');
-                const filename = `${dateStr}_${subject}_课堂数据.xlsx`;
-                
-                console.log('Filename:', filename);
-                console.log('Writing file...');
-                
-                // 下载Excel文件
-                XLSX.writeFile(wb, filename);
-                
-                console.log('File written successfully!');
-                
-                showMessage(`课堂数据已成功导出为Excel！文件名：${filename}`, 'success');
-                
-            } catch (error) {
-                console.error('导出失败:', error);
-                console.error('Error stack:', error.stack);
-                showMessage(`导出失败：${error.message}`, 'error');
-            }
+        exportDataBtn.addEventListener('click', () => {
+            console.log('Export button clicked');
+            const exportData = generateExportData();
+            const wb = createExcelWorkbook(exportData);
+            const subject = exportData.basicInfo.subject.replace(/ /g, '_');
+            const date = new Date().toISOString().split('T')[0];
+            const filename = `${subject}_课堂数据_${date}.xlsx`;
+            XLSX.writeFile(wb, filename);
+            showMessage('数据已导出！', 'success');
         });
-    } else {
-        console.error('Export button not found!');
     }
-    
-    // 初始化导出功能
-    console.log('Initializing export functionality...');
-    console.log('XLSX library available:', typeof XLSX !== 'undefined');
-    
-    // 测试导出按钮是否存在
-    const testExportBtn = document.getElementById('export-data-btn');
-    console.log('Export button element:', testExportBtn);
-    
+
+    // 初始化导出时间范围
     initializeExportTimeRange();
-    console.log('Export functionality initialized.');
-    
-    // ==================== 模态框事件监听器 ====================
-    
-    // 关闭模态框按钮
-    if (closeNamingModal) {
-        closeNamingModal.addEventListener('click', hideNamingModal);
-    }
-    
-    if (modalCloseBtn) {
-        modalCloseBtn.addEventListener('click', hideNamingModal);
-    }
-    
-    // 快速评分按钮
-    if (modalQuickScoringBtn) {
-        modalQuickScoringBtn.addEventListener('click', modalQuickScoring);
-    }
-    
-    // 点击遮罩层关闭模态框
-    if (namingModal) {
-        namingModal.addEventListener('click', (e) => {
-            if (e.target === namingModal) {
-                hideNamingModal();
-            }
-        });
-    }
-    
-    // ESC键关闭模态框
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && isModalOpen) {
-            hideNamingModal();
-        }
-    });
-    
-    // ==================== 评分模态框事件监听器 ====================
-    
-    // 关闭评分模态框按钮
-    if (closeScoringModal) {
-        closeScoringModal.addEventListener('click', hideScoringModal);
-    }
-    
-    if (closeGroupScoringModal) {
-        closeGroupScoringModal.addEventListener('click', hideGroupScoringModal);
-    }
-    
-    // 跳过评分按钮
-    if (modalSkipScoringBtn) {
-        modalSkipScoringBtn.addEventListener('click', () => {
-            hideScoringModal();
-            showMessage('已跳过评分', 'info');
-        });
-    }
-    
-    if (modalSkipGroupScoringBtn) {
-        modalSkipGroupScoringBtn.addEventListener('click', () => {
-            hideGroupScoringModal();
-            showMessage('已跳过小组评分', 'info');
-        });
-    }
-    
-    // 答题表现按钮
-    if (modalCorrectAnswerBtn) {
-        modalCorrectAnswerBtn.addEventListener('click', () => {
-            modalQuickPoints.value = '0.5';
-            modalQuickReason.value = '回答正确';
-            modalQuickReason.focus();
-        });
-    }
-    
-    if (modalIncorrectAnswerBtn) {
-        modalIncorrectAnswerBtn.addEventListener('click', () => {
-            modalQuickPoints.value = '0';
-            modalQuickReason.value = '回答错误';
-            modalQuickReason.focus();
-        });
-    }
-    
-    // 小组表现按钮
-    if (modalGroupCorrectBtn) {
-        modalGroupCorrectBtn.addEventListener('click', () => {
-            modalGroupQuickPoints.value = '1';
-            modalGroupQuickReason.value = '小组表现优秀，答案正确';
-            modalGroupQuickReason.focus();
-        });
-    }
-    
-    if (modalGroupPartialBtn) {
-        modalGroupPartialBtn.addEventListener('click', () => {
-            modalGroupQuickPoints.value = '0.5';
-            modalGroupQuickReason.value = '小组表现良好';
-            modalGroupQuickReason.focus();
-        });
-    }
-    
-    if (modalGroupPoorBtn) {
-        modalGroupPoorBtn.addEventListener('click', () => {
-            modalGroupQuickPoints.value = '0';
-            modalGroupQuickReason.value = '小组表现不佳';
-            modalGroupQuickReason.focus();
-        });
-    }
-    
-    // 确认评分按钮
-    if (modalConfirmScoringBtn) {
-        modalConfirmScoringBtn.addEventListener('click', () => {
-            if (!currentScoringStudent) return;
-            
-            const points = parseFloat(modalQuickPoints.value);
-            
-            // 获取评分原因（优先使用选择的值，如果没有则使用自定义输入）
-            let reason = '';
-            if (modalQuickReasonSelect.value === 'custom') {
-                reason = modalQuickReason.value.trim() || '快速评分';
-            } else if (modalQuickReasonSelect.value) {
-                reason = modalQuickReasonSelect.value;
-            } else {
-                reason = modalQuickReason.value.trim() || '快速评分';
-            }
-            
-            if (points > 0) {
-                studentPoints[currentScoringStudent] = (studentPoints[currentScoringStudent] || 0) + points;
-                const subject = getCurrentSubject() || '未指定学科';
-                pointsLog.push({
-                    studentId: currentScoringStudent,
-                    reason: reason,
-                    points: points,
-                    timestamp: new Date().toLocaleString(),
-                    subject: subject
-                });
-                
-                renderTopStudents();
-                renderPointsDistributionChart();
-                renderPointsLog();
-                saveState();
-                showMessage(`学生${currentScoringStudent}号 已加 ${points} 分！`, 'success');
-            } else {
-                showMessage(`学生${currentScoringStudent}号 未获得加分`, 'info');
-            }
-            
-            hideScoringModal();
-        });
-    }
-    
-    if (modalConfirmGroupScoringBtn) {
-        modalConfirmGroupScoringBtn.addEventListener('click', () => {
-            if (!currentScoringGroup || currentScoringGroup.length === 0) return;
-            
-            const points = parseFloat(modalGroupQuickPoints.value);
-            
-            // 获取评分原因（优先使用选择的值，如果没有则使用自定义输入）
-            let reason = '';
-            if (modalGroupQuickReasonSelect.value === 'custom') {
-                reason = modalGroupQuickReason.value.trim() || '小组快速评分';
-            } else if (modalGroupQuickReasonSelect.value) {
-                reason = modalGroupQuickReasonSelect.value;
-            } else {
-                reason = modalGroupQuickReason.value.trim() || '小组快速评分';
-            }
-            
-            const subject = getCurrentSubject() || '未指定学科';
-            currentScoringGroup.forEach(studentId => {
-                if (points > 0) {
-                    studentPoints[studentId] = (studentPoints[studentId] || 0) + points;
-                }
-                pointsLog.push({
-                    studentId: studentId,
-                    reason: reason,
-                    points: points,
-                    timestamp: new Date().toLocaleString(),
-                    subject: subject
-                });
-            });
-            
-            renderTopStudents();
-            renderPointsDistributionChart();
-            renderPointsLog();
-            saveState();
-            
-            if (points > 0) {
-                showMessage(`小组 ${currentScoringGroup.length} 名学生各加 ${points} 分！`, 'success');
-            } else {
-                showMessage(`小组 ${currentScoringGroup.length} 名学生未获得加分`, 'info');
-            }
-            
-            hideGroupScoringModal();
-        });
-    }
-    
-    // 点击遮罩层关闭评分模态框
-    if (scoringModal) {
-        scoringModal.addEventListener('click', (e) => {
-            if (e.target === scoringModal) {
-                hideScoringModal();
-            }
-        });
-    }
-    
-    if (groupScoringModal) {
-        groupScoringModal.addEventListener('click', (e) => {
-            if (e.target === groupScoringModal) {
-                hideGroupScoringModal();
-            }
-        });
-    }
-    
-    // ESC键关闭评分模态框
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if (scoringModal.style.display !== 'none') {
-                hideScoringModal();
-            }
-            if (groupScoringModal.style.display !== 'none') {
-                hideGroupScoringModal();
-            }
-        }
-    });
 });
