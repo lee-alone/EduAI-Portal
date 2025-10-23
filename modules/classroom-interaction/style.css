@@ -19,6 +19,12 @@
     --color-gray-800: #1F2937;
     --color-gray-900: #111827;
 
+    /* 文字颜色 */
+    --color-text-primary: #1E40AF; /* 温暖的深蓝色 */
+    --color-text-secondary: #6B7280;
+    --color-text-white: #FFFFFF;
+    --color-text-warm: #7C3AED; /* 温暖的紫色 */
+
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -441,13 +447,20 @@ body {
 
 /* 学生信息卡片样式 */
 .student-info-card {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-    color: white;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: var(--color-text-warm);
     border-radius: var(--border-radius-lg);
     padding: 1rem;
     text-align: center;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06);
     margin-bottom: 1rem;
+    border: 2px solid #f59e0b;
+}
+
+.student-info-card .text-lg,
+.student-info-card .text-sm {
+    color: var(--color-text-warm) !important;
+    font-weight: 600;
 }
 
 .group-info-card {
@@ -995,18 +1008,20 @@ body {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    z-index: 1000;
+    z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+    pointer-events: none;
 }
 
 .modal-overlay.show {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 /* 模态框容器 */
@@ -1021,6 +1036,8 @@ body {
     transform: scale(0.9) translateY(20px);
     transition: all 0.3s ease;
     position: relative;
+    z-index: 10001;
+    pointer-events: auto;
 }
 
 .modal-overlay.show .modal-container {
@@ -1236,14 +1253,34 @@ body.modal-open .main-content {
 /* 学生信息卡片 */
 .student-info-card,
 .group-info-card {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
     border-radius: var(--border-radius-lg);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
-    border: 2px solid var(--color-primary);
+    border: 2px solid #f59e0b;
     text-align: center;
     position: relative;
     overflow: hidden;
+    color: var(--color-text-warm);
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06);
+}
+
+.student-info-card .text-lg,
+.student-info-card .text-sm,
+.group-info-card .text-lg,
+.group-info-card .text-sm {
+    color: var(--color-text-warm) !important;
+    font-weight: 600;
+}
+
+.student-info-card .text-lg {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.student-info-card .text-sm {
+    font-size: 0.875rem;
+    opacity: 0.8;
 }
 
 .student-info-card::before,
@@ -1410,6 +1447,50 @@ body.modal-open .main-content {
 .modal-body .form-group:nth-child(3) { animation-delay: 0.2s; }
 .modal-body .form-group:nth-child(4) { animation-delay: 0.3s; }
 .modal-body .form-group:nth-child(5) { animation-delay: 0.4s; }
+
+/* 模态框内元素交互修复 */
+.modal-container * {
+    pointer-events: auto;
+}
+
+.modal-container button,
+.modal-container input,
+.modal-container select,
+.modal-container textarea {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.modal-container input:focus,
+.modal-container select:focus,
+.modal-container textarea:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* 确保模态框按钮可点击 */
+.modal-actions .btn {
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+}
+
+.modal-actions .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 模态框关闭按钮样式 */
+.modal-close-btn {
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+}
+
+.modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
 
 /* 等高网格布局 */
 .equal-height-grid {

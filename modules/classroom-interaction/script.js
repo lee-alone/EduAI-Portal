@@ -210,6 +210,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedStudentsDisplay = document.getElementById('selected-students-display');
     const clearSelectionBtn = document.getElementById('clear-selection-btn');
     const selectAllBtn = document.getElementById('select-all-btn');
+    
+    // 新加分系统相关DOM元素
+    const scoringTypeSection = document.getElementById('scoring-type-section');
+    const individualScoringBtn = document.getElementById('individual-scoring-btn');
+    const groupScoringBtn = document.getElementById('group-scoring-btn');
+    
+    // 调试信息
+    console.log('individualScoringBtn:', individualScoringBtn);
+    console.log('groupScoringBtn:', groupScoringBtn);
+    
+    // 新个人加分模态框相关元素
+    const newIndividualScoringModal = document.getElementById('new-individual-scoring-modal');
+    const newModalStudentName = document.getElementById('new-modal-student-name');
+    const newModalStudentId = document.getElementById('new-modal-student-id');
+    const newModalIndividualPoints = document.getElementById('new-modal-individual-points');
+    const newModalIndividualReasonSelect = document.getElementById('new-modal-individual-reason-select');
+    const newModalIndividualReason = document.getElementById('new-modal-individual-reason');
+    const newModalConfirmIndividualScoringBtn = document.getElementById('new-modal-confirm-individual-scoring-btn');
+    const newModalCancelIndividualScoringBtn = document.getElementById('new-modal-cancel-individual-scoring-btn');
+    const closeNewIndividualScoringModal = document.getElementById('close-new-individual-scoring-modal');
+    
+    // 新集体加分模态框相关元素
+    const newGroupScoringModal = document.getElementById('new-group-scoring-modal');
+    const newModalGroupStudents = document.getElementById('new-modal-group-students');
+    const newModalGroupCount = document.getElementById('new-modal-group-count');
+    const newModalGroupPoints = document.getElementById('new-modal-group-points');
+    const newModalGroupReasonSelect = document.getElementById('new-modal-group-reason-select');
+    const newModalGroupReason = document.getElementById('new-modal-group-reason');
+    const newModalConfirmGroupScoringBtn = document.getElementById('new-modal-confirm-group-scoring-btn');
+    const newModalCancelGroupScoringBtn = document.getElementById('new-modal-cancel-group-scoring-btn');
+    const closeNewGroupScoringModal = document.getElementById('close-new-group-scoring-modal');
 
     function initializeClassroom() {
         console.log('initializeClassroom: 开始初始化课堂...');
@@ -318,6 +349,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="ml-2 text-gray-700">${s.id}</span>
             </label>
         `).join('');
+        
+        // 为每个复选框添加事件监听器
+        const checkboxes = groupStudentSelection.querySelectorAll('input[name="group-student-selection"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                updateSelectedStudentsFromCheckboxes();
+            });
+        });
+    }
+    
+    // 从复选框更新选中的学生
+    function updateSelectedStudentsFromCheckboxes() {
+        const checkboxes = groupStudentSelection.querySelectorAll('input[name="group-student-selection"]:checked');
+        selectedStudents = Array.from(checkboxes).map(cb => parseInt(cb.value));
+        console.log('手动选择更新selectedStudents:', selectedStudents);
+        updateSelectionDisplay();
     }
 
     function renderCalledStudents() {
@@ -617,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 更新快速评分按钮显示
         if (isMultiple) {
-            modalQuickScoringBtn.innerHTML = '<i class="fas fa-users mr-2"></i>小组快速评分';
+            modalQuickScoringBtn.innerHTML = '<i class="fas fa-edit mr-2"></i>选择加分';
         } else {
             modalQuickScoringBtn.innerHTML = '<i class="fas fa-star mr-2"></i>快速评分';
         }
@@ -644,10 +691,29 @@ document.addEventListener('DOMContentLoaded', () => {
             // 单人快速评分
             showModalQuickScoring(currentModalStudents[0].id);
         } else {
-            // 小组快速评分
+            // 多人点名：将学生传递到手动选择模式
             const studentIds = currentModalStudents.map(s => s.id);
-            showModalGroupQuickScoring(studentIds);
+            transferStudentsToManualSelection(studentIds);
         }
+    }
+    
+    // 将学生传递到手动选择模式
+    function transferStudentsToManualSelection(studentIds) {
+        // 设置选中的学生
+        selectedStudents = studentIds;
+        
+        // 切换到手动选择模式
+        switchSelectionMode('manual');
+        
+        // 更新选择显示
+        updateSelectionDisplay();
+        
+        // 显示加分类型选择
+        if (scoringTypeSection) {
+            scoringTypeSection.style.display = 'block';
+        }
+        
+        showMessage(`已将 ${studentIds.length} 名学生传递到手动选择模式，您可以删除不需要加分的学生，然后选择加分类型`, 'info');
     }
     
     // 显示单人快速评分模态框
@@ -662,14 +728,19 @@ document.addEventListener('DOMContentLoaded', () => {
         modalQuickPoints.value = '0.5';
         modalQuickReason.value = '';
         
+        // 重置按钮状态
+        if (modalCorrectAnswerBtn) modalCorrectAnswerBtn.classList.remove('selected');
+        if (modalIncorrectAnswerBtn) modalIncorrectAnswerBtn.classList.remove('selected');
+        
         // 显示模态框
         scoringModal.style.display = 'flex';
         setTimeout(() => {
             scoringModal.classList.add('show');
-        }, 10);
-        
-        // 自动聚焦到原因输入框
-        modalQuickReason.focus();
+            // 自动聚焦到原因输入框
+            if (modalQuickReason) {
+                modalQuickReason.focus();
+            }
+        }, 100);
         
         showMessage(`请为学生${studentId}号 进行评分`, 'info');
     }
@@ -686,14 +757,20 @@ document.addEventListener('DOMContentLoaded', () => {
         modalGroupQuickPoints.value = '0.5';
         modalGroupQuickReason.value = '';
         
+        // 重置按钮状态
+        if (modalGroupCorrectBtn) modalGroupCorrectBtn.classList.remove('selected');
+        if (modalGroupPartialBtn) modalGroupPartialBtn.classList.remove('selected');
+        if (modalGroupPoorBtn) modalGroupPoorBtn.classList.remove('selected');
+        
         // 显示模态框
         groupScoringModal.style.display = 'flex';
         setTimeout(() => {
             groupScoringModal.classList.add('show');
-        }, 10);
-        
-        // 自动聚焦到原因输入框
-        modalGroupQuickReason.focus();
+            // 自动聚焦到原因输入框
+            if (modalGroupQuickReason) {
+                modalGroupQuickReason.focus();
+            }
+        }, 100);
         
         showMessage(`请为小组 ${studentNames} 进行评分`, 'info');
     }
@@ -711,6 +788,253 @@ document.addEventListener('DOMContentLoaded', () => {
         groupScoringModal.classList.remove('show');
         setTimeout(() => {
             groupScoringModal.style.display = 'none';
+        }, 300);
+    }
+    
+    // ==================== 新加分系统模态框功能 ====================
+    
+    // 显示新个人加分模态框
+    function showNewIndividualScoringModal() {
+        console.log('showNewIndividualScoringModal 被调用');
+        console.log('selectedStudents:', selectedStudents);
+        
+        // 如果没有预选学生，显示学生选择界面
+        if (selectedStudents.length === 0) {
+            console.log('没有预选学生，显示学生选择界面');
+            showStudentSelectionForIndividual();
+            return;
+        }
+        
+        // 显示选中的学生信息
+        const studentNames = selectedStudents.map(id => `学生${id}号`).join('、');
+        
+        newModalStudentName.textContent = studentNames;
+        newModalStudentId.textContent = `${selectedStudents.length}人`;
+        
+        // 重置表单
+        newModalIndividualPoints.value = '0.5';
+        newModalIndividualReason.value = '';
+        newModalIndividualReasonSelect.value = '';
+        newModalIndividualReason.style.display = 'none';
+        
+        // 显示模态框
+        newIndividualScoringModal.style.display = 'flex';
+        setTimeout(() => {
+            newIndividualScoringModal.classList.add('show');
+        }, 100);
+    }
+    
+    // 显示学生选择界面用于个人加分
+    function showStudentSelectionForIndividual() {
+        // 创建一个临时的学生选择模态框
+        const tempModal = document.createElement('div');
+        tempModal.className = 'modal-overlay';
+        tempModal.style.display = 'flex';
+        tempModal.innerHTML = `
+            <div class="modal-container" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fas fa-user mr-2"></i>
+                        选择学生进行个人加分
+                    </h3>
+                    <button class="modal-close-btn" id="close-temp-individual-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">选择学生座号:</label>
+                        <div id="temp-individual-student-selection" class="grid grid-cols-8 gap-1 mb-3 max-h-48 overflow-y-auto border p-2 rounded bg-gray-50">
+                            <!-- 学生座号复选框将在这里生成 -->
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="temp-individual-confirm-btn" class="btn btn-primary">
+                            <i class="fas fa-check mr-2"></i>确认选择
+                        </button>
+                        <button id="temp-individual-cancel-btn" class="btn btn-secondary">
+                            <i class="fas fa-times mr-2"></i>取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(tempModal);
+        
+        // 生成学生选择复选框
+        const studentSelection = document.getElementById('temp-individual-student-selection');
+        studentSelection.innerHTML = students.map(s => `
+            <label for="temp-individual-student-${s.id}" class="inline-flex items-center">
+                <input type="checkbox" id="temp-individual-student-${s.id}" name="temp-individual-student-selection" class="form-checkbox text-blue-600" value="${s.id}">
+                <span class="ml-2 text-gray-700">${s.id}</span>
+            </label>
+        `).join('');
+        
+        // 绑定事件
+        document.getElementById('close-temp-individual-modal').addEventListener('click', () => {
+            document.body.removeChild(tempModal);
+        });
+        
+        document.getElementById('temp-individual-cancel-btn').addEventListener('click', () => {
+            document.body.removeChild(tempModal);
+        });
+        
+        document.getElementById('temp-individual-confirm-btn').addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('input[name="temp-individual-student-selection"]:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            
+            if (selectedIds.length === 0) {
+                showMessage('请至少选择一名学生！', 'warning');
+                return;
+            }
+            
+            // 设置选中的学生
+            selectedStudents = selectedIds;
+            updateSelectionDisplay();
+            
+            // 关闭临时模态框
+            document.body.removeChild(tempModal);
+            
+            // 显示个人加分模态框
+            showNewIndividualScoringModal();
+        });
+        
+        // 背景点击关闭
+        tempModal.addEventListener('click', (e) => {
+            if (e.target === tempModal) {
+                document.body.removeChild(tempModal);
+            }
+        });
+    }
+    
+    // 显示新集体加分模态框
+    function showNewGroupScoringModal() {
+        console.log('showNewGroupScoringModal 被调用');
+        console.log('selectedStudents:', selectedStudents);
+        
+        // 如果没有预选学生，显示学生选择界面
+        if (selectedStudents.length === 0) {
+            console.log('没有预选学生，显示学生选择界面');
+            showStudentSelectionForGroup();
+            return;
+        }
+        
+        const studentNames = selectedStudents.map(id => `学生${id}号`).join('、');
+        
+        newModalGroupStudents.textContent = studentNames;
+        newModalGroupCount.textContent = `${selectedStudents.length}人`;
+        
+        // 重置表单
+        newModalGroupPoints.value = '0.5';
+        newModalGroupReason.value = '';
+        newModalGroupReasonSelect.value = '';
+        newModalGroupReason.style.display = 'none';
+        
+        // 显示模态框
+        newGroupScoringModal.style.display = 'flex';
+        setTimeout(() => {
+            newGroupScoringModal.classList.add('show');
+        }, 100);
+    }
+    
+    // 显示学生选择界面用于集体加分
+    function showStudentSelectionForGroup() {
+        // 创建一个临时的学生选择模态框
+        const tempModal = document.createElement('div');
+        tempModal.className = 'modal-overlay';
+        tempModal.style.display = 'flex';
+        tempModal.innerHTML = `
+            <div class="modal-container" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fas fa-users mr-2"></i>
+                        选择学生进行集体加分
+                    </h3>
+                    <button class="modal-close-btn" id="close-temp-group-modal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">选择学生座号:</label>
+                        <div id="temp-group-student-selection" class="grid grid-cols-8 gap-1 mb-3 max-h-48 overflow-y-auto border p-2 rounded bg-gray-50">
+                            <!-- 学生座号复选框将在这里生成 -->
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="temp-group-confirm-btn" class="btn btn-primary">
+                            <i class="fas fa-check mr-2"></i>确认选择
+                        </button>
+                        <button id="temp-group-cancel-btn" class="btn btn-secondary">
+                            <i class="fas fa-times mr-2"></i>取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(tempModal);
+        
+        // 生成学生选择复选框
+        const studentSelection = document.getElementById('temp-group-student-selection');
+        studentSelection.innerHTML = students.map(s => `
+            <label for="temp-group-student-${s.id}" class="inline-flex items-center">
+                <input type="checkbox" id="temp-group-student-${s.id}" name="temp-group-student-selection" class="form-checkbox text-blue-600" value="${s.id}">
+                <span class="ml-2 text-gray-700">${s.id}</span>
+            </label>
+        `).join('');
+        
+        // 绑定事件
+        document.getElementById('close-temp-group-modal').addEventListener('click', () => {
+            document.body.removeChild(tempModal);
+        });
+        
+        document.getElementById('temp-group-cancel-btn').addEventListener('click', () => {
+            document.body.removeChild(tempModal);
+        });
+        
+        document.getElementById('temp-group-confirm-btn').addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('input[name="temp-group-student-selection"]:checked');
+            const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            
+            if (selectedIds.length === 0) {
+                showMessage('请至少选择一名学生！', 'warning');
+                return;
+            }
+            
+            // 设置选中的学生
+            selectedStudents = selectedIds;
+            updateSelectionDisplay();
+            
+            // 关闭临时模态框
+            document.body.removeChild(tempModal);
+            
+            // 显示集体加分模态框
+            showNewGroupScoringModal();
+        });
+        
+        // 背景点击关闭
+        tempModal.addEventListener('click', (e) => {
+            if (e.target === tempModal) {
+                document.body.removeChild(tempModal);
+            }
+        });
+    }
+    
+    // 隐藏新个人加分模态框
+    function hideNewIndividualScoringModal() {
+        newIndividualScoringModal.classList.remove('show');
+        setTimeout(() => {
+            newIndividualScoringModal.style.display = 'none';
+        }, 300);
+    }
+    
+    // 隐藏新集体加分模态框
+    function hideNewGroupScoringModal() {
+        newGroupScoringModal.classList.remove('show');
+        setTimeout(() => {
+            newGroupScoringModal.style.display = 'none';
         }, 300);
     }
     
@@ -767,6 +1091,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSelectionDisplay() {
         if (selectedStudents.length === 0) {
             selectionResult.style.display = 'none';
+            
+            // 同步清空手动选择模式下的复选框状态
+            if (groupStudentSelection) {
+                const checkboxes = groupStudentSelection.querySelectorAll('input[name="group-student-selection"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            }
             return;
         }
         
@@ -777,6 +1109,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="remove-btn" data-student-id="${id}" title="删除学生${id}号">×</button>
             </span>
         `).join('');
+        
+        // 同步更新手动选择模式下的复选框状态
+        if (groupStudentSelection) {
+            const checkboxes = groupStudentSelection.querySelectorAll('input[name="group-student-selection"]');
+            checkboxes.forEach(checkbox => {
+                const studentId = parseInt(checkbox.value);
+                checkbox.checked = selectedStudents.includes(studentId);
+            });
+        }
     }
     
     // 添加学生到选择列表
@@ -817,6 +1158,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearSelection() {
         selectedStudents = [];
         updateSelectionDisplay();
+        
+        // 同时清空手动选择模式下的复选框状态
+        if (groupStudentSelection) {
+            const checkboxes = groupStudentSelection.querySelectorAll('input[name="group-student-selection"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
     }
     
     // 全选
@@ -1220,6 +1569,161 @@ document.addEventListener('DOMContentLoaded', () => {
     // 全选
     if (selectAllBtn) {
         selectAllBtn.addEventListener('click', selectAllStudents);
+    }
+    
+    
+    // 新个人加分模态框事件绑定
+    if (newModalIndividualReasonSelect) {
+        newModalIndividualReasonSelect.addEventListener('change', () => {
+            const selectedValue = newModalIndividualReasonSelect.value;
+            if (selectedValue === 'custom') {
+                newModalIndividualReason.style.display = 'block';
+                newModalIndividualReason.focus();
+            } else if (selectedValue) {
+                newModalIndividualReason.style.display = 'none';
+                newModalIndividualReason.value = selectedValue;
+            } else {
+                newModalIndividualReason.style.display = 'none';
+                newModalIndividualReason.value = '';
+            }
+        });
+    }
+    
+    if (newModalConfirmIndividualScoringBtn) {
+        newModalConfirmIndividualScoringBtn.addEventListener('click', () => {
+            if (selectedStudents.length === 0) return;
+            
+            const points = parseFloat(newModalIndividualPoints.value);
+            
+            // 获取评分原因
+            let reason = '';
+            if (newModalIndividualReasonSelect.value === 'custom') {
+                reason = newModalIndividualReason.value.trim();
+            } else if (newModalIndividualReasonSelect.value) {
+                reason = newModalIndividualReasonSelect.value;
+            } else {
+                reason = newModalIndividualReason.value.trim();
+            }
+            
+            // 验证输入
+            if (isNaN(points) || points <= 0) {
+                showMessage('请输入有效的加分值！', 'warning');
+                return;
+            }
+            
+            if (!reason) {
+                showMessage('请输入加分原因！', 'warning');
+                return;
+            }
+            
+            // 执行加分
+            const subject = getCurrentSubject() || '未指定学科';
+            selectedStudents.forEach(studentId => {
+                studentPoints[studentId] = (studentPoints[studentId] || 0) + points;
+                pointsLog.push({
+                    studentId: studentId,
+                    reason: reason,
+                    points: points,
+                    timestamp: new Date().toLocaleString(),
+                    subject: subject
+                });
+            });
+            
+            renderTopStudents();
+            renderPointsDistributionChart();
+            renderPointsLog();
+            saveState();
+            showMessage(`已为 ${selectedStudents.length} 名学生各加 ${points} 分！`, 'success');
+            
+            // 清空选择并隐藏模态框
+            clearSelection();
+            hideNewIndividualScoringModal();
+        });
+    }
+    
+    if (newModalCancelIndividualScoringBtn) {
+        newModalCancelIndividualScoringBtn.addEventListener('click', hideNewIndividualScoringModal);
+    }
+    
+    if (closeNewIndividualScoringModal) {
+        closeNewIndividualScoringModal.addEventListener('click', hideNewIndividualScoringModal);
+    }
+    
+    // 新集体加分模态框事件绑定
+    if (newModalGroupReasonSelect) {
+        newModalGroupReasonSelect.addEventListener('change', () => {
+            const selectedValue = newModalGroupReasonSelect.value;
+            if (selectedValue === 'custom') {
+                newModalGroupReason.style.display = 'block';
+                newModalGroupReason.focus();
+            } else if (selectedValue) {
+                newModalGroupReason.style.display = 'none';
+                newModalGroupReason.value = selectedValue;
+            } else {
+                newModalGroupReason.style.display = 'none';
+                newModalGroupReason.value = '';
+            }
+        });
+    }
+    
+    if (newModalConfirmGroupScoringBtn) {
+        newModalConfirmGroupScoringBtn.addEventListener('click', () => {
+            if (selectedStudents.length === 0) return;
+            
+            const points = parseFloat(newModalGroupPoints.value);
+            
+            // 获取评分原因
+            let reason = '';
+            if (newModalGroupReasonSelect.value === 'custom') {
+                reason = newModalGroupReason.value.trim();
+            } else if (newModalGroupReasonSelect.value) {
+                reason = newModalGroupReasonSelect.value;
+            } else {
+                reason = newModalGroupReason.value.trim();
+            }
+            
+            // 验证输入
+            if (isNaN(points) || points <= 0) {
+                showMessage('请输入有效的加分值！', 'warning');
+                return;
+            }
+            
+            if (!reason) {
+                showMessage('请输入加分原因！', 'warning');
+                return;
+            }
+            
+            // 执行加分
+            const subject = getCurrentSubject() || '未指定学科';
+            selectedStudents.forEach(studentId => {
+                studentPoints[studentId] = (studentPoints[studentId] || 0) + points;
+                pointsLog.push({
+                    studentId: studentId,
+                    reason: reason,
+                    points: points,
+                    timestamp: new Date().toLocaleString(),
+                    subject: subject
+                });
+            });
+            
+            renderTopStudents();
+            renderPointsDistributionChart();
+            renderPointsLog();
+            saveState();
+            showMessage(`已为 ${selectedStudents.length} 名学生各加 ${points} 分！`, 'success');
+            
+            // 清空选择并隐藏模态框
+            clearSelection();
+            hideNewGroupScoringModal();
+        });
+    }
+    
+    if (newModalCancelGroupScoringBtn) {
+        newModalCancelGroupScoringBtn.addEventListener('click', hideNewGroupScoringModal);
+    }
+    
+    if (closeNewGroupScoringModal) {
+        closeNewGroupScoringModal.addEventListener('click', hideNewGroupScoringModal);
     }
     
     // 范围输入验证
@@ -1942,4 +2446,250 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化导出时间范围
     initializeExportTimeRange();
+    
+    // ==================== 新加分系统事件监听器 ====================
+    
+    // 个人加分按钮
+    if (individualScoringBtn) {
+        console.log('绑定个人加分按钮事件');
+        individualScoringBtn.addEventListener('click', (e) => {
+            console.log('个人加分按钮被点击');
+            e.preventDefault();
+            showNewIndividualScoringModal();
+        });
+    } else {
+        console.log('个人加分按钮未找到');
+    }
+    
+    // 集体加分按钮
+    if (groupScoringBtn) {
+        console.log('绑定集体加分按钮事件');
+        groupScoringBtn.addEventListener('click', (e) => {
+            console.log('集体加分按钮被点击');
+            e.preventDefault();
+            showNewGroupScoringModal();
+        });
+    } else {
+        console.log('集体加分按钮未找到');
+    }
+    
+    // ==================== 模态框事件绑定 ====================
+    
+    // 点名结果模态框事件绑定
+    if (modalQuickScoringBtn) {
+        modalQuickScoringBtn.addEventListener('click', modalQuickScoring);
+    }
+    
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', hideNamingModal);
+    }
+    
+    if (closeNamingModal) {
+        closeNamingModal.addEventListener('click', hideNamingModal);
+    }
+    
+    // 单人评分模态框事件绑定
+    if (modalCorrectAnswerBtn) {
+        modalCorrectAnswerBtn.addEventListener('click', () => {
+            // 重置其他按钮状态
+            modalIncorrectAnswerBtn?.classList.remove('selected');
+            modalCorrectAnswerBtn.classList.add('selected');
+            // 设置默认值和原因
+            modalQuickPoints.value = '0.5';
+            modalQuickReason.value = '回答正确';
+        });
+    }
+    
+    if (modalIncorrectAnswerBtn) {
+        modalIncorrectAnswerBtn.addEventListener('click', () => {
+            // 重置其他按钮状态
+            modalCorrectAnswerBtn?.classList.remove('selected');
+            modalIncorrectAnswerBtn.classList.add('selected');
+            // 设置默认值和原因
+            modalQuickPoints.value = '0';
+            modalQuickReason.value = '回答错误';
+        });
+    }
+    
+    if (modalConfirmScoringBtn) {
+        modalConfirmScoringBtn.addEventListener('click', () => {
+            if (!currentScoringStudent) return;
+            
+            const points = parseFloat(modalQuickPoints.value);
+            const reason = modalQuickReason.value.trim() || '快速评分';
+            
+            if (points > 0) {
+                studentPoints[currentScoringStudent] = (studentPoints[currentScoringStudent] || 0) + points;
+                const subject = getCurrentSubject() || '未指定学科';
+                pointsLog.push({
+                    studentId: currentScoringStudent,
+                    reason: reason,
+                    points: points,
+                    timestamp: new Date().toLocaleString(),
+                    subject: subject
+                });
+                
+                renderTopStudents();
+                renderPointsDistributionChart();
+                renderPointsLog();
+                saveState();
+                showMessage(`学生${currentScoringStudent}号 已加 ${points} 分！`, 'success');
+            } else {
+                showMessage(`学生${currentScoringStudent}号 未获得加分`, 'info');
+            }
+            
+            hideScoringModal();
+        });
+    }
+    
+    if (modalSkipScoringBtn) {
+        modalSkipScoringBtn.addEventListener('click', () => {
+            hideScoringModal();
+            showMessage('已跳过评分', 'info');
+        });
+    }
+    
+    if (closeScoringModal) {
+        closeScoringModal.addEventListener('click', hideScoringModal);
+    }
+    
+    // 小组评分模态框事件绑定
+    if (modalGroupCorrectBtn) {
+        modalGroupCorrectBtn.addEventListener('click', () => {
+            // 重置其他按钮状态
+            modalGroupPartialBtn?.classList.remove('selected');
+            modalGroupPoorBtn?.classList.remove('selected');
+            modalGroupCorrectBtn.classList.add('selected');
+            // 设置默认值和原因
+            modalGroupQuickPoints.value = '1';
+            modalGroupQuickReason.value = '小组表现优秀，答案正确';
+        });
+    }
+    
+    if (modalGroupPartialBtn) {
+        modalGroupPartialBtn.addEventListener('click', () => {
+            // 重置其他按钮状态
+            modalGroupCorrectBtn?.classList.remove('selected');
+            modalGroupPoorBtn?.classList.remove('selected');
+            modalGroupPartialBtn.classList.add('selected');
+            // 设置默认值和原因
+            modalGroupQuickPoints.value = '0.5';
+            modalGroupQuickReason.value = '小组表现良好';
+        });
+    }
+    
+    if (modalGroupPoorBtn) {
+        modalGroupPoorBtn.addEventListener('click', () => {
+            // 重置其他按钮状态
+            modalGroupCorrectBtn?.classList.remove('selected');
+            modalGroupPartialBtn?.classList.remove('selected');
+            modalGroupPoorBtn.classList.add('selected');
+            // 设置默认值和原因
+            modalGroupQuickPoints.value = '0';
+            modalGroupQuickReason.value = '小组表现不佳';
+        });
+    }
+    
+    if (modalConfirmGroupScoringBtn) {
+        modalConfirmGroupScoringBtn.addEventListener('click', () => {
+            if (!currentScoringGroup || currentScoringGroup.length === 0) return;
+            
+            const points = parseFloat(modalGroupQuickPoints.value);
+            const reason = modalGroupQuickReason.value.trim() || '小组快速评分';
+            
+            const subject = getCurrentSubject() || '未指定学科';
+            currentScoringGroup.forEach(studentId => {
+                if (points > 0) {
+                    studentPoints[studentId] = (studentPoints[studentId] || 0) + points;
+                }
+                pointsLog.push({
+                    studentId: studentId,
+                    reason: reason,
+                    points: points,
+                    timestamp: new Date().toLocaleString(),
+                    subject: subject
+                });
+            });
+            
+            renderTopStudents();
+            renderPointsDistributionChart();
+            renderPointsLog();
+            saveState();
+            
+            if (points > 0) {
+                showMessage(`小组 ${currentScoringGroup.length} 名学生各加 ${points} 分！`, 'success');
+            } else {
+                showMessage(`小组 ${currentScoringGroup.length} 名学生未获得加分`, 'info');
+            }
+            
+            hideGroupScoringModal();
+        });
+    }
+    
+    if (modalSkipGroupScoringBtn) {
+        modalSkipGroupScoringBtn.addEventListener('click', () => {
+            hideGroupScoringModal();
+            showMessage('已跳过小组评分', 'info');
+        });
+    }
+    
+    if (closeGroupScoringModal) {
+        closeGroupScoringModal.addEventListener('click', hideGroupScoringModal);
+    }
+    
+    // 模态框背景点击关闭
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            if (namingModal && namingModal.classList.contains('show')) {
+                hideNamingModal();
+            }
+            if (scoringModal && scoringModal.classList.contains('show')) {
+                hideScoringModal();
+            }
+            if (groupScoringModal && groupScoringModal.classList.contains('show')) {
+                hideGroupScoringModal();
+            }
+            if (newIndividualScoringModal && newIndividualScoringModal.classList.contains('show')) {
+                hideNewIndividualScoringModal();
+            }
+            if (newGroupScoringModal && newGroupScoringModal.classList.contains('show')) {
+                hideNewGroupScoringModal();
+            }
+        }
+    });
+    
+    // ESC键关闭模态框和键盘导航
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (namingModal && namingModal.classList.contains('show')) {
+                hideNamingModal();
+            }
+            if (scoringModal && scoringModal.classList.contains('show')) {
+                hideScoringModal();
+            }
+            if (groupScoringModal && groupScoringModal.classList.contains('show')) {
+                hideGroupScoringModal();
+            }
+            if (newIndividualScoringModal && newIndividualScoringModal.classList.contains('show')) {
+                hideNewIndividualScoringModal();
+            }
+            if (newGroupScoringModal && newGroupScoringModal.classList.contains('show')) {
+                hideNewGroupScoringModal();
+            }
+        }
+        
+        // Enter键确认评分
+        if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey) {
+            if (scoringModal && scoringModal.classList.contains('show')) {
+                if (modalConfirmScoringBtn && document.activeElement !== modalSkipScoringBtn) {
+                    modalConfirmScoringBtn.click();
+                }
+            }
+            if (groupScoringModal && groupScoringModal.classList.contains('show')) {
+                if (modalConfirmGroupScoringBtn && document.activeElement !== modalSkipGroupScoringBtn) {
+                    modalConfirmGroupScoringBtn.click();
+                }
+            }
+        }
+    });
 });
