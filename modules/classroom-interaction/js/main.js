@@ -1,335 +1,482 @@
 /**
- * 主入口文件
- * 负责初始化所有模块和协调各模块之间的交互
+ * 课堂互动平台主入口文件
+ * 整合所有模块，提供统一的初始化和管理
  */
 
-import { ClassroomManager } from './core/classroom.js';
-import { StudentManager } from './core/students.js';
-import { PointsManager } from './core/points.js';
-import { RollcallManager } from './features/rollcall.js';
-import { ScoringManager } from './features/scoring.js';
-import { StorageManager } from './utils/storage.js';
-import { showMessage } from './utils/helpers.js';
+// 注意：由于改为传统script标签方式，模块导入将在HTML中处理
 
 /**
- * 课堂互动应用主类
+ * 主应用类
  */
-export class ClassroomApp {
+class ClassroomInteractionApp {
     constructor() {
-        this.classroom = new ClassroomManager();
-        this.studentManager = new StudentManager(this.classroom);
-        this.pointsManager = new PointsManager(this.classroom);
-        this.rollcallManager = new RollcallManager(this.classroom);
-        this.scoringManager = new ScoringManager(this.classroom);
-        this.storage = new StorageManager();
-        
+        this.modules = {};
         this.isInitialized = false;
+        this.init();
     }
 
     /**
      * 初始化应用
      */
-    async initialize() {
+    async init() {
         try {
-            console.log('开始初始化课堂互动应用...');
             
-            // 初始化课堂数据
-            this.classroom.initializeClassroom();
+            // 等待DOM加载完成
+            if (document.readyState === 'loading') {
+                await new Promise(resolve => {
+                    document.addEventListener('DOMContentLoaded', resolve);
+                });
+            }
+
+            // 初始化模块
+            await this.initializeModules();
             
-            // 从本地存储加载数据
-            this.loadStoredData();
+            // 绑定全局事件
+            this.bindGlobalEvents();
             
-            // 绑定事件监听器
-            this.bindEventListeners();
-            
-            // 初始化UI
-            this.initializeUI();
+            // 加载保存的状态
+            this.loadAppState();
             
             this.isInitialized = true;
-            console.log('课堂互动应用初始化完成');
             
         } catch (error) {
-            console.error('应用初始化失败:', error);
-            showMessage('应用初始化失败，请刷新页面重试', 'error');
+            // 应用初始化失败
+            this.showErrorMessage('应用初始化失败，请刷新页面重试');
         }
     }
 
     /**
-     * 从本地存储加载数据
+     * 初始化所有模块
      */
-    loadStoredData() {
-        // 加载课堂状态
-        const classroomState = this.storage.loadClassroomState();
-        this.classroom.studentPoints = classroomState.studentPoints;
-        this.classroom.calledStudents = classroomState.calledStudents;
-        this.classroom.pointsLog = classroomState.pointsLog;
-
-        // 加载学生名单
-        const studentRoster = this.storage.loadStudentRoster();
-        this.classroom.setStudentRoster(studentRoster);
-
-        // 加载活动数据
-        const activityData = this.storage.loadActivityData();
-        this.classroom.setActivityData(activityData);
-    }
-
-    /**
-     * 绑定事件监听器
-     */
-    bindEventListeners() {
-        // 页面加载完成事件
-        document.addEventListener('DOMContentLoaded', () => {
-            this.onDOMContentLoaded();
-        });
-
-        // 页面卸载前保存数据
-        window.addEventListener('beforeunload', () => {
-            this.saveAllData();
-        });
-
-        // 键盘快捷键
-        document.addEventListener('keydown', (e) => {
-            this.handleKeyboardShortcuts(e);
-        });
-    }
-
-    /**
-     * DOM内容加载完成处理
-     */
-    onDOMContentLoaded() {
-        // 初始化UI组件
-        this.initializeUI();
-        
-        // 渲染初始数据
-        this.renderInitialData();
-    }
-
-    /**
-     * 初始化UI
-     */
-    initializeUI() {
-        // 这里可以添加UI初始化逻辑
-        console.log('UI初始化完成');
-    }
-
-    /**
-     * 渲染初始数据
-     */
-    renderInitialData() {
-        // 渲染积分榜
-        this.renderLeaderboard();
-        
-        // 渲染积分分布图
-        this.renderPointsChart();
-        
-        // 渲染最近记录
-        this.renderRecentLog();
-    }
-
-    /**
-     * 处理键盘快捷键
-     * @param {KeyboardEvent} e 键盘事件
-     */
-    handleKeyboardShortcuts(e) {
-        // Ctrl + Enter: 随机点名
-        if (e.ctrlKey && e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            this.handleRandomCall();
-        }
-        
-        // Ctrl + Shift + Enter: 多人点名
-        if (e.ctrlKey && e.shiftKey && e.key === 'Enter') {
-            e.preventDefault();
-            this.handleMultiCall();
-        }
-        
-        // Escape: 关闭模态框
-        if (e.key === 'Escape') {
-            this.closeAllModals();
-        }
-    }
-
-    /**
-     * 处理随机点名
-     */
-    handleRandomCall() {
-        const result = this.rollcallManager.randomCall();
-        if (result.success) {
-            showMessage(result.message, 'success');
-            this.renderCalledStudents();
-        } else {
-            showMessage(result.message, 'warning');
-        }
-    }
-
-    /**
-     * 处理多人点名
-     */
-    handleMultiCall() {
-        const countInput = document.getElementById('multi-call-num');
-        const count = parseInt(countInput?.value) || 3;
-        
-        const result = this.rollcallManager.multiCall(count);
-        if (result.success) {
-            showMessage(result.message, 'success');
-            this.renderCalledStudents();
-        } else {
-            showMessage(result.message, 'warning');
-        }
-    }
-
-    /**
-     * 关闭所有模态框
-     */
-    closeAllModals() {
-        const modals = document.querySelectorAll('.modal-overlay');
-        modals.forEach(modal => {
-            modal.style.display = 'none';
-            modal.classList.remove('show');
-        });
-    }
-
-    /**
-     * 渲染积分榜
-     */
-    renderLeaderboard() {
-        const leaderboard = this.pointsManager.getPointsLeaderboard(3);
-        const topStudentsList = document.getElementById('top-students-list');
-        
-        if (!topStudentsList) return;
-
-        if (leaderboard.length === 0) {
-            topStudentsList.innerHTML = '<li class="text-gray-500 text-center py-4"><i class="fas fa-chart-bar mr-2"></i>暂无积分记录</li>';
-            return;
-        }
-
-        topStudentsList.innerHTML = leaderboard.map((student, index) => {
-            const rankClass = index === 0 ? 'text-yellow-500' : 
-                            index === 1 ? 'text-gray-400' : 
-                            index === 2 ? 'text-orange-500' : 'text-gray-500';
+    async initializeModules() {
+        try {
+            // 检查类是否已定义
+            if (typeof ClassroomManager === 'undefined') {
+                throw new Error('ClassroomManager 未定义');
+            }
+            if (typeof StudentManager === 'undefined') {
+                throw new Error('StudentManager 未定义');
+            }
+            if (typeof PointsManager === 'undefined') {
+                throw new Error('PointsManager 未定义');
+            }
             
-            return `
-                <li class="flex items-center py-3 px-4 my-2 bg-white rounded-lg shadow-sm border">
-                    <div class="flex items-center flex-1">
-                        <span class="font-bold text-lg mr-3 ${rankClass}">${index + 1}.</span>
-                        <div class="flex-1">
-                            <div class="font-semibold text-gray-800">${student.name}</div>
-                            <div class="text-sm text-gray-500">${student.id}号</div>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-bold text-blue-600 text-lg">${student.points}分</div>
-                    </div>
-                </li>
-            `;
-        }).join('');
-    }
-
-    /**
-     * 渲染积分分布图
-     */
-    renderPointsChart() {
-        // 这里可以添加图表渲染逻辑
-        console.log('渲染积分分布图');
-    }
-
-    /**
-     * 渲染最近记录
-     */
-    renderRecentLog() {
-        const recentLog = this.pointsManager.getRecentPointsLog(3);
-        const recentPointsLog = document.getElementById('recent-points-log');
-        
-        if (!recentPointsLog) return;
-
-        if (recentLog.length === 0) {
-            recentPointsLog.innerHTML = '<li class="text-gray-500">暂无加分记录</li>';
-            return;
+            // 初始化核心模块
+            this.modules.classroom = new ClassroomManager();
+            this.modules.students = new StudentManager();
+            this.modules.points = new PointsManager();
+            
+            // 初始化功能模块
+            this.modules.rollcall = new RollCallManager();
+            this.modules.scoring = new ScoringManager();
+            
+            // 初始化工具模块
+            this.modules.storage = new StorageManager();
+            this.modules.helpers = new HelperManager();
+            this.modules.componentLoader = new ComponentLoader();
+            
+            // 设置全局引用
+            window.classroomManager = this.modules.classroom;
+            window.studentManager = this.modules.students;
+            window.pointsManager = this.modules.points;
+            window.rollCallManager = this.modules.rollcall;
+            window.scoringManager = this.modules.scoring;
+            window.storageManager = this.modules.storage;
+            window.helperManager = this.modules.helpers;
+            window.componentLoader = this.modules.componentLoader;
+        } catch (error) {
+            // 模块初始化失败
+            throw error;
         }
-
-        recentPointsLog.innerHTML = recentLog.map(log => `
-            <li class="py-2 border-b last:border-b-0 text-sm text-gray-700">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1">
-                        <span class="font-medium text-blue-600">${log.timestamp}</span>
-                        <span class="text-gray-500 mx-1">-</span>
-                        <span class="font-semibold">${log.studentId}号 ${this.classroom.getStudentName(log.studentId)}</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2">${log.subject || '未指定学科'}</span>
-                        <span class="font-bold text-green-600">+${log.points}分</span>
-                    </div>
-                </div>
-                <div class="mt-1 text-gray-600">
-                    <i class="fas fa-comment mr-1"></i>${log.reason}
-                </div>
-            </li>
-        `).join('');
     }
 
     /**
-     * 渲染已点名学生
+     * 绑定全局事件
      */
-    renderCalledStudents() {
-        const calledStudents = this.rollcallManager.getCalledStudentsList();
-        const calledStudentsList = document.getElementById('called-students-list');
+    bindGlobalEvents() {
+        // Tab切换
+        this.bindTabSwitching();
         
-        if (!calledStudentsList) return;
-
-        if (calledStudents.length === 0) {
-            calledStudentsList.innerHTML = '<li class="text-gray-500">暂无点名记录</li>';
-            return;
-        }
-
-        const statistics = this.rollcallManager.getCallStatistics();
-        const studentsList = calledStudents.map(s => `学生${s.id}号`).join('、');
+        // 文件上传
+        this.bindFileUpload();
         
-        calledStudentsList.innerHTML = `
-            <div class="mb-2 text-sm text-gray-600">
-                已点名 ${statistics.calledCount}/${statistics.totalStudents} 人 (${statistics.callPercentage})
-            </div>
-            <div class="text-gray-700 text-sm leading-relaxed">
-                ${studentsList}
-            </div>
-        `;
-    }
-
-    /**
-     * 保存所有数据
-     */
-    saveAllData() {
-        // 保存课堂状态
-        this.storage.saveClassroomState({
-            studentPoints: this.classroom.studentPoints,
-            calledStudents: this.classroom.calledStudents,
-            pointsLog: this.classroom.pointsLog
+        // AI报告生成
+        this.bindAIReportGeneration();
+        
+        // 数据导出
+        this.bindDataExport();
+        
+        // 页面卸载时保存状态
+        window.addEventListener('beforeunload', () => {
+            this.saveAppState();
         });
-
-        // 保存学生名单
-        this.storage.saveStudentRoster(this.classroom.studentRoster);
-
-        // 保存活动数据
-        this.storage.saveActivityData(this.classroom.activityData);
     }
 
     /**
-     * 获取应用实例
-     * @returns {ClassroomApp} 应用实例
+     * 绑定Tab切换事件
      */
-    static getInstance() {
-        if (!ClassroomApp.instance) {
-            ClassroomApp.instance = new ClassroomApp();
+    bindTabSwitching() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+
+                // 更新按钮状态
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // 更新内容显示
+                tabContents.forEach(content => {
+                    if (content.id === targetTab) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            });
+        });
+    }
+
+    /**
+     * 绑定文件上传事件
+     */
+    bindFileUpload() {
+        const activityExcelUpload = document.getElementById('activity-excel-upload');
+        const rosterExcelUpload = document.getElementById('roster-excel-upload');
+
+        if (activityExcelUpload) {
+            activityExcelUpload.addEventListener('change', (event) => {
+                this.handleFileUpload(event.target.files[0], 'activity');
+            });
         }
-        return ClassroomApp.instance;
+
+        if (rosterExcelUpload) {
+            rosterExcelUpload.addEventListener('change', (event) => {
+                this.handleFileUpload(event.target.files[0], 'roster');
+            });
+        }
+    }
+
+    /**
+     * 绑定AI报告生成事件
+     */
+    bindAIReportGeneration() {
+        const generateAiReportBtn = document.getElementById('generate-ai-report-btn');
+        if (generateAiReportBtn) {
+            generateAiReportBtn.addEventListener('click', () => {
+                this.generateAIReport();
+            });
+        }
+    }
+
+    /**
+     * 绑定数据导出事件
+     * 注意：导出按钮事件已在helpers.js中绑定，这里不需要重复绑定
+     */
+    bindDataExport() {
+        // 导出按钮事件已在helpers.js中统一处理，避免重复绑定
+    }
+
+    /**
+     * 处理文件上传
+     */
+    handleFileUpload(file, type) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+
+                if (type === 'activity') {
+                    this.handleActivityData(json);
+                } else if (type === 'roster') {
+                    this.handleRosterData(json);
+                }
+            } catch (error) {
+                // 文件解析失败
+                this.showErrorMessage('文件解析失败，请检查文件格式');
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    /**
+     * 处理课堂活动数据
+     */
+    handleActivityData(data) {
+        this.showMessage('课堂活动Excel上传成功！', 'success');
+        // 这里可以添加更多的数据处理逻辑
+    }
+
+    /**
+     * 处理学生名单数据
+     */
+    handleRosterData(data) {
+        const roster = this.parseRoster(data);
+        this.modules.students.setStudentRoster(roster);
+        this.showMessage('学生名单Excel上传成功！', 'success');
+    }
+
+    /**
+     * 解析学生名单
+     */
+    parseRoster(json) {
+        const roster = {};
+        // 假设名单Excel有'座号'和'姓名'列
+        json.forEach(row => {
+            if (row['座号'] && row['姓名']) {
+                roster[row['座号'].toString()] = row['姓名'];
+            }
+        });
+        return roster;
+    }
+
+    /**
+     * 生成AI报告
+     */
+    async generateAIReport() {
+        try {
+            const aiModelInput = document.getElementById('ai-model-input');
+            const customPromptTextarea = document.getElementById('custom-prompt-textarea');
+            const aiReportOutput = document.getElementById('ai-report-output');
+            
+            const model = aiModelInput?.value || 'deepseek-chat';
+            const customPrompt = customPromptTextarea?.value || '';
+            
+            if (!customPrompt.trim()) {
+                this.showMessage('请填写自定义AI提示词', 'warning');
+                return;
+            }
+            
+            // 显示加载状态
+            if (aiReportOutput) {
+                aiReportOutput.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>正在生成AI报告...</div>';
+            }
+            
+            // 获取积分数据
+            const pointsData = this.modules.points.getAllPointsData();
+            const pointsLog = this.modules.points.pointsLog;
+            
+            // 构建提示词
+            const prompt = this.buildAIPrompt(customPrompt, pointsData, pointsLog);
+            
+            // 调用AI API
+            const report = await this.callAIAPI(model, prompt);
+            
+            // 显示结果
+            if (aiReportOutput) {
+                aiReportOutput.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <h3 class="text-lg font-semibold mb-3">AI学情报告</h3>
+                        <div class="prose max-w-none">${report}</div>
+                    </div>
+                `;
+            }
+            
+            this.showMessage('AI报告生成成功！', 'success');
+            
+        } catch (error) {
+            // 生成AI报告失败
+            this.showErrorMessage('AI报告生成失败，请检查网络连接和API配置');
+        }
+    }
+
+    /**
+     * 构建AI提示词
+     */
+    buildAIPrompt(customPrompt, pointsData, pointsLog) {
+        const topStudents = pointsData
+            .filter(s => s.points > 0)
+            .sort((a, b) => b.points - a.points)
+            .slice(0, 10);
+        
+        const recentActivities = pointsLog.slice(0, 20);
+        
+        return `
+${customPrompt}
+
+以下是学生的积分数据：
+
+积分排行榜（前10名）：
+${topStudents.map((s, i) => `${i + 1}. ${s.studentName}（${s.studentId}号）：${s.points}分`).join('\n')}
+
+最近活动记录：
+${recentActivities.map(log => `${log.timestamp} - ${log.studentName}：${log.reason}（${log.points > 0 ? '+' : ''}${log.points}分）`).join('\n')}
+
+请基于以上数据生成学情报告。
+        `.trim();
+    }
+
+    /**
+     * 调用AI API
+     */
+    async callAIAPI(model, prompt) {
+        const apiKey = this.getSharedApiKey();
+        const apiConfig = this.getApiConfig(model);
+        
+        const payload = {
+            model: model,
+            messages: [
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            max_tokens: 2000,
+            temperature: 0.7
+        };
+        
+        const response = await fetch(apiConfig.url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API调用失败: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.choices[0].message.content;
+    }
+
+    /**
+     * 获取API密钥
+     */
+    getSharedApiKey() {
+        const keyParts = ["sk-0560c9a8", "49694436a71c", "1ef4c053505a"];
+        return keyParts.join('');
+    }
+
+    /**
+     * 获取API配置
+     */
+    getApiConfig(model) {
+        const API_CONFIG = {
+            deepseek: { url: "https://api.deepseek.com/v1/chat/completions", models: ["deepseek-chat", "deepseek-reasoner"] },
+            glm: { url: "https://open.bigmodel.cn/api/paas/v4/chat/completions", models: ["glm-4"] },
+            qwen: { url: "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation", models: ["qwen-turbo"] }
+        };
+        
+        return Object.values(API_CONFIG).find(config => config.models.includes(model)) || API_CONFIG.deepseek;
+    }
+
+    /**
+     * 保存应用状态
+     */
+    saveAppState() {
+        try {
+            const state = {
+                classroom: {
+                    currentSubject: this.modules.classroom?.currentSubject,
+                    classSize: this.modules.classroom?.classSize
+                },
+                students: {
+                    studentRoster: this.modules.students?.studentRoster
+                    // 注意：selectedStudents 和 calledStudents 不应该被持久化，每次打开网页应该从空白状态开始
+                },
+                points: {
+                    pointsData: Object.fromEntries(this.modules.points?.pointsData || new Map()),
+                    pointsLog: this.modules.points?.pointsLog || []
+                },
+                timestamp: Date.now()
+            };
+            
+            this.modules.storage?.save('appState', state);
+        } catch (error) {
+            // 保存应用状态失败
+        }
+    }
+
+    /**
+     * 加载应用状态
+     */
+    loadAppState() {
+        try {
+            const state = this.modules.storage?.load('appState');
+            if (!state) return;
+            
+            // 恢复课堂状态
+            if (state.classroom) {
+                this.modules.classroom.currentSubject = state.classroom.currentSubject || '';
+                // 不要覆盖classroom.js中已经加载的classSize
+                // this.modules.classroom.classSize = state.classroom.classSize || 55;
+            }
+            
+            // 恢复学生状态
+            if (state.students) {
+                this.modules.students.studentRoster = state.students.studentRoster || {};
+                // 注意：selectedStudents 和 calledStudents 不应该被恢复，每次打开网页应该从空白状态开始
+                this.modules.students.selectedStudents.clear();
+                this.modules.students.calledStudents.clear();
+            }
+            
+            // 恢复积分状态
+            if (state.points) {
+                this.modules.points.pointsData = new Map(Object.entries(state.points.pointsData || {}));
+                this.modules.points.pointsLog = state.points.pointsLog || [];
+            }
+            
+            // 重新渲染界面
+            this.refreshUI();
+            
+        } catch (error) {
+            // 加载应用状态失败
+        }
+    }
+
+    /**
+     * 刷新UI
+     */
+    refreshUI() {
+        // 刷新学生选择界面
+        this.modules.students?.renderGroupStudentSelection();
+        this.modules.students?.renderCalledStudents();
+        
+        // 刷新积分界面
+        this.modules.points?.renderTopStudents();
+        this.modules.points?.renderPointsDistributionChart();
+        this.modules.points?.renderPointsLog();
+    }
+
+    /**
+     * 显示消息
+     */
+    showMessage(message, type = "info", duration = 4000) {
+        this.modules.helpers?.showMessage(message, type, duration);
+    }
+
+    /**
+     * 显示错误消息
+     */
+    showErrorMessage(message) {
+        this.showMessage(message, 'error', 6000);
+    }
+
+    /**
+     * 获取模块
+     */
+    getModule(name) {
+        return this.modules[name];
+    }
+
+    /**
+     * 获取所有模块
+     */
+    getAllModules() {
+        return this.modules;
     }
 }
 
-// 创建全局应用实例
-const app = ClassroomApp.getInstance();
-
-// 自动初始化应用
-app.initialize();
-
-// 导出应用实例
-export default app;
-
+// 创建应用实例
+const app = new ClassroomInteractionApp();

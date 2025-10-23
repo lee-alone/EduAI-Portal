@@ -1,0 +1,1272 @@
+/**
+ * AI学情分析组件样式
+ * 现代化的AI分析界面设计
+ */
+
+/* AI分析主容器 */
+.ai-analysis-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-analysis-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* 添加动态背景粒子效果 */
+.ai-analysis-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><pattern id="particles" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/><circle cx="30" cy="30" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="200" height="200" fill="url(%23particles)"/></svg>');
+    animation: float 20s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* AI分析标题 */
+.ai-analysis-title {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    z-index: 1;
+    animation: slideInDown 1s ease-out;
+}
+
+.ai-analysis-title h2 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(45deg, #fff, #f0f8ff, #e6f3ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    display: inline-block;
+}
+
+.ai-analysis-title h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+    animation: expandLine 1.5s ease-out 0.5s both;
+}
+
+.ai-analysis-subtitle {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-top: 1rem;
+    animation: fadeInUp 1s ease-out 0.3s both;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes expandLine {
+    from {
+        width: 0;
+    }
+    to {
+        width: 60px;
+    }
+}
+
+/* AI分析卡片 */
+.ai-analysis-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(30px);
+    border-radius: 32px;
+    padding: 3rem;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideInUp 1.2s ease-out 0.3s both;
+}
+
+.ai-analysis-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c, #667eea);
+    background-size: 300% 100%;
+    animation: gradient-shift 4s ease-in-out infinite;
+}
+
+.ai-analysis-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
+    pointer-events: none;
+}
+
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ai-analysis-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 
+        0 40px 80px rgba(0, 0, 0, 0.18),
+        0 0 0 1px rgba(255, 255, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* 文件上传区域 */
+.ai-upload-section {
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 1s ease-out 0.6s both;
+}
+
+.ai-upload-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.ai-upload-title i {
+    color: #667eea;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* 文件上传组件 */
+.ai-file-upload {
+    position: relative;
+    margin-bottom: 2rem;
+    animation: fadeInUp 1s ease-out 0.8s both;
+}
+
+.ai-file-upload input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.ai-file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 2.5rem;
+    border: 3px dashed #cbd5e0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+}
+
+.ai-file-upload-label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.15), transparent);
+    transition: left 0.6s ease;
+}
+
+.ai-file-upload-label::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    transition: all 0.4s ease;
+}
+
+.ai-file-upload-label:hover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #ebf8ff 0%, #e6fffa 100%);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.2);
+}
+
+.ai-file-upload-label:hover::before {
+    left: 100%;
+}
+
+.ai-file-upload-label:hover::after {
+    width: 200px;
+    height: 200px;
+}
+
+.ai-file-upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    z-index: 3;
+    transition: all 0.3s ease;
+}
+
+.ai-file-upload-icon {
+    font-size: 3rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.ai-file-upload-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2d3748;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.ai-file-upload-hint {
+    font-size: 1rem;
+    color: #718096;
+    text-align: center;
+    font-weight: 400;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* AI模型选择 */
+.ai-model-section {
+    margin-bottom: 2rem;
+    animation: fadeInUp 1s ease-out 1.1s both;
+}
+
+.ai-model-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ai-model-title i {
+    color: #667eea;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* AI高级设置折叠区域 */
+.ai-advanced-settings {
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 1s ease-out 1s both;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.ai-advanced-settings #ai-advanced-settings-toggle-header {
+    padding: 1rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    transition: all 0.3s ease;
+}
+
+.ai-advanced-settings #ai-advanced-settings-toggle-header:hover {
+    background: linear-gradient(135deg, #ebf8ff 0%, #e6fffa 100%);
+    border-color: rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+.ai-advanced-settings #ai-advanced-settings-toggle-header label {
+    color: #2d3748;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.ai-advanced-settings #ai-advanced-settings-toggle-header i {
+    color: #667eea;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ai-advanced-settings #ai-advanced-settings-chevron {
+    color: #667eea;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+/* AI高级设置内容区域 */
+#ai-advanced-settings-content {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1rem;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    backdrop-filter: blur(5px);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* AI模型选择区域 */
+.ai-model-selection {
+    margin-bottom: 1.5rem;
+}
+
+.ai-model-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-model-label::before {
+    content: '🤖';
+    font-size: 1.2rem;
+}
+
+.ai-model-select {
+    width: 100%;
+    padding: 1.25rem 1.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 3rem;
+}
+
+.ai-model-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 8px 25px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #fafbff 0%, #f8fafc 100%);
+}
+
+.ai-model-select:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* 自定义模型输入区域 */
+.ai-model-custom {
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.ai-model-custom-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #718096;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-model-custom-label::before {
+    content: '⚙️';
+    font-size: 1rem;
+}
+
+.ai-model-custom-input {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ai-model-custom-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 15px rgba(102, 126, 234, 0.08);
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #fafbff 0%, #f8fafc 100%);
+}
+
+.ai-model-custom-input:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* 模型选择状态指示器 */
+.ai-model-selection.focused {
+    transform: translateY(-2px);
+}
+
+.ai-model-selection.focused .ai-model-select {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 8px 25px rgba(102, 126, 234, 0.1);
+}
+
+/* 模型选项样式增强 */
+.ai-model-select option {
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #4a5568;
+    background: white;
+}
+
+.ai-model-select option:hover {
+    background: #f7fafc;
+}
+
+.ai-model-select option:checked {
+    background: #667eea;
+    color: white;
+}
+
+/* 自定义模型输入框的显示/隐藏动画 */
+.ai-model-custom {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-model-custom.show {
+    opacity: 1;
+    max-height: 100px;
+    margin-top: 1rem;
+}
+
+/* 模型选择提示 */
+.ai-model-hint {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border-left: 3px solid #667eea;
+}
+
+.ai-model-hint::before {
+    content: '💡';
+    font-size: 1rem;
+}
+
+/* API配置区域 */
+.ai-api-section {
+    margin-bottom: 2rem;
+    animation: fadeInUp 1s ease-out 1.15s both;
+}
+
+.ai-api-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ai-api-title i {
+    color: #667eea;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* API Key配置 */
+.ai-api-key-group {
+    margin-bottom: 1.5rem;
+}
+
+.ai-api-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-api-label::before {
+    content: '🔑';
+    font-size: 1.2rem;
+}
+
+.ai-api-key-input {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-family: 'Courier New', monospace;
+}
+
+.ai-api-key-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 15px rgba(102, 126, 234, 0.08);
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #fafbff 0%, #f8fafc 100%);
+}
+
+.ai-api-key-input:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* API端点配置 */
+.ai-endpoint-group {
+    margin-bottom: 1.5rem;
+}
+
+.ai-endpoint-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-endpoint-label::before {
+    content: '🌐';
+    font-size: 1.2rem;
+}
+
+.ai-endpoint-select {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 1rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 3rem;
+}
+
+.ai-endpoint-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 15px rgba(102, 126, 234, 0.08);
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #fafbff 0%, #f8fafc 100%);
+}
+
+.ai-endpoint-select:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* 自定义端点输入区域 */
+.ai-endpoint-custom {
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+.ai-endpoint-custom.show {
+    opacity: 1;
+    max-height: 100px;
+    margin-top: 1rem;
+}
+
+.ai-endpoint-custom-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #718096;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-endpoint-custom-label::before {
+    content: '⚙️';
+    font-size: 1rem;
+}
+
+.ai-endpoint-custom-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-family: 'Courier New', monospace;
+}
+
+.ai-endpoint-custom-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 4px 15px rgba(102, 126, 234, 0.08);
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #fafbff 0%, #f8fafc 100%);
+}
+
+.ai-endpoint-custom-input:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+/* API配置提示信息 */
+.ai-api-hint {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border-left: 3px solid #667eea;
+}
+
+.ai-api-hint::before {
+    content: '💡';
+    font-size: 1rem;
+}
+
+/* 自定义提示词区域 */
+.ai-prompt-section {
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 1s ease-out 1.2s both;
+}
+
+.ai-prompt-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ai-prompt-title i {
+    color: #667eea;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.ai-prompt-textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 1.5rem 1.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    resize: vertical;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    font-family: inherit;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.ai-prompt-textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15), 0 8px 25px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #fafbff 0%, #f8fafc 100%);
+}
+
+.ai-prompt-hint {
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    color: #718096;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+/* 生成按钮 */
+.ai-generate-btn {
+    width: 100%;
+    padding: 1.5rem 2.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+    animation: fadeInUp 1s ease-out 1.4s both;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ai-generate-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.ai-generate-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    transition: all 0.4s ease;
+}
+
+.ai-generate-btn:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.ai-generate-btn:hover::before {
+    left: 100%;
+}
+
+.ai-generate-btn:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+.ai-generate-btn:active {
+    transform: translateY(-2px) scale(1.01);
+}
+
+.ai-generate-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+    box-shadow: 0 8px 25px rgba(160, 174, 192, 0.3);
+}
+
+/* AI报告输出区域 */
+.ai-report-output {
+    margin-top: 3rem;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 24px;
+    border: 2px solid #e2e8f0;
+    min-height: 250px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 1s ease-out 1.6s both;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.ai-report-output::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(102, 126, 234, 0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+    opacity: 0.6;
+    pointer-events: none;
+    animation: float 15s ease-in-out infinite;
+}
+
+.ai-report-output::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+    background-size: 200% 100%;
+    animation: gradient-shift 3s ease-in-out infinite;
+}
+
+.ai-report-content {
+    position: relative;
+    z-index: 1;
+    color: #4a5568;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.ai-report-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    color: #667eea;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.ai-report-loading i {
+    animation: spin 1.5s linear infinite;
+    font-size: 2rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .ai-analysis-container {
+        padding: 1rem;
+    }
+    
+    .ai-analysis-title h2 {
+        font-size: 2.2rem;
+    }
+    
+    .ai-analysis-subtitle {
+        font-size: 1rem;
+    }
+    
+    .ai-analysis-card {
+        padding: 2rem;
+        border-radius: 24px;
+    }
+    
+    .ai-file-upload-label {
+        padding: 1.5rem 2rem;
+        min-height: 100px;
+    }
+    
+    .ai-file-upload-icon {
+        font-size: 2.5rem;
+    }
+    
+    .ai-file-upload-text {
+        font-size: 1.1rem;
+    }
+    
+    .ai-generate-btn {
+        padding: 1.25rem 2rem;
+        font-size: 1.1rem;
+    }
+    
+    .ai-model-input,
+    .ai-prompt-textarea {
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+    }
+    
+    .ai-report-output {
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ai-analysis-container {
+        padding: 0.5rem;
+    }
+    
+    .ai-analysis-title h2 {
+        font-size: 1.8rem;
+    }
+    
+    .ai-analysis-card {
+        padding: 1.5rem;
+        border-radius: 20px;
+    }
+    
+    .ai-file-upload-label {
+        padding: 1.25rem 1.5rem;
+        min-height: 80px;
+    }
+    
+    .ai-file-upload-icon {
+        font-size: 2rem;
+    }
+    
+    .ai-file-upload-text {
+        font-size: 1rem;
+    }
+    
+    .ai-generate-btn {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* 动画效果 */
+.ai-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ai-slide-in {
+    animation: slideIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 成功状态 */
+.ai-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+}
+
+.ai-success:hover {
+    box-shadow: 0 12px 35px rgba(72, 187, 120, 0.4);
+}
+
+/* 错误状态 */
+.ai-error {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+}
+
+.ai-error:hover {
+    box-shadow: 0 12px 35px rgba(245, 101, 101, 0.4);
+}
+
+/* 通知系统 */
+.ai-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ai-notification-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+    font-weight: 500;
+}
+
+.ai-notification-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+.ai-notification-error {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.ai-notification-info {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+}
+
+/* 报告内容样式 */
+.ai-report-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.ai-report-section h4 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.ai-report-section p {
+    line-height: 1.7;
+    color: #4a5568;
+}
+
+.ai-report-section ul {
+    line-height: 1.7;
+    color: #4a5568;
+    padding-left: 1.5rem;
+}
+
+.ai-report-section li {
+    margin-bottom: 0.5rem;
+}
+
+/* 文件上传状态指示器 */
+.ai-file-upload-status {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #48bb78;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(72, 187, 120, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(72, 187, 120, 0);
+    }
+}
+
+/* 加载动画增强 */
+.ai-loading-dots {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 20px;
+}
+
+.ai-loading-dots div {
+    position: absolute;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #667eea;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.ai-loading-dots div:nth-child(1) {
+    left: 8px;
+    animation: ai-loading-dots1 0.6s infinite;
+}
+
+.ai-loading-dots div:nth-child(2) {
+    left: 8px;
+    animation: ai-loading-dots2 0.6s infinite;
+}
+
+.ai-loading-dots div:nth-child(3) {
+    left: 32px;
+    animation: ai-loading-dots2 0.6s infinite;
+}
+
+.ai-loading-dots div:nth-child(4) {
+    left: 56px;
+    animation: ai-loading-dots3 0.6s infinite;
+}
+
+@keyframes ai-loading-dots1 {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+
+@keyframes ai-loading-dots3 {
+    0% { transform: scale(1); }
+    100% { transform: scale(0); }
+}
+
+@keyframes ai-loading-dots2 {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(24px, 0); }
+}

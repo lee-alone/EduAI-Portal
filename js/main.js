@@ -221,10 +221,98 @@ const observer = new IntersectionObserver(entries => {
 
 document.querySelectorAll('.card').forEach(card => observer.observe(card));
 
+// 水平滚动模块自动移动功能
+class HorizontalScrollManager {
+  constructor() {
+    this.container = document.querySelector('.modules-horizontal');
+    this.cards = document.querySelectorAll('.modules-horizontal .module-card');
+    this.isScrolling = false;
+    this.scrollSpeed = 2;
+    this.edgeThreshold = 100; // 边缘检测阈值
+    
+    if (this.container) {
+      this.init();
+    }
+  }
+  
+  init() {
+    this.bindEvents();
+  }
+  
+  bindEvents() {
+    // 鼠标移动事件
+    this.container.addEventListener('mousemove', (e) => {
+      if (this.isScrolling) return;
+      
+      const rect = this.container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const containerWidth = rect.width;
+      
+      // 检测是否在边缘区域
+      if (mouseX < this.edgeThreshold) {
+        // 左边缘 - 向左滚动
+        this.startScrolling('left');
+      } else if (mouseX > containerWidth - this.edgeThreshold) {
+        // 右边缘 - 向右滚动
+        this.startScrolling('right');
+      } else {
+        // 中间区域 - 停止滚动
+        this.stopScrolling();
+      }
+    });
+    
+    // 鼠标离开容器时停止滚动
+    this.container.addEventListener('mouseleave', () => {
+      this.stopScrolling();
+    });
+    
+    // 触摸事件支持
+    this.container.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+    });
+  }
+  
+  startScrolling(direction) {
+    if (this.isScrolling) return;
+    
+    this.isScrolling = true;
+    this.scrollDirection = direction;
+    
+    const scroll = () => {
+      if (!this.isScrolling) return;
+      
+      const currentScroll = this.container.scrollLeft;
+      const maxScroll = this.container.scrollWidth - this.container.clientWidth;
+      
+      if (direction === 'left' && currentScroll > 0) {
+        this.container.scrollLeft -= this.scrollSpeed;
+        requestAnimationFrame(scroll);
+      } else if (direction === 'right' && currentScroll < maxScroll) {
+        this.container.scrollLeft += this.scrollSpeed;
+        requestAnimationFrame(scroll);
+      } else {
+        this.stopScrolling();
+      }
+    };
+    
+    requestAnimationFrame(scroll);
+  }
+  
+  stopScrolling() {
+    this.isScrolling = false;
+    this.scrollDirection = null;
+  }
+}
+
 // 初始化粒子网络系统
 let particleNetwork;
+let horizontalScrollManager;
+
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('particleNetworkCanvas')) {
     particleNetwork = new ParticleNetwork();
   }
+  
+  // 初始化水平滚动管理器
+  horizontalScrollManager = new HorizontalScrollManager();
 });

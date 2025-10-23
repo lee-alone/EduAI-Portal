@@ -205,6 +205,56 @@ main {
   padding-top: 100px;
 }
 
+/* 水平排列模块样式 */
+.modules-horizontal {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 20px 0;
+  gap: 20px;
+  scroll-behavior: smooth;
+}
+
+.modules-horizontal .col-lg-3 {
+  flex: 0 0 auto;
+  width: 300px;
+  max-width: none;
+}
+
+.modules-horizontal .module-card {
+  width: 100%;
+  min-width: 280px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.modules-horizontal .module-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+  z-index: 10;
+  position: relative;
+}
+
+/* 隐藏滚动条但保持滚动功能 */
+.modules-horizontal::-webkit-scrollbar {
+  height: 8px;
+}
+
+.modules-horizontal::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+
+.modules-horizontal::-webkit-scrollbar-thumb {
+  background: rgba(0,123,255,0.3);
+  border-radius: 4px;
+}
+
+.modules-horizontal::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,123,255,0.5);
+}
+
 .section {
   padding: 80px 0;
 }
@@ -336,6 +386,20 @@ footer a:hover {
   .card {
     transform: none !important;
     opacity: 1 !important;
+  }
+  
+  /* 移动端水平滚动优化 */
+  .modules-horizontal {
+    padding: 15px 0;
+    gap: 15px;
+  }
+  
+  .modules-horizontal .col-lg-3 {
+    width: 250px;
+  }
+  
+  .modules-horizontal .module-card {
+    min-width: 240px;
   }
 }
 

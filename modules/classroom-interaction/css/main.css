@@ -11,14 +11,16 @@
 @import url('./components/buttons.css');
 @import url('./components/forms.css');
 @import url('./components/cards.css');
+@import url('./components/modals.css');
+@import url('./components/scoring.css');
+@import url('./components/leaderboard.css');
+@import url('./components/student-selection.css');
+@import url('./components/utilities.css');
+@import url('./components/ai-analysis.css');
 
 /* 布局样式 */
 @import url('./layouts/header.css');
 @import url('./layouts/main.css');
-@import url('./layouts/grid.css');
-
-/* 主题样式 */
-@import url('./themes/light.css');
 
 /* 全局样式 */
 body {
@@ -26,9 +28,10 @@ body {
     background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-gray-100) 100%);
     color: var(--color-gray-900);
     min-height: 100vh;
-    line-height: var(--line-height-normal);
+    line-height: 1.6;
     overflow-x: hidden;
 }
+
 
 /* 工具类 */
 .sr-only {

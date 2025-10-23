@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>课堂互动平台</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"> <!-- Module-specific styles -->
+    <link rel="stylesheet" href="css/main.css"> <!-- Module-specific styles -->
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <!-- Chart.js for data visualization -->
@@ -79,7 +79,6 @@
                                 <label for="multi-call-num" class="block text-gray-700 text-sm font-bold mb-2">多人点名人数:</label>
                                 <input type="number" id="multi-call-num" class="modern-input" value="3" min="1">
                             </div>
-                            <div id="call-result" class="modern-input text-center text-gray-700 min-h-[40px] flex items-center justify-center">点名结果将显示在这里</div>
                         </div>
 
                         <div class="card-section">
@@ -143,10 +142,10 @@
                             <div class="form-group">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">选择方式:</label>
                                 <div class="flex gap-2 mb-3">
-                                    <button id="manual-selection-btn" class="btn btn-primary flex-1 selection-mode-btn active">
+                                    <button id="manual-selection-btn" class="btn btn-outline flex-1 selection-mode-btn active">
                                         <i class="fas fa-hand-pointer mr-2"></i>手动选择
                                     </button>
-                                    <button id="range-selection-btn" class="btn btn-secondary flex-1 selection-mode-btn">
+                                    <button id="range-selection-btn" class="btn btn-outline flex-1 selection-mode-btn">
                                         <i class="fas fa-arrows-alt-h mr-2"></i>范围选择
                                     </button>
                                 </div>
@@ -156,7 +155,7 @@
                             <div id="manual-selection-mode" class="selection-mode">
                                 <div class="form-group">
                                     <span class="block text-gray-700 text-sm font-bold mb-2">选择学生座号:</span>
-                                    <div id="group-student-selection" class="grid grid-cols-8 gap-1 mb-3 max-h-48 overflow-y-auto border p-2 rounded bg-gray-50">
+                                    <div id="group-student-selection" class="grid grid-cols-8 gap-3 mb-3 max-h-64 overflow-y-auto border-2 border-gray-200 p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-inner">
                                         <!-- 学生座号复选框将在这里生成 -->
                                     </div>
                                 </div>
@@ -212,6 +211,18 @@
                         <!-- 第二步：加分类型 -->
                         <div class="card-section" id="scoring-type-section">
                             <h4 class="font-medium mb-2 text-gray-700">第二步：选择加分类型</h4>
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-3">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle text-yellow-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-yellow-700">
+                                            <strong>提示：</strong>选择学生后，可以选择个人加分（为每个学生单独评分）或集体加分（为所有学生添加相同分数）。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <button id="individual-scoring-btn" class="btn btn-success w-full">
                                     <i class="fas fa-user mr-2"></i>个人加分
@@ -284,7 +295,7 @@
                         </div>
 
                         <div class="card-section">
-                            <h4 class="font-medium mb-2 text-gray-700">积分分布</h4>
+                            <h4 class="font-medium mb-2 text-gray-700">学科积分分布</h4>
                             <div class="chart-container">
                                 <canvas id="points-distribution-chart" width="400" height="200"></canvas>
                             </div>
@@ -294,7 +305,7 @@
                         </div>
 
                         <div class="card-section">
-                            <div class="flex items-center justify-between cursor-pointer" id="recent-log-toggle-header">
+                            <div class="flex items-center justify-between cursor-pointer" id="recent-log-toggle-header" onclick="toggleRecentLog()">
                                 <h4 class="font-medium text-gray-700"><i class="fas fa-history mr-2"></i>最近加分记录</h4>
                                 <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200" id="recent-log-chevron"></i>
                             </div>
@@ -308,7 +319,7 @@
                         </div>
                         <!-- 导出功能区域 - 折叠式设计 -->
                         <div class="card-section">
-                            <div class="flex items-center justify-between cursor-pointer" id="export-toggle-header">
+                            <div class="flex items-center justify-between cursor-pointer" id="export-toggle-header" onclick="toggleExport()">
                                 <h4 class="font-medium text-gray-700"><i class="fas fa-download mr-2"></i>数据导出</h4>
                                 <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200" id="export-chevron"></i>
                             </div>
@@ -348,38 +359,45 @@
                                     </div>
                                 </div>
 
-                                <!-- 导出选项 -->
+                                <!-- 导出说明 -->
                                 <div class="form-group">
-                                    <label class="block text-gray-700 text-sm font-bold mb-2">导出选项:</label>
-                                    <div class="space-y-2">
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="include-detailed-log" class="form-checkbox text-blue-600 mr-2" checked>
-                                            <span class="text-gray-700">包含详细加分记录</span>
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="checkbox" id="include-statistics" class="form-checkbox text-blue-600 mr-2" checked>
-                                            <span class="text-gray-700">包含统计信息</span>
-                                        </label>
+                                    <div class="bg-blue-50 border-l-4 border-blue-400 p-3">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-info-circle text-blue-400"></i>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm text-blue-700">
+                                                    <strong>导出说明：</strong>将生成包含7个工作表的Excel文件，包括课堂表现记录、学生积分汇总、统计信息、学科表现分析、学生表现趋势、时间段表现分析和学科优势分析。
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- 高级设置 -->
+                                <!-- 高级设置 - 折叠式设计 -->
                                 <div class="form-group border-t pt-4 mt-4">
-                                    <label class="block text-gray-700 text-sm font-bold mb-3">
-                                        <i class="fas fa-cog mr-2"></i>高级设置
-                                    </label>
+                                    <div class="flex items-center justify-between cursor-pointer" id="advanced-settings-toggle-header" onclick="toggleAdvancedSettings()">
+                                        <label class="block text-gray-700 text-sm font-bold">
+                                            <i class="fas fa-cog mr-2"></i>高级设置
+                                        </label>
+                                        <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200" id="advanced-settings-chevron"></i>
+                                    </div>
                                     
-                                    <!-- 班级人数设置 -->
-                                    <div class="form-group">
-                                        <label for="class-size-input" class="block text-gray-700 text-sm font-bold mb-2">班级人数:</label>
-                                        <div class="flex gap-2 items-center">
-                                            <input type="number" id="class-size-input" class="modern-input flex-1" value="55" min="1" max="100">
-                                            <button type="button" id="apply-class-size-btn" class="btn btn-primary">
-                                                <i class="fas fa-save mr-2"></i>应用设置
-                                            </button>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                            设置班级总人数，影响学生座号范围和统计计算
+                                    <!-- 折叠内容区域 -->
+                                    <div id="advanced-settings-content" class="mt-4" style="display: none;">
+                                        <!-- 班级人数设置 -->
+                                        <div class="form-group">
+                                            <label for="class-size-input" class="block text-gray-700 text-sm font-bold mb-2">班级人数:</label>
+                                            <div class="flex gap-2 items-center">
+                                                <input type="number" id="class-size-input" class="modern-input flex-1" value="55" min="1" max="100">
+                                                <button type="button" id="apply-class-size-btn" class="btn btn-primary">
+                                                    <i class="fas fa-save mr-2"></i>应用设置
+                                                </button>
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                设置班级总人数，影响学生座号范围和统计计算
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -393,29 +411,142 @@
                 </div>
             </div>
 
-            <div id="ai-analysis" class="tab-content">
-                <h2 class="text-xl font-semibold mb-4 text-gray-800"><i class="fas fa-robot mr-2"></i>AI学情分析与报告</h2>
-                <div class="module-section">
-                        <div class="form-group">
-                            <label for="activity-excel-upload" class="block text-gray-700 text-sm font-bold mb-2">上传课堂活动Excel:</label>
-                            <input type="file" id="activity-excel-upload" class="modern-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <div id="ai-analysis" class="tab-content ai-analysis-container">
+                <div class="ai-analysis-title">
+                    <h2><i class="fas fa-brain mr-3"></i>AI学情分析与报告</h2>
+                    <p class="ai-analysis-subtitle">智能分析学生表现，生成个性化学情报告</p>
+                </div>
+                
+                <div class="ai-analysis-card ai-fade-in">
+                    <!-- 文件上传区域 -->
+                    <div class="ai-upload-section">
+                        <h3 class="ai-upload-title">
+                            <i class="fas fa-upload"></i>
+                            数据上传
+                        </h3>
+                        
+                        <div class="ai-file-upload">
+                            <input type="file" id="activity-excel-upload" accept=".xlsx,.xls" />
+                            <label for="activity-excel-upload" class="ai-file-upload-label">
+                                <div class="ai-file-upload-content">
+                                    <i class="fas fa-file-excel ai-file-upload-icon"></i>
+                                    <div class="ai-file-upload-text">上传课堂活动Excel文件</div>
+                                    <div class="ai-file-upload-hint">支持 .xlsx 和 .xls 格式</div>
+                                </div>
+                            </label>
                         </div>
-                        <div class="form-group">
-                            <label for="roster-excel-upload" class="block text-gray-700 text-sm font-bold mb-2">上传学生名单Excel (座号-姓名对照):</label>
-                            <input type="file" id="roster-excel-upload" class="modern-input file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        
+                        <div class="ai-file-upload">
+                            <input type="file" id="roster-excel-upload" accept=".xlsx,.xls" />
+                            <label for="roster-excel-upload" class="ai-file-upload-label">
+                                <div class="ai-file-upload-content">
+                                    <i class="fas fa-users ai-file-upload-icon"></i>
+                                    <div class="ai-file-upload-text">上传学生名单Excel (座号-姓名对照)</div>
+                                    <div class="ai-file-upload-hint">支持 .xlsx 和 .xls 格式</div>
+                                </div>
+                            </label>
                         </div>
-                        <div class="form-group">
-                            <label for="ai-model-input" class="block text-gray-700 text-sm font-bold mb-2">AI模型 (例如: deepseek-chat, glm-4):</label>
-                            <input type="text" id="ai-model-input" class="modern-input" value="deepseek-chat">
+                    </div>
+                    
+                    <!-- AI高级设置 - 折叠式设计 -->
+                    <div class="ai-advanced-settings">
+                        <div class="flex items-center justify-between cursor-pointer" id="ai-advanced-settings-toggle-header" onclick="toggleAIAdvancedSettings()">
+                            <label class="block text-gray-700 text-lg font-bold">
+                                <i class="fas fa-cog mr-2"></i>AI高级设置
+                            </label>
+                            <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200" id="ai-advanced-settings-chevron"></i>
                         </div>
-                        <div class="form-group">
-                            <label for="custom-prompt-textarea" class="block text-gray-700 text-sm font-bold mb-2">自定义AI提示词:</label>
-                            <textarea id="custom-prompt-textarea" rows="6" class="modern-textarea" placeholder="例如：请以班主任的口吻，对学生的课堂表现进行总结和鼓励。"></textarea>
+                        
+                        <!-- 折叠内容区域 -->
+                        <div id="ai-advanced-settings-content" class="mt-4" style="display: none;">
+                            <!-- AI模型配置 -->
+                            <div class="ai-model-section">
+                                <h3 class="ai-model-title">
+                                    <i class="fas fa-robot"></i>
+                                    AI模型配置
+                                </h3>
+                                <div class="ai-model-selection">
+                                    <label for="ai-model-select" class="ai-model-label">选择AI模型:</label>
+                                    <select id="ai-model-select" class="ai-model-select">
+                                        <option value="deepseek-chat" selected>DeepSeek 教育模型</option>
+                                        <option value="glm-4">智谱 GLM 教育版</option>
+                                        <option value="qwen-turbo">通义千问 教研助手</option>
+                                        <option value="custom">自定义模型</option>
+                                    </select>
+                                </div>
+                                <div class="ai-model-custom">
+                                    <label for="ai-model-custom-input" class="ai-model-custom-label">自定义模型 (可选):</label>
+                                    <input type="text" id="ai-model-custom-input" class="ai-model-custom-input" 
+                                           placeholder="输入自定义模型名称">
+                                </div>
+                                <div class="ai-model-hint">
+                                    选择适合的AI模型可以获得更好的分析效果。DeepSeek适合教育场景，GLM-4适合中文理解，通义千问适合教研分析。
+                                </div>
+                            </div>
+                            
+                            <!-- API配置 -->
+                            <div class="ai-api-section">
+                                <h3 class="ai-api-title">
+                                    <i class="fas fa-key"></i>
+                                    API配置
+                                </h3>
+                                <div class="ai-api-key-group">
+                                    <label for="ai-api-key" class="ai-api-label">API Key（可选）:</label>
+                                    <input type="password" id="ai-api-key" class="ai-api-key-input" 
+                                           placeholder="如有专属 API Key，请在此输入">
+                                    <div class="ai-api-hint">
+                                        <i class="fas fa-info-circle"></i>
+                                        留空将使用默认API Key，输入自定义Key将覆盖默认设置
+                                    </div>
+                                </div>
+                                <div class="ai-endpoint-group">
+                                    <label for="ai-endpoint-select" class="ai-endpoint-label">API端点:</label>
+                                    <select id="ai-endpoint-select" class="ai-endpoint-select">
+                                        <option value="https://api.deepseek.com/v1/chat/completions" selected>DeepSeek API</option>
+                                        <option value="https://open.bigmodel.cn/api/paas/v4/chat/completions">智谱AI API</option>
+                                        <option value="https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation">通义千问 API</option>
+                                        <option value="custom">自定义端点</option>
+                                    </select>
+                                    <div class="ai-endpoint-custom">
+                                        <label for="ai-endpoint-custom-input" class="ai-endpoint-custom-label">自定义端点:</label>
+                                        <input type="url" id="ai-endpoint-custom-input" class="ai-endpoint-custom-input" 
+                                               placeholder="https://api.example.com/v1/chat/completions">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 自定义提示词 -->
+                            <div class="ai-prompt-section">
+                                <h3 class="ai-prompt-title">
+                                    <i class="fas fa-edit"></i>
+                                    自定义AI提示词
+                                </h3>
+                                <textarea id="custom-prompt-textarea" class="ai-prompt-textarea" 
+                                          placeholder="例如：请以班主任的口吻，对学生的课堂表现进行总结和鼓励。分析学生的学习状态，提供个性化的建议和鼓励。"></textarea>
+                                <div class="ai-prompt-hint">
+                                    <i class="fas fa-lightbulb"></i>
+                                    提示：详细的提示词能帮助AI生成更准确的学情分析报告
+                                </div>
+                            </div>
                         </div>
-                        <button id="generate-ai-report-btn" class="btn btn-success w-full"><i class="fas fa-robot mr-2"></i>生成AI学情报告</button>
-                        <div id="ai-report-output" class="card mt-6">
-                            <p class="text-gray-700">AI生成的学情报告将显示在这里。</p>
+                    </div>
+                    
+                    <!-- 生成按钮 -->
+                    <button id="generate-ai-report-btn" class="ai-generate-btn">
+                        <i class="fas fa-robot mr-2"></i>
+                        生成AI学情报告
+                    </button>
+                    
+                    <!-- AI报告输出 -->
+                    <div id="ai-report-output" class="ai-report-output">
+                        <div class="ai-report-content">
+                            <div style="text-align: center; color: #718096;">
+                                <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">AI学情分析报告</p>
+                                <p>上传数据文件并点击生成按钮，AI将为您生成详细的学情分析报告</p>
+                            </div>
                         </div>
+                    </div>
                 </div>
             </div>
     </main>
@@ -442,6 +573,58 @@
                         选择加分
                     </button>
                     <button id="modal-close-btn" class="btn btn-secondary">
+                        <i class="fas fa-check mr-2"></i>
+                        确定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 多人点名结果模态框 -->
+    <div id="multi-call-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-users mr-2"></i>
+                    多人点名结果
+                </h3>
+                <button class="modal-close-btn" id="close-multi-call-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-multi-call-result" class="multi-call-result-display">
+                    <!-- 多人点名结果将显示在这里 -->
+                </div>
+                <div class="modal-actions">
+                    <button id="modal-multi-call-close-btn" class="btn btn-primary">
+                        <i class="fas fa-check mr-2"></i>
+                        确定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 范围选择结果模态框 -->
+    <div id="range-selection-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-arrows-alt-h mr-2"></i>
+                    范围选择结果
+                </h3>
+                <button class="modal-close-btn" id="close-range-selection-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-range-selection-result" class="range-selection-result-display">
+                    <!-- 范围选择结果将显示在这里 -->
+                </div>
+                <div class="modal-actions">
+                    <button id="modal-range-selection-confirm-btn" class="btn btn-primary">
                         <i class="fas fa-check mr-2"></i>
                         确定
                     </button>
@@ -492,14 +675,36 @@
                     <label for="modal-quick-reason" class="block text-gray-700 text-sm font-bold mb-2">评分原因:</label>
                     <select id="modal-quick-reason-select" class="quick-reason-input mb-2">
                         <option value="">请选择评价类型</option>
-                        <option value="回答问题正确">回答问题正确</option>
-                        <option value="思路清晰，表达准确">思路清晰，表达准确</option>
-                        <option value="积极参与讨论">积极参与讨论</option>
-                        <option value="创新思维，见解独到">创新思维，见解独到</option>
-                        <option value="帮助同学解答问题">帮助同学解答问题</option>
-                        <option value="课堂表现优秀">课堂表现优秀</option>
-                        <option value="作业完成质量高">作业完成质量高</option>
-                        <option value="学习态度认真">学习态度认真</option>
+                        <optgroup label="答题表现">
+                            <option value="回答问题正确">回答问题正确</option>
+                            <option value="思路清晰，表达准确">思路清晰，表达准确</option>
+                            <option value="解题方法新颖">解题方法新颖</option>
+                            <option value="答案完整详细">答案完整详细</option>
+                        </optgroup>
+                        <optgroup label="课堂参与">
+                            <option value="积极参与讨论">积极参与讨论</option>
+                            <option value="主动举手发言">主动举手发言</option>
+                            <option value="课堂提问积极">课堂提问积极</option>
+                            <option value="小组合作表现好">小组合作表现好</option>
+                        </optgroup>
+                        <optgroup label="学习态度">
+                            <option value="学习态度认真">学习态度认真</option>
+                            <option value="课堂专注度高">课堂专注度高</option>
+                            <option value="作业完成质量高">作业完成质量高</option>
+                            <option value="预习复习到位">预习复习到位</option>
+                        </optgroup>
+                        <optgroup label="互助行为">
+                            <option value="帮助同学解答问题">帮助同学解答问题</option>
+                            <option value="主动分享学习心得">主动分享学习心得</option>
+                            <option value="协助老师维持秩序">协助老师维持秩序</option>
+                            <option value="带动班级学习氛围">带动班级学习氛围</option>
+                        </optgroup>
+                        <optgroup label="创新表现">
+                            <option value="创新思维，见解独到">创新思维，见解独到</option>
+                            <option value="提出有价值的问题">提出有价值的问题</option>
+                            <option value="展示独特的解题思路">展示独特的解题思路</option>
+                            <option value="课堂表现优秀">课堂表现优秀</option>
+                        </optgroup>
                         <option value="custom">自定义评价</option>
                     </select>
                     <input type="text" id="modal-quick-reason" class="quick-reason-input" placeholder="自定义评价内容" style="display: none;">
@@ -561,14 +766,45 @@
                     <label for="modal-group-quick-reason" class="block text-gray-700 text-sm font-bold mb-2">评分原因:</label>
                     <select id="modal-group-quick-reason-select" class="quick-reason-input mb-2">
                         <option value="">请选择评价类型</option>
-                        <option value="小组讨论积极">小组讨论积极</option>
-                        <option value="合作完成学习任务">合作完成学习任务</option>
-                        <option value="小组展示表现优秀">小组展示表现优秀</option>
-                        <option value="团队协作能力强">团队协作能力强</option>
-                        <option value="小组创新思维突出">小组创新思维突出</option>
-                        <option value="小组学习氛围良好">小组学习氛围良好</option>
-                        <option value="小组作业完成质量高">小组作业完成质量高</option>
-                        <option value="小组互助学习效果好">小组互助学习效果好</option>
+                        <optgroup label="集体合作表现">
+                            <option value="集体讨论积极热烈">集体讨论积极热烈</option>
+                            <option value="团队协作配合默契">团队协作配合默契</option>
+                            <option value="集体分工明确合理">集体分工明确合理</option>
+                            <option value="集体完成学习任务">集体完成学习任务</option>
+                            <option value="集体组织能力强">集体组织能力强</option>
+                        </optgroup>
+                        <optgroup label="集体学习表现">
+                            <option value="集体展示表现优秀">集体展示表现优秀</option>
+                            <option value="集体创新思维突出">集体创新思维突出</option>
+                            <option value="集体学习氛围浓厚">集体学习氛围浓厚</option>
+                            <option value="集体作业完成质量高">集体作业完成质量高</option>
+                            <option value="集体课堂参与度高">集体课堂参与度高</option>
+                        </optgroup>
+                        <optgroup label="集体互助行为">
+                            <option value="集体内互相帮助">集体内互相帮助</option>
+                            <option value="集体共同进步明显">集体共同进步明显</option>
+                            <option value="集体带动班级氛围">集体带动班级氛围</option>
+                            <option value="集体协助老师管理">集体协助老师管理</option>
+                            <option value="集体分享学习心得">集体分享学习心得</option>
+                        </optgroup>
+                        <optgroup label="集体创新表现">
+                            <option value="集体提出创新方案">集体提出创新方案</option>
+                            <option value="集体展示独特思路">集体展示独特思路</option>
+                            <option value="集体解决复杂问题">集体解决复杂问题</option>
+                            <option value="集体贡献有价值观点">集体贡献有价值观点</option>
+                        </optgroup>
+                        <optgroup label="集体纪律表现">
+                            <option value="集体遵守课堂纪律">集体遵守课堂纪律</option>
+                            <option value="集体维护课堂秩序">集体维护课堂秩序</option>
+                            <option value="集体按时完成任务">集体按时完成任务</option>
+                            <option value="集体态度认真负责">集体态度认真负责</option>
+                        </optgroup>
+                        <optgroup label="集体荣誉表现">
+                            <option value="集体获得比赛奖项">集体获得比赛奖项</option>
+                            <option value="集体代表班级荣誉">集体代表班级荣誉</option>
+                            <option value="集体为班级争光">集体为班级争光</option>
+                            <option value="集体表现突出优秀">集体表现突出优秀</option>
+                        </optgroup>
                         <option value="custom">自定义评价</option>
                     </select>
                     <input type="text" id="modal-group-quick-reason" class="quick-reason-input" placeholder="自定义评价内容" style="display: none;">
@@ -612,14 +848,36 @@
                     <label for="new-modal-individual-reason" class="block text-gray-700 text-sm font-bold mb-2">评分原因:</label>
                     <select id="new-modal-individual-reason-select" class="modern-input mb-2">
                         <option value="">请选择评价类型</option>
-                        <option value="回答问题正确">回答问题正确</option>
-                        <option value="思路清晰，表达准确">思路清晰，表达准确</option>
-                        <option value="积极参与讨论">积极参与讨论</option>
-                        <option value="创新思维，见解独到">创新思维，见解独到</option>
-                        <option value="帮助同学解答问题">帮助同学解答问题</option>
-                        <option value="课堂表现优秀">课堂表现优秀</option>
-                        <option value="作业完成质量高">作业完成质量高</option>
-                        <option value="学习态度认真">学习态度认真</option>
+                        <optgroup label="答题表现">
+                            <option value="回答问题正确">回答问题正确</option>
+                            <option value="思路清晰，表达准确">思路清晰，表达准确</option>
+                            <option value="解题方法新颖">解题方法新颖</option>
+                            <option value="答案完整详细">答案完整详细</option>
+                        </optgroup>
+                        <optgroup label="课堂参与">
+                            <option value="积极参与讨论">积极参与讨论</option>
+                            <option value="主动举手发言">主动举手发言</option>
+                            <option value="课堂提问积极">课堂提问积极</option>
+                            <option value="小组合作表现好">小组合作表现好</option>
+                        </optgroup>
+                        <optgroup label="学习态度">
+                            <option value="学习态度认真">学习态度认真</option>
+                            <option value="课堂专注度高">课堂专注度高</option>
+                            <option value="作业完成质量高">作业完成质量高</option>
+                            <option value="预习复习到位">预习复习到位</option>
+                        </optgroup>
+                        <optgroup label="互助行为">
+                            <option value="帮助同学解答问题">帮助同学解答问题</option>
+                            <option value="主动分享学习心得">主动分享学习心得</option>
+                            <option value="协助老师维持秩序">协助老师维持秩序</option>
+                            <option value="带动班级学习氛围">带动班级学习氛围</option>
+                        </optgroup>
+                        <optgroup label="创新表现">
+                            <option value="创新思维，见解独到">创新思维，见解独到</option>
+                            <option value="提出有价值的问题">提出有价值的问题</option>
+                            <option value="展示独特的解题思路">展示独特的解题思路</option>
+                            <option value="课堂表现优秀">课堂表现优秀</option>
+                        </optgroup>
                         <option value="custom">自定义评价</option>
                     </select>
                     <input type="text" id="new-modal-individual-reason" class="modern-input" placeholder="自定义评价内容" style="display: none;">
@@ -648,6 +906,18 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <strong>集体加分说明：</strong>为选中的学生集体加分，所有学生将获得相同的分数。适用于小组合作、集体活动、团队表现等场景。
+                        </p>
+                    </div>
+                </div>
+            </div>
             <div class="modal-body">
                 <div id="new-modal-group-info" class="group-info-card">
                     <div class="text-center">
@@ -657,20 +927,59 @@
                 </div>
                 <div class="form-group">
                     <label for="new-modal-group-points" class="block text-gray-700 text-sm font-bold mb-2">加分值:</label>
-                    <input type="number" id="new-modal-group-points" class="modern-input" value="0.5" step="0.5" min="0.5">
+                    <div class="flex gap-2 mb-2">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('new-modal-group-points').value='0.5'">0.5分</button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('new-modal-group-points').value='1'">1分</button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('new-modal-group-points').value='1.5'">1.5分</button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('new-modal-group-points').value='2'">2分</button>
+                    </div>
+                    <input type="number" id="new-modal-group-points" class="modern-input" value="0.5" step="0.5" min="0.5" max="5">
+                    <div class="text-xs text-gray-500 mt-1">建议：集体表现优秀可给予0.5-2分，特别突出可给予更高分数</div>
                 </div>
                 <div class="form-group">
                     <label for="new-modal-group-reason" class="block text-gray-700 text-sm font-bold mb-2">评分原因:</label>
+                    <div class="text-xs text-gray-500 mb-2">请根据集体的具体表现选择最合适的评价类型</div>
                     <select id="new-modal-group-reason-select" class="modern-input mb-2">
                         <option value="">请选择评价类型</option>
-                        <option value="小组讨论积极">小组讨论积极</option>
-                        <option value="合作完成学习任务">合作完成学习任务</option>
-                        <option value="小组展示表现优秀">小组展示表现优秀</option>
-                        <option value="团队协作能力强">团队协作能力强</option>
-                        <option value="小组创新思维突出">小组创新思维突出</option>
-                        <option value="小组学习氛围良好">小组学习氛围良好</option>
-                        <option value="小组作业完成质量高">小组作业完成质量高</option>
-                        <option value="小组互助学习效果好">小组互助学习效果好</option>
+                        <optgroup label="集体合作表现">
+                            <option value="集体讨论积极热烈">集体讨论积极热烈</option>
+                            <option value="团队协作配合默契">团队协作配合默契</option>
+                            <option value="集体分工明确合理">集体分工明确合理</option>
+                            <option value="集体完成学习任务">集体完成学习任务</option>
+                            <option value="集体组织能力强">集体组织能力强</option>
+                        </optgroup>
+                        <optgroup label="集体学习表现">
+                            <option value="集体展示表现优秀">集体展示表现优秀</option>
+                            <option value="集体创新思维突出">集体创新思维突出</option>
+                            <option value="集体学习氛围浓厚">集体学习氛围浓厚</option>
+                            <option value="集体作业完成质量高">集体作业完成质量高</option>
+                            <option value="集体课堂参与度高">集体课堂参与度高</option>
+                        </optgroup>
+                        <optgroup label="集体互助行为">
+                            <option value="集体内互相帮助">集体内互相帮助</option>
+                            <option value="集体共同进步明显">集体共同进步明显</option>
+                            <option value="集体带动班级氛围">集体带动班级氛围</option>
+                            <option value="集体协助老师管理">集体协助老师管理</option>
+                            <option value="集体分享学习心得">集体分享学习心得</option>
+                        </optgroup>
+                        <optgroup label="集体创新表现">
+                            <option value="集体提出创新方案">集体提出创新方案</option>
+                            <option value="集体展示独特思路">集体展示独特思路</option>
+                            <option value="集体解决复杂问题">集体解决复杂问题</option>
+                            <option value="集体贡献有价值观点">集体贡献有价值观点</option>
+                        </optgroup>
+                        <optgroup label="集体纪律表现">
+                            <option value="集体遵守课堂纪律">集体遵守课堂纪律</option>
+                            <option value="集体维护课堂秩序">集体维护课堂秩序</option>
+                            <option value="集体按时完成任务">集体按时完成任务</option>
+                            <option value="集体态度认真负责">集体态度认真负责</option>
+                        </optgroup>
+                        <optgroup label="集体荣誉表现">
+                            <option value="集体获得比赛奖项">集体获得比赛奖项</option>
+                            <option value="集体代表班级荣誉">集体代表班级荣誉</option>
+                            <option value="集体为班级争光">集体为班级争光</option>
+                            <option value="集体表现突出优秀">集体表现突出优秀</option>
+                        </optgroup>
                         <option value="custom">自定义评价</option>
                     </select>
                     <input type="text" id="new-modal-group-reason" class="modern-input" placeholder="自定义评价内容" style="display: none;">
@@ -683,10 +992,32 @@
                         <i class="fas fa-times mr-2"></i>取消
                     </button>
                 </div>
+                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <div class="text-xs text-gray-600">
+                        <i class="fas fa-lightbulb mr-1"></i>
+                        <strong>提示：</strong>集体加分将同时为所有选中的学生添加相同分数，适用于小组合作、集体活动、团队竞赛等场景。
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script> <!-- Module-specific script -->
+    <!-- 核心模块 -->
+    <script src="js/core/classroom.js"></script>
+    <script src="js/core/students.js"></script>
+    <script src="js/core/points.js"></script>
+    
+    <!-- 功能模块 -->
+    <script src="js/features/rollcall.js"></script>
+    <script src="js/features/scoring.js"></script>
+    <script src="js/features/ai-analysis.js"></script>
+    
+    <!-- 工具模块 -->
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/component-loader.js"></script>
+    
+    <!-- 主入口文件 -->
+    <script src="js/main.js"></script>
 </body>
 </html>

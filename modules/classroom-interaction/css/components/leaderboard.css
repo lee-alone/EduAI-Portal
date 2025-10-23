@@ -1,0 +1,278 @@
+/* 列表样式 */
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: white;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 0.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+.list-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.list-item.top-student {
+    background: linear-gradient(135deg, #FFD700 0%, #FFECB3 100%); /* 金色渐变 */
+    font-weight: 700;
+    color: var(--color-gray-900);
+}
+
+.list-item.top-student:nth-child(2) {
+    background: linear-gradient(135deg, #C0C0C0 0%, #E0E0E0 100%); /* 银色渐变 */
+}
+
+.list-item.top-student:nth-child(3) {
+    background: linear-gradient(135deg, #CD7F32 0%, #F0D9C5 100%); /* 铜色渐变 */
+}
+
+.list-item span.rank {
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
+}
+
+.list-item span.name {
+    flex-grow: 1;
+}
+
+.list-item span.points {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.log-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--color-gray-200);
+    font-size: 0.9rem;
+    color: var(--color-gray-700);
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+/* 积分榜优化样式 */
+.leaderboard-item {
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.leaderboard-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s;
+}
+
+.leaderboard-item:hover::before {
+    left: 100%;
+}
+
+.leaderboard-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* 排名徽章样式 */
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 12px;
+}
+
+.rank-badge.gold {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.rank-badge.silver {
+    background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+    color: white;
+    box-shadow: 0 2px 8px rgba(192, 192, 192, 0.3);
+}
+
+.rank-badge.bronze {
+    background: linear-gradient(135deg, #CD7F32, #B8860B);
+    color: white;
+    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.3);
+}
+
+.rank-badge.other {
+    background: var(--color-gray-200);
+    color: var(--color-gray-600);
+}
+
+/* 统计信息样式 */
+.leaderboard-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.leaderboard-stats span {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: var(--color-gray-100);
+    border-radius: var(--border-radius-lg);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-gray-700);
+    transition: all var(--transition-fast);
+}
+
+.leaderboard-stats span:hover {
+    background: var(--color-primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* 图表容器样式 */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 1rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-gray-200);
+}
+
+.chart-container canvas {
+    max-height: 100%;
+}
+
+/* 导出功能样式 */
+.export-time-btn {
+    background: white;
+    border: 2px solid var(--color-gray-300);
+    color: var(--color-gray-700);
+    transition: all var(--transition-normal);
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.export-time-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.export-time-btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    box-shadow: var(--shadow-lg);
+}
+
+.export-time-btn.active:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+}
+
+/* 自定义时间范围样式 */
+#custom-date-range {
+    background: var(--color-gray-50);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem;
+    margin-top: 0.5rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 导出选项样式 */
+.space-y-2 > * + * {
+    margin-top: 0.5rem;
+}
+
+.form-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.25rem;
+    border: 2px solid var(--color-gray-300);
+    background: white;
+    transition: all var(--transition-normal);
+}
+
+.form-checkbox:checked {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.form-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* 导出功能折叠样式 */
+#export-toggle-header {
+    transition: background-color var(--transition-fast);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-md);
+}
+
+#export-toggle-header:hover {
+    background-color: var(--color-gray-50);
+}
+
+#export-chevron {
+    transition: transform var(--transition-normal);
+}
+
+#export-content {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* 最近加分记录折叠样式 */
+#recent-log-toggle-header {
+    transition: background-color var(--transition-fast);
+    padding: 0.5rem;
+    border-radius: var(--border-radius-md);
+}
+
+#recent-log-toggle-header:hover {
+    background-color: var(--color-gray-50);
+}
+
+#recent-log-chevron {
+    transition: transform var(--transition-normal);
+}
+
+#recent-log-content {
+    animation: slideDown 0.3s ease-out;
+}

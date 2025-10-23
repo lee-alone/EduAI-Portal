@@ -1,0 +1,99 @@
+/* 消息提示 */
+.message-alert {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius-lg);
+    color: white;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+    z-index: 10000;
+    animation: slideInDown 0.5s ease-out, fadeOut 0.5s ease-in 3.5s forwards;
+}
+
+.message-alert.success {
+    background: linear-gradient(135deg, var(--color-success), #059669);
+}
+.message-alert.error {
+    background: linear-gradient(135deg, var(--color-error), #DC2626);
+}
+.message-alert.warning {
+    background: linear-gradient(135deg, var(--color-warning), #D97706);
+}
+.message-alert.info {
+    background: linear-gradient(135deg, var(--color-primary), #1D4ED8);
+}
+
+@keyframes slideInDown {
+    from { top: -50px; opacity: 0; }
+    to { top: 1rem; opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; display: none; }
+}
+
+/* 加载动画 */
+.loading-spinner {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 统计信息样式 */
+.stats-info {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* 快捷键提示 */
+.keyboard-hint {
+    font-size: 0.8rem;
+    color: var(--color-gray-500);
+    margin-top: 0.25rem;
+}
+
+/* 确认对话框样式 */
+.confirm-dialog {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-xl);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* 等高网格布局 */
+.equal-height-grid {
+    display: grid;
+    grid-template-rows: 1fr; /* 确保所有行高度一致 */
+    align-items: stretch; /* 拉伸子元素填满容器 */
+}
+
+.equal-height-grid > .module-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* 填满父容器高度 */
+}
+
+.equal-height-grid .module-section .card-section:last-child {
+    flex-grow: 1; /* 让最后一个卡片区域自动填充剩余空间 */
+    display: flex;
+    flex-direction: column;
+}

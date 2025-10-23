@@ -106,15 +106,7 @@ class HelperManager {
         // 导出按钮
         const exportBtn = document.getElementById('export-data-btn');
         if (exportBtn) {
-            exportBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // 防止重复点击
-                if (exportBtn.disabled) return;
-                
-                this.handleExportData();
-            });
+            exportBtn.addEventListener('click', () => this.handleExportData());
         }
 
         // 班级人数设置
@@ -141,16 +133,7 @@ class HelperManager {
      * 处理导出数据
      */
     handleExportData() {
-        const exportBtn = document.getElementById('export-data-btn');
-        
-        // 防止重复点击
-        if (exportBtn.disabled) return;
-        
         try {
-            // 禁用按钮防止重复点击
-            exportBtn.disabled = true;
-            exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>正在导出...';
-            
             // 获取时间范围
             const activeTimeBtn = document.querySelector('.export-time-btn.active');
             const timeRange = activeTimeBtn?.id.replace('export-', '').replace('-btn', '') || 'today';
@@ -181,12 +164,6 @@ class HelperManager {
             window.classroomManager?.showMessage('数据导出成功', 'success');
         } catch (error) {
             window.classroomManager?.showMessage('导出数据失败', 'error');
-        } finally {
-            // 恢复按钮状态
-            setTimeout(() => {
-                exportBtn.disabled = false;
-                exportBtn.innerHTML = '<i class="fas fa-file-export mr-2"></i>导出课堂数据';
-            }, 1000);
         }
     }
 

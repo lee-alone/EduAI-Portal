@@ -1,376 +1,46 @@
-/**
- * 表单组件样式
- * 定义所有表单相关的样式
- */
-
-/* 表单组 */
+/* 表单元素 */
 .form-group {
-    margin-bottom: var(--spacing-6);
+    margin-bottom: 1.5rem;
 }
 
-.form-group:last-child {
-    margin-bottom: 0;
-}
-
-/* 标签样式 */
-.form-label {
+.form-group label {
     display: block;
-    margin-bottom: var(--spacing-2);
-    font-weight: var(--font-weight-semibold);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
     color: var(--color-gray-700);
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-tight);
+    font-size: 0.95rem;
 }
 
-.form-label.required::after {
-    content: ' *';
-    color: var(--color-error);
-    font-weight: var(--font-weight-bold);
-}
-
-/* 输入框基础样式 */
-.form-input,
-.form-select,
-.form-textarea {
+.modern-input, .modern-select, .modern-textarea {
     width: 100%;
-    padding: var(--spacing-3) var(--spacing-4);
+    padding: 0.75rem 1rem;
     border: 1px solid var(--color-gray-300);
     border-radius: var(--border-radius-md);
-    font-size: var(--font-size-base);
-    line-height: var(--line-height-normal);
+    font-size: 1rem;
+    transition: all var(--transition-normal);
+    background: white;
     color: var(--color-gray-900);
-    background-color: white;
-    transition: all var(--transition-fast);
-    box-shadow: var(--shadow-xs);
 }
 
-.form-input:focus,
-.form-select:focus,
-.form-textarea:focus {
+.modern-input:focus, .modern-select:focus, .modern-textarea:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     transform: translateY(-1px);
 }
 
-.form-input:disabled,
-.form-select:disabled,
-.form-textarea:disabled {
-    background-color: var(--color-gray-100);
-    color: var(--color-gray-500);
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-/* 输入框状态 */
-.form-input.error,
-.form-select.error,
-.form-textarea.error {
-    border-color: var(--color-error);
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-.form-input.warning,
-.form-select.warning,
-.form-textarea.warning {
-    border-color: var(--color-warning);
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
-}
-
-.form-input.success,
-.form-select.success,
-.form-textarea.success {
-    border-color: var(--color-success);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-/* 文本域 */
-.form-textarea {
+.modern-textarea {
     resize: vertical;
     min-height: 80px;
-    font-family: inherit;
 }
 
-.form-textarea.no-resize {
-    resize: none;
+/* 输入验证样式 */
+.modern-input.error {
+    border-color: var(--color-error) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
 }
 
-/* 选择框 */
-.form-select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right var(--spacing-3) center;
-    background-repeat: no-repeat;
-    background-size: 1rem;
-    padding-right: var(--spacing-10);
-    appearance: none;
+.modern-input.warning {
+    border-color: var(--color-warning) !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
 }
-
-/* 复选框和单选框 */
-.form-checkbox,
-.form-radio {
-    width: 1.25rem;
-    height: 1.25rem;
-    border: 2px solid var(--color-gray-300);
-    border-radius: var(--border-radius-sm);
-    background-color: white;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    position: relative;
-    appearance: none;
-    margin: 0;
-}
-
-.form-radio {
-    border-radius: var(--border-radius-full);
-}
-
-.form-checkbox:checked,
-.form-radio:checked {
-    background-color: var(--color-primary);
-    border-color: var(--color-primary);
-}
-
-.form-checkbox:checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 0.75rem;
-    font-weight: var(--font-weight-bold);
-}
-
-.form-radio:checked::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0.5rem;
-    height: 0.5rem;
-    background-color: white;
-    border-radius: var(--border-radius-full);
-    transform: translate(-50%, -50%);
-}
-
-.form-checkbox:focus,
-.form-radio:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* 复选框和单选框标签 */
-.form-checkbox-label,
-.form-radio-label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    cursor: pointer;
-    font-size: var(--font-size-sm);
-    color: var(--color-gray-700);
-    user-select: none;
-}
-
-/* 开关按钮 */
-.form-switch {
-    position: relative;
-    width: 3rem;
-    height: 1.5rem;
-    background-color: var(--color-gray-300);
-    border-radius: var(--border-radius-full);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    appearance: none;
-    border: none;
-    outline: none;
-}
-
-.form-switch:checked {
-    background-color: var(--color-primary);
-}
-
-.form-switch::after {
-    content: '';
-    position: absolute;
-    top: 0.125rem;
-    left: 0.125rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    background-color: white;
-    border-radius: var(--border-radius-full);
-    transition: all var(--transition-fast);
-    box-shadow: var(--shadow-sm);
-}
-
-.form-switch:checked::after {
-    transform: translateX(1.5rem);
-}
-
-.form-switch:focus {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* 文件输入 */
-.form-file {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-    overflow: hidden;
-}
-
-.form-file-input {
-    position: absolute;
-    left: -9999px;
-    opacity: 0;
-}
-
-.form-file-label {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    padding: var(--spacing-3) var(--spacing-4);
-    background-color: var(--color-gray-100);
-    border: 2px dashed var(--color-gray-300);
-    border-radius: var(--border-radius-md);
-    color: var(--color-gray-700);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    transition: all var(--transition-fast);
-    cursor: pointer;
-}
-
-.form-file:hover .form-file-label {
-    background-color: var(--color-gray-200);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-}
-
-.form-file-input:focus + .form-file-label {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
-/* 表单验证消息 */
-.form-error,
-.form-warning,
-.form-success {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-1);
-    margin-top: var(--spacing-1);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-}
-
-.form-error {
-    color: var(--color-error);
-}
-
-.form-warning {
-    color: var(--color-warning);
-}
-
-.form-success {
-    color: var(--color-success);
-}
-
-/* 表单帮助文本 */
-.form-help {
-    margin-top: var(--spacing-1);
-    font-size: var(--font-size-sm);
-    color: var(--color-gray-500);
-    line-height: var(--line-height-normal);
-}
-
-/* 表单组布局 */
-.form-row {
-    display: flex;
-    gap: var(--spacing-4);
-    margin-bottom: var(--spacing-6);
-}
-
-.form-col {
-    flex: 1;
-}
-
-.form-col-auto {
-    flex: 0 0 auto;
-}
-
-/* 内联表单 */
-.form-inline {
-    display: flex;
-    align-items: end;
-    gap: var(--spacing-4);
-    flex-wrap: wrap;
-}
-
-.form-inline .form-group {
-    margin-bottom: 0;
-    flex: 1;
-    min-width: 200px;
-}
-
-/* 表单字段组 */
-.form-fieldset {
-    border: 1px solid var(--color-gray-300);
-    border-radius: var(--border-radius-md);
-    padding: var(--spacing-6);
-    margin-bottom: var(--spacing-6);
-}
-
-.form-legend {
-    padding: 0 var(--spacing-2);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-gray-700);
-    font-size: var(--font-size-sm);
-}
-
-/* 响应式表单 */
-@media (max-width: 640px) {
-    .form-row {
-        flex-direction: column;
-        gap: var(--spacing-4);
-    }
-    
-    .form-inline {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .form-inline .form-group {
-        min-width: auto;
-    }
-    
-    .form-input,
-    .form-select,
-    .form-textarea {
-        padding: var(--spacing-4);
-        font-size: var(--font-size-base);
-        min-height: 44px; /* 触屏友好的最小高度 */
-    }
-}
-
-/* 触屏优化 */
-@media (hover: none) and (pointer: coarse) {
-    .form-checkbox,
-    .form-radio {
-        width: 1.5rem;
-        height: 1.5rem;
-    }
-    
-    .form-switch {
-        width: 3.5rem;
-        height: 2rem;
-    }
-    
-    .form-switch::after {
-        width: 1.5rem;
-        height: 1.5rem;
-    }
-    
-    .form-switch:checked::after {
-        transform: translateX(1.75rem);
-    }
-}
-
