@@ -14,8 +14,10 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- FileSaver for file downloads -->
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    <!-- html-docx for Word export -->
-    <script src="https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas for HTML to PDF conversion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <nav class="header-nav">
@@ -465,26 +467,29 @@
                             数据上传
                         </h3>
                         
-                        <div class="ai-file-upload">
-                            <input type="file" id="activity-excel-upload" accept=".xlsx,.xls" />
-                            <label for="activity-excel-upload" class="ai-file-upload-label">
-                                <div class="ai-file-upload-content">
-                                    <i class="fas fa-file-excel ai-file-upload-icon"></i>
-                                    <div class="ai-file-upload-text">上传课堂活动Excel文件</div>
-                                    <div class="ai-file-upload-hint">支持 .xlsx 和 .xls 格式</div>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <div class="ai-file-upload">
-                            <input type="file" id="roster-excel-upload" accept=".xlsx,.xls" />
-                            <label for="roster-excel-upload" class="ai-file-upload-label">
-                                <div class="ai-file-upload-content">
-                                    <i class="fas fa-users ai-file-upload-icon"></i>
-                                    <div class="ai-file-upload-text">上传学生名单Excel (座号-姓名对照)</div>
-                                    <div class="ai-file-upload-hint">支持 .xlsx 和 .xls 格式</div>
-                                </div>
-                            </label>
+                        <!-- 水平并列的文件上传区域 -->
+                        <div class="ai-upload-grid">
+                            <div class="ai-file-upload ai-file-upload-compact">
+                                <input type="file" id="activity-excel-upload" accept=".xlsx,.xls" />
+                                <label for="activity-excel-upload" class="ai-file-upload-label">
+                                    <div class="ai-file-upload-content">
+                                        <i class="fas fa-file-excel ai-file-upload-icon"></i>
+                                        <div class="ai-file-upload-text">课堂活动Excel文件</div>
+                                        <div class="ai-file-upload-hint">支持 .xlsx 和 .xls 格式</div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="ai-file-upload ai-file-upload-compact">
+                                <input type="file" id="roster-excel-upload" accept=".xlsx,.xls" />
+                                <label for="roster-excel-upload" class="ai-file-upload-label">
+                                    <div class="ai-file-upload-content">
+                                        <i class="fas fa-users ai-file-upload-icon"></i>
+                                        <div class="ai-file-upload-text">学生名单Excel</div>
+                                        <div class="ai-file-upload-hint">座号-姓名对照</div>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
                     </div>
                     

@@ -27,6 +27,70 @@ class AIAnalysisManager {
         this.updateModelSelection();
         // 初始化端点选择状态
         this.updateEndpointSelection();
+        // 检查依赖库加载状态
+        this.checkDependencies();
+    }
+
+    /**
+     * 检查依赖库加载状态
+     */
+    checkDependencies() {
+        console.log('🔍 检查依赖库加载状态...');
+        
+        // 检查jsPDF库
+        if (typeof window.jspdf !== 'undefined' || typeof jsPDF !== 'undefined') {
+            console.log('✅ jsPDF库已加载');
+        } else {
+            console.warn('⚠️ jsPDF库未加载，PDF导出功能将降级到HTML格式');
+            // 尝试动态加载PDF库
+            this.loadPDFLibraries();
+        }
+        
+        // 检查html2canvas库
+        if (typeof html2canvas !== 'undefined') {
+            console.log('✅ html2canvas库已加载');
+        } else {
+            console.warn('⚠️ html2canvas库未加载，PDF转换功能可能受限');
+        }
+        
+        // 检查FileSaver库
+        if (typeof saveAs !== 'undefined') {
+            console.log('✅ FileSaver库已加载');
+        } else {
+            console.warn('⚠️ FileSaver库未加载，文件下载功能可能受限');
+        }
+        
+        // 检查XLSX库
+        if (typeof XLSX !== 'undefined') {
+            console.log('✅ XLSX库已加载');
+        } else {
+            console.warn('⚠️ XLSX库未加载，Excel处理功能可能受限');
+        }
+    }
+
+    /**
+     * 动态加载PDF相关库
+     */
+    async loadPDFLibraries() {
+        try {
+            console.log('🔄 尝试动态加载PDF相关库...');
+            
+            // 动态加载jsPDF
+            if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
+                const jsPDFScript = document.createElement('script');
+                jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                document.head.appendChild(jsPDFScript);
+            }
+            
+            // 动态加载html2canvas
+            if (typeof html2canvas === 'undefined') {
+                const html2canvasScript = document.createElement('script');
+                html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                document.head.appendChild(html2canvasScript);
+            }
+        } catch (error) {
+            console.error('❌ 动态加载PDF库失败:', error);
+        }
     }
 
     /**
@@ -476,12 +540,16 @@ class AIAnalysisManager {
             }
         });
         
+        // 计算班级总人数（从学生名单映射表获取）
+        const totalClassSize = Object.keys(nameMapping).length;
+        
         return {
             integratedRecords: integratedRecords,
             unmatchedRecords: unmatchedRecords,
             nameMapping: nameMapping,
-            totalRecords: mainActivitySheet.data.length,
-            matchedRecords: integratedRecords.length,
+            totalRecords: mainActivitySheet.data.length,  // 课堂活动记录数
+            matchedRecords: integratedRecords.length,    // 成功匹配的活动记录数
+            totalClassSize: totalClassSize,             // 班级总人数
             matchRate: (integratedRecords.length / mainActivitySheet.data.length * 100).toFixed(1)
         };
     }
@@ -630,14 +698,446 @@ class AIAnalysisManager {
         // 调试：输出处理结果到控制台
         this.debugDataProcessing(integratedData, summary);
         
-        // 调用AI分析
-        this.updateLoadingMessage('正在调用AI进行学情分析...');
-        const aiReport = await this.callAIAnalysis(integratedData, summary);
+        // 检查学生数量，决定是否需要分批处理
+        const studentCount = integratedData.integratedRecords.length;
+        const shouldUseBatchProcessing = studentCount > 20; // 超过20个学生时使用分批处理
         
-        // 生成最终报告HTML
-        const report = this.generateFinalReportHTML(integratedData, summary, aiReport);
+        if (shouldUseBatchProcessing) {
+            console.log(`📊 学生数量较多(${studentCount}名)，使用分批分析模式`);
+            return await this.generateBatchAIReport(integratedData, summary);
+        } else {
+            // 调用AI分析
+            this.updateLoadingMessage('正在调用AI进行学情分析...');
+            const aiReport = await this.callAIAnalysis(integratedData, summary);
+            
+            // 生成最终报告HTML
+            const report = this.generateFinalReportHTML(integratedData, summary, aiReport);
+            
+            return report;
+        }
+    }
+    
+    /**
+     * 分批生成AI分析报告
+     */
+    async generateBatchAIReport(integratedData, summary) {
+        this.updateLoadingMessage('正在分批调用AI进行学情分析...');
         
-        return report;
+        try {
+            // 第一步：生成班级整体分析
+            this.updateLoadingMessage('正在生成班级整体分析...');
+            const overallAnalysis = await this.callOverallAnalysis(integratedData, summary);
+            
+            // 第二步：分批生成学生个别分析
+            this.updateLoadingMessage('正在生成学生个别分析...');
+            const studentAnalyses = await this.callBatchStudentAnalysis(integratedData, summary);
+            
+            // 第三步：合并所有分析结果
+            this.updateLoadingMessage('正在合并分析结果...');
+            const combinedReport = this.combineBatchAnalyses(overallAnalysis, studentAnalyses, summary);
+            
+            return combinedReport;
+        } catch (error) {
+            console.error('分批分析失败:', error);
+            // 降级到单次分析
+            this.updateLoadingMessage('分批分析失败，尝试单次分析...');
+            const aiReport = await this.callAIAnalysis(integratedData, summary);
+            return this.generateFinalReportHTML(integratedData, summary, aiReport);
+        }
+    }
+    
+    /**
+     * 调用班级整体分析
+     */
+    async callOverallAnalysis(integratedData, summary) {
+        const { nameMapping } = integratedData;
+        
+        // 获取班级总人数和未活跃学生信息
+        const totalClassSize = Object.keys(nameMapping).length;
+        const activeStudents = summary.activeStudents;
+        const inactiveStudents = totalClassSize - activeStudents;
+        
+        // 获取未活跃学生名单
+        const studentPerformance = this.buildStudentPerformanceData(integratedData.integratedRecords);
+        const activeStudentNames = new Set(studentPerformance.studentList.map(s => s.name));
+        const inactiveStudentNames = Object.values(nameMapping).filter(name => !activeStudentNames.has(name));
+        
+        // 调试信息
+        console.log('🔍 分批分析-未活跃学生分析:', {
+            班级总人数: totalClassSize,
+            活跃学生数: activeStudents,
+            未活跃学生数: inactiveStudents,
+            活跃学生名单: Array.from(activeStudentNames),
+            未活跃学生名单: inactiveStudentNames
+        });
+        
+        const prompt = `
+# 班级整体学情分析
+
+## 数据概览
+- 总记录数: ${summary.totalRecords}
+- 成功匹配: ${summary.matchedRecords}
+- 活跃学生数: ${summary.activeStudents}
+- 班级总人数: ${totalClassSize}
+- 未活跃学生数: ${inactiveStudents}
+- 涉及学科: ${summary.subjects.join('、')}
+- 数据匹配率: ${summary.matchRate}%
+
+## 未活跃学生名单
+${inactiveStudentNames.length > 0 ? 
+    `以下${inactiveStudentNames.length}名学生未参与课堂活动：${inactiveStudentNames.join('、')}` : 
+    '所有学生都有参与记录'
+}
+
+## 分析要求
+请基于以上数据，生成详细的班级整体表现分析报告，必须包含以下内容：
+
+### 1. 课堂参与度分析
+- 分析学生参与课堂活动的积极性
+- 统计参与率高的学生特点
+- 分析参与度低的原因
+
+### 2. 学科表现分布
+- 分析各学科的学生表现情况
+- 识别学科优势和薄弱环节
+- 提供学科改进建议
+
+### 3. 学习氛围评价
+- 评价班级整体学习氛围
+- 分析学生之间的互动情况
+- 识别学习氛围的影响因素
+
+### 4. 整体学习状态
+- 总结班级整体学习状态
+- 分析学习态度和积极性
+- 识别需要关注的问题
+
+### 5. 教学建议
+- 针对班级整体的教学改进建议
+- 课堂管理优化建议
+- 教学方法调整建议
+
+### 6. 个性化关注
+针对${inactiveStudents}名未活跃学生，必须具体列出每个学生的姓名：${inactiveStudentNames.join('、')}
+为每个未活跃学生提供具体的关注建议。
+
+**重要提醒：**
+- 必须生成完整的分析报告，不少于800字
+- 每个部分都要有详细的分析内容
+- 必须包含所有未活跃学生的具体姓名
+- 使用HTML格式输出，包含适当的标题和段落结构
+- 确保内容详实、分析深入、建议具体
+        `;
+        
+        return await this.callAIAnalysisWithPrompt(prompt);
+    }
+    
+    /**
+     * 分批调用学生个别分析
+     */
+    async callBatchStudentAnalysis(integratedData, summary) {
+        const studentPerformance = this.buildStudentPerformanceData(integratedData.integratedRecords);
+        const students = studentPerformance.studentList;
+        const batchSize = 10; // 每批处理10个学生
+        const batches = [];
+        
+        for (let i = 0; i < students.length; i += batchSize) {
+            const batch = students.slice(i, i + batchSize);
+            batches.push(batch);
+        }
+        
+        const allAnalyses = [];
+        
+        for (let i = 0; i < batches.length; i++) {
+            const batch = batches[i];
+            this.updateLoadingMessage(`正在分析第${i + 1}批学生 (${batch.length}名)...`);
+            
+            const prompt = `
+# 学生个别表现分析
+
+## 学生表现详情
+${batch.map(student => this.generateStudentDescription(student)).join('\n\n')}
+
+## 分析要求
+请基于以上每个学生的具体表现数据，为每个学生生成一段话的个性化评价。
+
+**重要格式要求：**
+- 每个学生必须是一段话，约150-200字
+- 不要使用"学习积极性评价："、"课堂表现特点："等标题
+- 直接写一段话，包含：学习积极性、表现特点、建议鼓励、关注问题
+- 语言要积极正面，体现教育关怀
+- 分析要具体、深入、有针对性
+- 使用HTML格式，但不要分段标题
+
+**示例格式：**
+张三同学本学期表现积极，课堂参与度高，在数学和物理方面表现突出。他能够主动举手发言，思维敏捷，解题思路清晰。建议继续保持这种学习热情，可以尝试挑战更有难度的题目。需要注意的是，他在某些基础概念上还需要加强练习，建议多做一些基础题巩固。
+
+**特别关注：**
+- 对于有"无积分记录"的学生，要特别说明他们被点名但可能回答错误，老师给予了安慰评语，需要特别关注其学习状态
+- 对于只有错误回答的学生，要分析原因并给予鼓励
+- 对于混合表现的学生，要分析其学习波动原因
+- 对于全部正确的学生，要给予肯定并鼓励继续保持
+
+请确保每个学生都有完整的分析内容，不要遗漏任何学生。
+            `;
+            
+            const analysis = await this.callAIAnalysisWithPrompt(prompt);
+            allAnalyses.push(analysis);
+            
+            // 添加延迟避免API限制
+            if (i < batches.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+        
+        return allAnalyses;
+    }
+    
+    /**
+     * 生成学生描述（一人一段话格式）
+     */
+    generateStudentDescription(student) {
+        const { name, studentId, participationCount, subjects, totalPoints, 
+                correctAnswers, incorrectAnswers, noScoreRecords, records } = student;
+        
+        // 计算时间段描述
+        const timeDescription = this.getTimeDescription(records);
+        
+        // 基础信息
+        let description = `**${name}（${studentId}号）**：${timeDescription}参与课堂活动${participationCount}次`;
+        
+        // 学科信息
+        if (subjects.length > 0) {
+            description += `，主要涉及${subjects.join('、')}${subjects.length > 1 ? '等' : ''}学科`;
+        }
+        
+        // 表现类型分析
+        if (correctAnswers > 0 && incorrectAnswers > 0) {
+            description += `。表现特点为混合型，其中正确回答${correctAnswers}次，错误回答${incorrectAnswers}次`;
+        } else if (correctAnswers > 0) {
+            description += `。表现优秀，全部正确回答${correctAnswers}次`;
+        } else if (incorrectAnswers > 0) {
+            description += `。表现一般，错误回答${incorrectAnswers}次`;
+        }
+        
+        // 特殊情况
+        if (noScoreRecords > 0) {
+            description += `，另有${noScoreRecords}次无积分记录（老师给予安慰评语）`;
+        }
+        
+        // 积分总结
+        description += `。总积分为${totalPoints}分`;
+        
+        // 学习状态评价
+        if (totalPoints >= 5) {
+            description += `，显示出良好的学习积极性，是班级的学习榜样`;
+        } else if (totalPoints >= 2) {
+            description += `，学习态度认真，课堂参与度较高`;
+        } else if (totalPoints > 0) {
+            description += `，有一定的学习积极性，但还需要加强`;
+        } else {
+            description += `，需要特别关注其学习状态，建议加强基础知识的巩固`;
+        }
+        
+        return description + '。';
+    }
+
+    /**
+     * 根据数据时间范围确定时间段描述
+     */
+    getTimeDescription(records) {
+        if (!records || records.length === 0) {
+            return '本学期';
+        }
+        
+        // 获取最早的记录日期
+        const dates = records
+            .map(record => record.date)
+            .filter(date => date)
+            .map(date => {
+                // 尝试解析不同格式的日期
+                let parsedDate;
+                if (typeof date === 'string') {
+                    // 尝试解析中文日期格式
+                    if (date.includes('年') && date.includes('月') && date.includes('日')) {
+                        // 格式：2024年1月15日
+                        const match = date.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+                        if (match) {
+                            parsedDate = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+                        }
+                    } else if (date.includes('-')) {
+                        // 格式：2024-01-15
+                        parsedDate = new Date(date);
+                    } else if (date.includes('/')) {
+                        // 格式：2024/01/15
+                        parsedDate = new Date(date);
+                    }
+                }
+                return parsedDate;
+            })
+            .filter(date => date && !isNaN(date.getTime()));
+        
+        if (dates.length === 0) {
+            return '本学期';
+        }
+        
+        // 找到最早的日期
+        const earliestDate = new Date(Math.min(...dates.map(d => d.getTime())));
+        const currentDate = new Date();
+        const daysDiff = Math.floor((currentDate - earliestDate) / (1000 * 60 * 60 * 24));
+        
+        // 根据时间差确定描述
+        if (daysDiff <= 7) {
+            return '本周';
+        } else if (daysDiff <= 30) {
+            return '本月';
+        } else if (daysDiff <= 60) {
+            return '上学期';
+        } else {
+            return '本学期';
+        }
+    }
+
+    /**
+     * 使用自定义提示词调用AI分析
+     */
+    async callAIAnalysisWithPrompt(prompt) {
+        const selectedModel = this.getSelectedModel();
+        const apiKey = this.getAPIKey();
+        const apiEndpoint = this.getAPIEndpoint();
+        
+        const requestData = {
+            model: selectedModel,
+            messages: [
+                {
+                    role: "system",
+                    content: "你是一位专业的班主任，擅长分析学生课堂表现数据，生成详细的学情分析报告。"
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 6000,
+            stream: false
+        };
+        
+        const response = await fetch(apiEndpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.error) {
+            throw new Error(`AI分析失败: ${result.error.message}`);
+        }
+        
+        let aiContent = result.choices?.[0]?.message?.content;
+        if (!aiContent) {
+            throw new Error('AI未返回有效内容');
+        }
+        
+        return this.cleanAIOutput(aiContent);
+    }
+    
+    /**
+     * 合并分批分析结果
+     */
+    combineBatchAnalyses(overallAnalysis, studentAnalyses, summary) {
+        const currentDate = new Date().toLocaleDateString('zh-CN');
+        const selectedModel = this.getSelectedModel();
+        
+        return `
+            <div class="ai-report-header">
+                <h3 style="color: #2d3748; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-chart-line" style="color: #667eea;"></i>
+                    AI学情分析报告
+                </h3>
+                <p style="color: #4a5568; margin-bottom: 0.5rem; font-weight: 500;">生成时间: ${currentDate}</p>
+                <p style="color: #4a5568; margin-bottom: 0.5rem; font-weight: 500;">使用模型: ${selectedModel}</p>
+                <p style="color: #4a5568; margin-bottom: 0.5rem; font-weight: 500;">数据匹配率: ${summary.matchRate}%</p>
+                <p style="color: #4a5568; margin-bottom: 2rem; font-weight: 500;">AI分析完成（分批处理模式）</p>
+            </div>
+            
+            <div class="ai-report-section">
+                <h4 style="color: #4a5568; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-database" style="color: #667eea;"></i>
+                    数据处理结果
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #4299e1;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.totalRecords}</div>
+                        <div style="color: #718096;">课堂活动记录数</div>
+                    </div>
+                    <div style="background: #f0fff4; padding: 1rem; border-radius: 8px; border-left: 4px solid #48bb78;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.matchedRecords}</div>
+                        <div style="color: #718096;">成功匹配记录</div>
+                    </div>
+                    <div style="background: #fff5f5; padding: 1rem; border-radius: 8px; border-left: 4px solid #f56565;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.unmatchedRecords}</div>
+                        <div style="color: #718096;">未匹配记录</div>
+                    </div>
+                    <div style="background: #faf5ff; padding: 1rem; border-radius: 8px; border-left: 4px solid #9f7aea;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.totalClassSize}</div>
+                        <div style="color: #718096;">班级总人数</div>
+                    </div>
+                    <div style="background: #e6fffa; padding: 1rem; border-radius: 8px; border-left: 4px solid #38b2ac;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.activeStudents}</div>
+                        <div style="color: #718096;">参与活动学生</div>
+                    </div>
+                    <div style="background: #fef5e7; padding: 1rem; border-radius: 8px; border-left: 4px solid #ed8936;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.inactiveStudents}</div>
+                        <div style="color: #718096;">未参与学生</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-report-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4 style="color: #4a5568; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-robot" style="color: #667eea;"></i>
+                        AI智能分析报告
+                    </h4>
+                    <button id="export-report-btn" class="ai-export-btn" onclick="exportAIReport()" style="
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border: none;
+                        padding: 0.5rem 1rem;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 0.5rem;
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <i class="fas fa-download"></i>
+                        导出PDF报告
+                    </button>
+                </div>
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
+                    ${overallAnalysis}
+                    ${studentAnalyses.join('')}
+                </div>
+            </div>
+            
+            <div class="ai-report-footer" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0;">
+                <p style="color: #718096; font-size: 0.9rem; text-align: center;">
+                    <i class="fas fa-robot mr-1"></i>
+                    本报告由AI智能分析生成，基于真实课堂数据
+                </p>
+            </div>
+        `;
     }
 
     /**
@@ -646,15 +1146,35 @@ class AIAnalysisManager {
     debugDataProcessing(integratedData, summary) {
         console.group('🔍 AI学情分析 - 数据处理结果');
         
+        // 统计不同类型的学生表现
+        const studentPerformance = this.buildStudentPerformanceData(integratedData.integratedRecords);
+        const allCorrectStudents = studentPerformance.studentList.filter(s => s.hasCorrectAnswer && !s.hasIncorrectAnswer && !s.hasNoScoreRecord);
+        const allIncorrectStudents = studentPerformance.studentList.filter(s => !s.hasCorrectAnswer && s.hasIncorrectAnswer && !s.hasNoScoreRecord);
+        const mixedPerformanceStudents = studentPerformance.studentList.filter(s => s.hasCorrectAnswer && s.hasIncorrectAnswer);
+        const noScoreStudents = studentPerformance.studentList.filter(s => s.hasNoScoreRecord);
+        
         console.log('📊 数据统计:', {
-            总记录数: summary.totalRecords,
-            成功匹配: summary.matchedRecords,
-            未匹配记录: summary.unmatchedRecords,
+            课堂活动记录数: summary.totalRecords,
+            成功匹配记录数: summary.matchedRecords,
+            未匹配记录数: summary.unmatchedRecords,
             匹配率: summary.matchRate + '%',
-            活跃学生数: summary.activeStudents,
+            班级总人数: summary.totalClassSize,
+            参与活动学生数: summary.activeStudents,
+            未参与学生数: summary.inactiveStudents,
             涉及学科: summary.subjects,
             总积分: summary.totalPoints,
             平均积分: summary.averagePoints
+        });
+        
+        console.log('🎯 学生表现类型分析:', {
+            全部正确学生: allCorrectStudents.length,
+            全部错误学生: allIncorrectStudents.length,
+            混合表现学生: mixedPerformanceStudents.length,
+            无积分记录学生: noScoreStudents.length,
+            全部正确学生名单: allCorrectStudents.map(s => s.name),
+            全部错误学生名单: allIncorrectStudents.map(s => s.name),
+            混合表现学生名单: mixedPerformanceStudents.map(s => s.name),
+            无积分记录学生名单: noScoreStudents.map(s => s.name)
         });
         
         console.log('👥 学生名单映射:', integratedData.nameMapping);
@@ -681,14 +1201,25 @@ class AIAnalysisManager {
      * 清理AI输出内容
      */
     cleanAIOutput(content) {
+        if (!content || typeof content !== 'string') {
+            return '<div class="ai-report-content">AI输出内容为空</div>';
+        }
+        
         // 移除开头的```html标记
         content = content.replace(/^```html\s*/i, '');
         
         // 移除结尾的```标记
         content = content.replace(/\s*```\s*$/i, '');
         
-        // 移除多余的换行符
+        // 移除多余的换行符，但保留必要的段落结构
         content = content.replace(/\n{3,}/g, '\n\n');
+        
+        // 检查内容完整性
+        const hasCompleteStructure = this.checkContentCompleteness(content);
+        
+        if (!hasCompleteStructure) {
+            console.warn('⚠️ AI输出内容可能不完整，建议重新生成');
+        }
         
         // 确保内容以HTML标签开始
         if (!content.trim().startsWith('<')) {
@@ -697,6 +1228,26 @@ class AIAnalysisManager {
         }
         
         return content.trim();
+    }
+    
+    /**
+     * 检查AI输出内容的完整性
+     */
+    checkContentCompleteness(content) {
+        if (!content || content.length < 100) {
+            return false;
+        }
+        
+        // 检查基本结构
+        const hasBasicStructure = content.includes('<') || content.includes('学生') || content.includes('分析');
+        
+        // 检查是否有实质内容（不只是标题）
+        const hasSubstantialContent = content.length > 500;
+        
+        // 检查是否有学生相关分析
+        const hasStudentContent = content.includes('学生') || content.includes('表现') || content.includes('评价');
+        
+        return hasBasicStructure && hasSubstantialContent && hasStudentContent;
     }
 
     /**
@@ -725,7 +1276,8 @@ class AIAnalysisManager {
                     }
                 ],
                 temperature: 0.7,
-                max_tokens: 4000
+                max_tokens: 8000,  // 增加token限制以支持更完整的输出
+                stream: false  // 确保完整响应
             };
             
             console.log('🤖 调用AI分析:', {
@@ -784,10 +1336,28 @@ class AIAnalysisManager {
      * 构建AI分析提示词
      */
     buildAIPrompt(integratedData, summary) {
-        const { integratedRecords, unmatchedRecords } = integratedData;
+        const { integratedRecords, unmatchedRecords, nameMapping } = integratedData;
         
         // 构建学生表现数据
         const studentPerformance = this.buildStudentPerformanceData(integratedRecords);
+        
+        // 获取班级总人数（从学生名单映射表获取）
+        const totalClassSize = Object.keys(nameMapping).length;
+        const activeStudents = studentPerformance.studentList.length;
+        const inactiveStudents = totalClassSize - activeStudents;
+        
+        // 获取未活跃学生名单
+        const activeStudentNames = new Set(studentPerformance.studentList.map(s => s.name));
+        const inactiveStudentNames = Object.values(nameMapping).filter(name => !activeStudentNames.has(name));
+        
+        // 调试信息
+        console.log('🔍 未活跃学生分析:', {
+            班级总人数: totalClassSize,
+            活跃学生数: activeStudents,
+            未活跃学生数: inactiveStudents,
+            活跃学生名单: Array.from(activeStudentNames),
+            未活跃学生名单: inactiveStudentNames
+        });
         
         // 构建提示词
         const prompt = `
@@ -797,50 +1367,72 @@ class AIAnalysisManager {
 - 总记录数: ${summary.totalRecords}
 - 成功匹配: ${summary.matchedRecords}
 - 活跃学生数: ${summary.activeStudents}
+- 班级总人数: ${totalClassSize}
+- 未活跃学生数: ${inactiveStudents}
 - 涉及学科: ${summary.subjects.join('、')}
 - 数据匹配率: ${summary.matchRate}%
 
-## 学生表现数据
-${JSON.stringify(studentPerformance, null, 2)}
+## 活跃学生表现详情
+${studentPerformance.studentList.map(student => this.generateStudentDescription(student)).join('\n\n')}
 
-## 需要分析的学生列表
-以下学生都有发言记录，必须在个别学生表现评价部分逐一分析：
-${studentPerformance.studentList.map(student => `- ${student.name} (参与${student.participationCount}次，涉及学科：${student.subjects.join('、')})`).join('\n')}
+## 未活跃学生名单
+${inactiveStudentNames.length > 0 ? 
+    `以下${inactiveStudentNames.length}名学生未参与课堂活动：${inactiveStudentNames.join('、')}` : 
+    '所有学生都有参与记录'
+}
 
 ## 分析要求
 请基于以上数据，生成一份详细的学情分析报告，包含以下内容：
 
 ### 1. 班级整体表现分析
 - 课堂参与度分析
-- 学科表现分布
+- 学科表现分布  
 - 学习氛围评价
 - 整体学习状态
 
-### 2. 个别学生表现评价（重要：必须分析所有发言学生）
-请为数据中的每一个学生生成个性化评价，包括：
-- 学习积极性评价
-- 课堂表现特点
-- 学习建议和鼓励
-- 需要关注的问题
+### 2. 个别学生表现评价
+请为数据中的每一个学生生成个性化评价，**必须使用以下格式**：
 
-**特别注意：**
-- 必须分析数据中出现的每一个学生
-- 不能遗漏任何有发言记录的学生
-- 为每个学生提供具体的、个性化的评价
+**格式要求：**
+- 每个学生必须用 div class="student-evaluation" 包装
+- 学生姓名用 h4 class="student-name" 作为标题
+- 评价内容用 div class="evaluation-content" 包装
+- 每个学生的评价要独立成段，包含学习积极性、表现特点、建议鼓励、关注问题
+- 使用清晰的段落分隔，每个方面用 p 标签包装
+
+**示例格式：**
+div class="student-evaluation"
+    h4 class="student-name"张三/h4
+    div class="evaluation-content"
+        p strong学习积极性：/strong张三同学本学期表现积极，课堂参与度高.../p
+        p strong表现特点：/strong在数学和物理方面表现突出，思维敏捷.../p
+        p strong建议鼓励：/strong建议继续保持这种学习热情，可以尝试挑战更有难度的题目.../p
+        p strong关注问题：/strong在某些基础概念上还需要加强练习.../p
+    /div
+/div
+
+**重要提醒：**
+- 必须分析数据中出现的每一个学生（共${studentPerformance.studentList.length}名学生）
+- 每个学生都要有完整的四个方面的评价
 - 根据学生的实际表现数据给出针对性建议
-- 在个别学生表现评价部分，必须包含以上列出的所有${studentPerformance.studentList.length}个学生的分析
-- 每个学生的分析应该独立成段，包含学生姓名、表现评价和建议
+- **特别注意以下情况：**
+  - 对于有"无积分记录"的学生，说明他们被点名了但可能回答错误，老师给予了安慰评语，需要特别关注其学习状态
+  - 对于只有错误回答的学生，需要分析原因并给予鼓励
+  - 对于混合表现的学生，要分析其学习波动原因
+  - 对于全部正确的学生，要给予肯定并鼓励继续保持
 
 ### 3. 教学建议
 - 针对班级整体的教学建议
 - 个别学生的关注重点
 - 改进措施和后续计划
+- **个性化关注**: 针对${inactiveStudents}名未活跃学生，建议进行个别沟通，了解具体原因。未活跃学生名单：${inactiveStudentNames.join('、')}
 
 ## 输出格式
 请以HTML格式输出报告，使用适当的标题、段落和样式，确保报告结构清晰、内容详实。
 
 ## 重要提醒
 请确保在"个别学生表现评价"部分中，为数据中的每一个学生都提供详细的分析和评价，不要遗漏任何学生。
+在"教学建议"部分的"个性化关注"中，必须具体列出所有未活跃学生的姓名。
         `;
         
         return prompt;
@@ -863,7 +1455,13 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
                     subjects: new Set(),
                     dates: new Set(),
                     totalPoints: 0,
-                    participationCount: 0
+                    participationCount: 0,
+                    correctAnswers: 0,      // 正确回答次数
+                    incorrectAnswers: 0,    // 错误回答次数
+                    noScoreRecords: 0,      // 无积分记录次数（可能是安慰评语）
+                    hasCorrectAnswer: false, // 是否有正确回答
+                    hasIncorrectAnswer: false, // 是否有错误回答
+                    hasNoScoreRecord: false   // 是否有无积分记录
                 };
             }
             
@@ -878,7 +1476,21 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
             // 统计信息
             if (record.subject) studentData[studentName].subjects.add(record.subject);
             if (record.date) studentData[studentName].dates.add(record.date);
-            if (record.points) studentData[studentName].totalPoints += record.points;
+            
+            // 分析回答情况
+            if (record.points && record.points > 0) {
+                studentData[studentName].totalPoints += record.points;
+                studentData[studentName].correctAnswers++;
+                studentData[studentName].hasCorrectAnswer = true;
+            } else if (record.points === 0) {
+                studentData[studentName].incorrectAnswers++;
+                studentData[studentName].hasIncorrectAnswer = true;
+            } else {
+                // 没有积分记录，可能是安慰评语或其他情况
+                studentData[studentName].noScoreRecords++;
+                studentData[studentName].hasNoScoreRecord = true;
+            }
+            
             studentData[studentName].participationCount++;
         });
         
@@ -906,9 +1518,17 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
             // 添加学生列表，确保AI知道需要分析哪些学生
             studentList: Object.keys(studentData).map(name => ({
                 name: name,
+                studentId: studentData[name].studentId,
                 participationCount: studentData[name].participationCount,
                 subjects: studentData[name].subjects,
-                totalPoints: studentData[name].totalPoints
+                totalPoints: studentData[name].totalPoints,
+                correctAnswers: studentData[name].correctAnswers,
+                incorrectAnswers: studentData[name].incorrectAnswers,
+                noScoreRecords: studentData[name].noScoreRecords,
+                hasCorrectAnswer: studentData[name].hasCorrectAnswer,
+                hasIncorrectAnswer: studentData[name].hasIncorrectAnswer,
+                hasNoScoreRecord: studentData[name].hasNoScoreRecord,
+                records: studentData[name].records  // 添加记录数据用于时间分析
             }))
         };
     }
@@ -917,7 +1537,7 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
      * 生成数据摘要
      */
     generateDataSummary(integratedData) {
-        const { integratedRecords, unmatchedRecords, totalRecords, matchedRecords, matchRate } = integratedData;
+        const { integratedRecords, unmatchedRecords, totalRecords, matchedRecords, matchRate, totalClassSize } = integratedData;
         
         // 统计学生信息
         const students = new Set();
@@ -933,11 +1553,13 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
         });
         
         return {
-            totalRecords: totalRecords,
-            matchedRecords: matchedRecords,
+            totalRecords: totalRecords,           // 课堂活动记录数
+            matchedRecords: matchedRecords,       // 成功匹配的活动记录数
             unmatchedRecords: unmatchedRecords.length,
             matchRate: matchRate,
-            activeStudents: students.size,
+            totalClassSize: totalClassSize,       // 班级总人数
+            activeStudents: students.size,        // 参与活动的学生数
+            inactiveStudents: totalClassSize - students.size, // 未参与活动的学生数
             subjects: Array.from(subjects),
             dates: Array.from(dates),
             totalPoints: totalPoints,
@@ -972,19 +1594,27 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                     <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #4299e1;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.totalRecords}</div>
-                        <div style="color: #718096;">总记录数</div>
+                        <div style="color: #718096;">课堂活动记录数</div>
                     </div>
                     <div style="background: #f0fff4; padding: 1rem; border-radius: 8px; border-left: 4px solid #48bb78;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.matchedRecords}</div>
-                        <div style="color: #718096;">成功匹配</div>
+                        <div style="color: #718096;">成功匹配记录</div>
                     </div>
                     <div style="background: #fff5f5; padding: 1rem; border-radius: 8px; border-left: 4px solid #f56565;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.unmatchedRecords}</div>
                         <div style="color: #718096;">未匹配记录</div>
                     </div>
                     <div style="background: #faf5ff; padding: 1rem; border-radius: 8px; border-left: 4px solid #9f7aea;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.totalClassSize}</div>
+                        <div style="color: #718096;">班级总人数</div>
+                    </div>
+                    <div style="background: #e6fffa; padding: 1rem; border-radius: 8px; border-left: 4px solid #38b2ac;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.activeStudents}</div>
-                        <div style="color: #718096;">活跃学生</div>
+                        <div style="color: #718096;">参与活动学生</div>
+                    </div>
+                    <div style="background: #fef5e7; padding: 1rem; border-radius: 8px; border-left: 4px solid #ed8936;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.inactiveStudents}</div>
+                        <div style="color: #718096;">未参与学生</div>
                     </div>
                 </div>
             </div>
@@ -1007,9 +1637,9 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
                         align-items: center;
                         gap: 0.5rem;
                         transition: all 0.3s ease;
-                    " onmouseover="this.style.transform='translateY(-2px)' onmouseout="this.style.transform='translateY(0)'">
+                    " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                         <i class="fas fa-download"></i>
-                        导出Word报告
+                        导出PDF报告
                     </button>
                 </div>
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
@@ -1027,7 +1657,7 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
     }
 
     /**
-     * 导出AI报告为Word文档
+     * 导出AI报告为PDF文档
      */
     exportAIReport() {
         try {
@@ -1038,50 +1668,17 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
                 return;
             }
 
-            // 直接获取完整的HTML内容，确保包含所有AI输出
-            const reportContent = reportOutput.innerHTML;
+            console.log('🔍 开始导出PDF报告...');
             
-            console.log('🔍 导出前内容检查:', {
-                contentLength: reportContent.length,
-                hasAIContent: reportContent.includes('AI智能分析报告'),
-                hasDataSection: reportContent.includes('数据处理结果'),
-                hasAISection: reportContent.includes('AI智能分析报告'),
-                contentPreview: reportContent.substring(0, 500) + '...'
-            });
-            
-            // 构建完整的HTML内容
-            const htmlContent = this.buildExportHTML(reportContent);
-            
-            // 最终内容检查
-            console.log('🔍 最终导出内容检查:', {
-                htmlContentLength: htmlContent.length,
-                hasAIContent: htmlContent.includes('AI智能分析报告'),
-                hasDataSection: htmlContent.includes('数据处理结果'),
-                contentPreview: htmlContent.substring(0, 1000) + '...'
-            });
-            
-            // 检查是否有html-docx库
-            if (typeof htmlDocx !== 'undefined') {
-                try {
-                    const docx = htmlDocx.asBlob(htmlContent);
-                    const fileName = `AI学情分析报告_${new Date().toISOString().slice(0, 10)}.docx`;
-                    
-                    // 使用FileSaver保存文件
-                    if (typeof saveAs !== 'undefined') {
-                        saveAs(docx, fileName);
-                        this.showNotification('Word报告导出成功！', 'success');
-                    } else {
-                        // 降级到下载链接
-                        this.downloadFile(docx, fileName);
-                    }
-                } catch (error) {
-                    console.error('导出Word失败:', error);
-                    // 降级到HTML格式
-                    this.exportAsHTML(htmlContent);
-                }
+            // 检查PDF库是否可用
+            if (typeof window.jspdf !== 'undefined' || typeof jsPDF !== 'undefined') {
+                this.exportAsPDF(reportOutput);
+            } else if (typeof html2canvas !== 'undefined') {
+                this.exportAsPDFWithCanvas(reportOutput);
             } else {
-                // 降级到HTML格式
-                this.exportAsHTML(htmlContent);
+                console.warn('⚠️ PDF库未加载，降级到HTML格式');
+                this.showNotification('PDF库未加载，将导出为HTML格式', 'warning');
+                this.exportAsHTML(this.getCompleteReportContent(reportOutput));
             }
         } catch (error) {
             console.error('导出报告失败:', error);
@@ -1138,8 +1735,15 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
             contentLength: fullContent.length,
             hasAIContent: fullContent.includes('AI智能分析报告'),
             hasDataSection: fullContent.includes('数据处理结果'),
-            hasAISection: fullContent.includes('AI智能分析报告')
+            hasAISection: fullContent.includes('AI智能分析报告'),
+            hasAIAnalysis: fullContent.includes('AI智能分析报告'),
+            contentPreview: fullContent.substring(0, 1000) + '...'
         });
+        
+        // 检查内容是否完整
+        if (fullContent.length < 1000) {
+            console.warn('⚠️ 报告内容可能不完整，长度:', fullContent.length);
+        }
         
         return additionalStyles + fullContent;
     }
@@ -1152,7 +1756,8 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
         
         console.log('🔍 构建导出HTML:', {
             reportHTML: reportHTML.substring(0, 200) + '...',
-            hasAIContent: reportHTML.includes('AI智能分析报告')
+            hasAIContent: reportHTML.includes('AI智能分析报告'),
+            contentLength: reportHTML.length
         });
         
         return `
@@ -1167,6 +1772,7 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
                     line-height: 1.6;
                     margin: 40px;
                     color: #333;
+                    background: white;
                 }
                 .report-header {
                     text-align: center;
@@ -1273,6 +1879,21 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
                 .ai-report-content strong {
                     color: #2d3748 !important;
                 }
+                /* 确保表格样式正确 */
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin-bottom: 15px;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    text-align: left;
+                }
+                th {
+                    background-color: #f2f2f2;
+                    font-weight: bold;
+                }
             </style>
         </head>
         <body>
@@ -1292,6 +1913,115 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
     }
 
     /**
+     * 使用jsPDF导出PDF
+     */
+    async exportAsPDF(reportOutput) {
+        try {
+            console.log('🔧 使用jsPDF生成PDF...');
+            
+            // 获取jsPDF实例
+            const { jsPDF } = window.jspdf || window;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // 设置中文字体支持
+            pdf.setFont('helvetica');
+            
+            // 获取报告文本内容
+            const textContent = reportOutput.innerText || reportOutput.textContent;
+            const lines = pdf.splitTextToSize(textContent, 180); // A4纸宽度约180mm
+            
+            // 添加标题
+            pdf.setFontSize(16);
+            pdf.text('AI学情分析报告', 105, 20, { align: 'center' });
+            
+            // 添加生成时间
+            pdf.setFontSize(10);
+            pdf.text(`生成时间: ${new Date().toLocaleString('zh-CN')}`, 105, 30, { align: 'center' });
+            
+            // 添加内容
+            pdf.setFontSize(12);
+            let yPosition = 50;
+            const pageHeight = 280; // A4纸高度约280mm
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (yPosition > pageHeight) {
+                    pdf.addPage();
+                    yPosition = 20;
+                }
+                pdf.text(lines[i], 15, yPosition);
+                yPosition += 6;
+            }
+            
+            // 保存PDF
+            const fileName = `AI学情分析报告_${new Date().toISOString().slice(0, 10)}.pdf`;
+            pdf.save(fileName);
+            
+            this.showNotification('PDF报告导出成功！', 'success');
+            console.log('✅ PDF文档生成成功:', fileName);
+            
+        } catch (error) {
+            console.error('❌ jsPDF导出失败:', error);
+            this.showNotification(`PDF导出失败: ${error.message}，将导出为HTML格式`, 'warning');
+            this.exportAsHTML(this.getCompleteReportContent(reportOutput));
+        }
+    }
+
+    /**
+     * 使用html2canvas + jsPDF导出PDF
+     */
+    async exportAsPDFWithCanvas(reportOutput) {
+        try {
+            console.log('🔧 使用html2canvas + jsPDF生成PDF...');
+            
+            // 使用html2canvas将HTML转换为图片
+            const canvas = await html2canvas(reportOutput, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            
+            // 获取jsPDF实例
+            const { jsPDF } = window.jspdf || window;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            
+            // 计算图片尺寸
+            const imgWidth = 210; // A4纸宽度
+            const pageHeight = 295; // A4纸高度
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            
+            let position = 0;
+            
+            // 添加图片到PDF
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            
+            // 如果内容超过一页，添加新页面
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+            
+            // 保存PDF
+            const fileName = `AI学情分析报告_${new Date().toISOString().slice(0, 10)}.pdf`;
+            pdf.save(fileName);
+            
+            this.showNotification('PDF报告导出成功！', 'success');
+            console.log('✅ PDF文档生成成功:', fileName);
+            
+        } catch (error) {
+            console.error('❌ html2canvas + jsPDF导出失败:', error);
+            this.showNotification(`PDF导出失败: ${error.message}，将导出为HTML格式`, 'warning');
+            this.exportAsHTML(this.getCompleteReportContent(reportOutput));
+        }
+    }
+
+    /**
      * 导出为HTML格式
      */
     exportAsHTML(htmlContent) {
@@ -1303,6 +2033,47 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
             this.showNotification('HTML报告导出成功！', 'success');
         } else {
             this.downloadFile(blob, fileName);
+        }
+    }
+
+    /**
+     * 备用Word导出方法 - 使用更简单的方式
+     */
+    exportAsWordSimple() {
+        try {
+            const reportOutput = document.getElementById('ai-report-output');
+            if (!reportOutput) {
+                this.showNotification('未找到报告内容', 'error');
+                return;
+            }
+
+            // 获取纯文本内容
+            const textContent = reportOutput.innerText || reportOutput.textContent;
+            
+            // 创建简单的Word文档内容
+            const wordContent = `
+AI学情分析报告
+生成时间: ${new Date().toLocaleString('zh-CN')}
+
+${textContent}
+
+---
+本报告由AI智能分析生成，基于真实课堂数据
+            `;
+            
+            // 创建Blob并下载
+            const blob = new Blob([wordContent], { type: 'text/plain;charset=utf-8' });
+            const fileName = `AI学情分析报告_${new Date().toISOString().slice(0, 10)}.txt`;
+            
+            if (typeof saveAs !== 'undefined') {
+                saveAs(blob, fileName);
+                this.showNotification('文本报告导出成功！', 'success');
+            } else {
+                this.downloadFile(blob, fileName);
+            }
+        } catch (error) {
+            console.error('简单导出失败:', error);
+            this.showNotification('导出失败，请重试', 'error');
         }
     }
 
@@ -1347,19 +2118,27 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                     <div style="background: #f7fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #4299e1;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.totalRecords}</div>
-                        <div style="color: #718096;">总记录数</div>
+                        <div style="color: #718096;">课堂活动记录数</div>
                     </div>
                     <div style="background: #f0fff4; padding: 1rem; border-radius: 8px; border-left: 4px solid #48bb78;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.matchedRecords}</div>
-                        <div style="color: #718096;">成功匹配</div>
+                        <div style="color: #718096;">成功匹配记录</div>
                     </div>
                     <div style="background: #fff5f5; padding: 1rem; border-radius: 8px; border-left: 4px solid #f56565;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.unmatchedRecords}</div>
                         <div style="color: #718096;">未匹配记录</div>
                     </div>
                     <div style="background: #faf5ff; padding: 1rem; border-radius: 8px; border-left: 4px solid #9f7aea;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.totalClassSize}</div>
+                        <div style="color: #718096;">班级总人数</div>
+                    </div>
+                    <div style="background: #e6fffa; padding: 1rem; border-radius: 8px; border-left: 4px solid #38b2ac;">
                         <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.activeStudents}</div>
-                        <div style="color: #718096;">活跃学生</div>
+                        <div style="color: #718096;">参与活动学生</div>
+                    </div>
+                    <div style="background: #fef5e7; padding: 1rem; border-radius: 8px; border-left: 4px solid #ed8936;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #2d3748;">${summary.inactiveStudents}</div>
+                        <div style="color: #718096;">未参与学生</div>
                     </div>
                 </div>
             </div>
@@ -1530,6 +2309,9 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
             </div>
         `;
         
+        // 添加学生评价导航
+        this.addStudentEvaluationNavigation();
+        
         // 添加淡入动画
         output.style.opacity = '0';
         output.style.transform = 'translateY(20px)';
@@ -1539,6 +2321,54 @@ ${studentPerformance.studentList.map(student => `- ${student.name} (参与${stud
             output.style.opacity = '1';
             output.style.transform = 'translateY(0)';
         }, 100);
+    }
+
+    /**
+     * 添加学生评价导航
+     */
+    addStudentEvaluationNavigation() {
+        const reportContent = document.querySelector('.ai-report-content');
+        if (!reportContent) return;
+
+        // 查找所有学生评价
+        const studentEvaluations = reportContent.querySelectorAll('.student-evaluation');
+        if (studentEvaluations.length === 0) return;
+
+        // 创建导航
+        const nav = document.createElement('div');
+        nav.className = 'student-evaluation-nav';
+        nav.innerHTML = `
+            <h5>学生评价导航</h5>
+            <div class="student-evaluation-links">
+                ${Array.from(studentEvaluations).map((evaluation, index) => {
+                    const studentName = evaluation.querySelector('.student-name')?.textContent || `学生${index + 1}`;
+                    const studentId = `student-${index + 1}`;
+                    evaluation.id = studentId;
+                    return `<a href="#${studentId}" class="student-evaluation-link">${studentName}</a>`;
+                }).join('')}
+            </div>
+        `;
+
+        // 将导航插入到第一个学生评价之前
+        const firstStudentEvaluation = studentEvaluations[0];
+        if (firstStudentEvaluation) {
+            firstStudentEvaluation.parentNode.insertBefore(nav, firstStudentEvaluation);
+        }
+
+        // 添加平滑滚动
+        nav.addEventListener('click', (e) => {
+            if (e.target.classList.contains('student-evaluation-link')) {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
     }
 
     /**
@@ -1605,6 +2435,15 @@ window.aiAnalysisManager = new AIAnalysisManager();
 window.exportAIReport = function() {
     if (window.aiAnalysisManager) {
         window.aiAnalysisManager.exportAIReport();
+    } else {
+        console.error('AI分析管理器未初始化');
+    }
+};
+
+// 全局简单导出函数
+window.exportAISimple = function() {
+    if (window.aiAnalysisManager) {
+        window.aiAnalysisManager.exportAsWordSimple();
     } else {
         console.error('AI分析管理器未初始化');
     }

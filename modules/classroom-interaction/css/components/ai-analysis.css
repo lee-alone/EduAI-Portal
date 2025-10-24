@@ -131,8 +131,8 @@
     border: 1px solid rgba(255, 255, 255, 0.4);
     position: relative;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: slideInUp 1.2s ease-out 0.3s both;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideInUp 0.5s ease-out 0.1s both;
 }
 
 .ai-analysis-card::before {
@@ -175,9 +175,9 @@
 }
 
 .ai-analysis-card:hover {
-    transform: translateY(-12px) scale(1.02);
+    transform: translateY(-8px) scale(1.01);
     box-shadow: 
-        0 40px 80px rgba(0, 0, 0, 0.18),
+        0 30px 60px rgba(0, 0, 0, 0.15),
         0 0 0 1px rgba(255, 255, 255, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
@@ -185,7 +185,7 @@
 /* 文件上传区域 */
 .ai-upload-section {
     margin-bottom: 2.5rem;
-    animation: fadeInUp 1s ease-out 0.6s both;
+    animation: fadeInUp 0.5s ease-out 0.2s both;
 }
 
 .ai-upload-title {
@@ -218,7 +218,43 @@
 .ai-file-upload {
     position: relative;
     margin-bottom: 2rem;
-    animation: fadeInUp 1s ease-out 0.8s both;
+    animation: fadeInUp 0.5s ease-out 0.3s both;
+}
+
+/* 水平并列的文件上传网格布局 */
+.ai-upload-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.5s ease-out 0.3s both;
+}
+
+/* 紧凑型文件上传组件 */
+.ai-file-upload-compact {
+    margin-bottom: 0;
+}
+
+.ai-file-upload-compact .ai-file-upload-label {
+    padding: 1.5rem 1.5rem;
+    min-height: 100px;
+    border-radius: 16px;
+}
+
+.ai-file-upload-compact .ai-file-upload-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.ai-file-upload-compact .ai-file-upload-text {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.ai-file-upload-compact .ai-file-upload-hint {
+    font-size: 0.85rem;
+    color: #718096;
 }
 
 .ai-file-upload input[type="file"] {
@@ -239,51 +275,23 @@
     border-radius: 20px;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     min-height: 120px;
 }
 
-.ai-file-upload-label::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.15), transparent);
-    transition: left 0.6s ease;
-}
+/* 移除背景滑动效果 */
 
-.ai-file-upload-label::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 0;
-    height: 0;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    transition: all 0.4s ease;
-}
+/* 移除背景扩散效果 */
 
 .ai-file-upload-label:hover {
     border-color: #667eea;
-    background: linear-gradient(135deg, #ebf8ff 0%, #e6fffa 100%);
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
 }
 
-.ai-file-upload-label:hover::before {
-    left: 100%;
-}
-
-.ai-file-upload-label:hover::after {
-    width: 200px;
-    height: 200px;
-}
+/* 移除悬停时的背景效果 */
 
 .ai-file-upload-content {
     display: flex;
@@ -292,7 +300,7 @@
     gap: 1rem;
     position: relative;
     z-index: 3;
-    transition: all 0.3s ease;
+    transition: all 0.5s ease;
 }
 
 .ai-file-upload-icon {
@@ -361,7 +369,7 @@
 /* AI高级设置折叠区域 */
 .ai-advanced-settings {
     margin-bottom: 2.5rem;
-    animation: fadeInUp 1s ease-out 1s both;
+    animation: fadeInUp 0.5s ease-out 0.4s both;
     background: rgba(255, 255, 255, 0.6);
     border-radius: 16px;
     padding: 1.5rem;
@@ -374,7 +382,7 @@
     border-radius: 12px;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     border: 1px solid rgba(102, 126, 234, 0.1);
-    transition: all 0.3s ease;
+    transition: all 0.5s ease;
 }
 
 .ai-advanced-settings #ai-advanced-settings-toggle-header:hover {
@@ -401,7 +409,7 @@
 .ai-advanced-settings #ai-advanced-settings-chevron {
     color: #667eea;
     font-size: 1.2rem;
-    transition: transform 0.3s ease;
+    transition: transform 0.5s ease;
 }
 
 /* AI高级设置内容区域 */
@@ -412,7 +420,7 @@
     margin-top: 1rem;
     border: 1px solid rgba(102, 126, 234, 0.1);
     backdrop-filter: blur(5px);
-    animation: slideDown 0.3s ease-out;
+    animation: slideDown 0.5s ease-out;
 }
 
 @keyframes slideDown {
@@ -453,7 +461,7 @@
     border: 2px solid #e2e8f0;
     border-radius: 16px;
     font-size: 1.1rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     cursor: pointer;
@@ -506,7 +514,7 @@
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     font-size: 1rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
@@ -556,7 +564,7 @@
     opacity: 0;
     max-height: 0;
     overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ai-model-custom.show {
@@ -637,7 +645,7 @@
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     font-size: 1rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     font-family: 'Courier New', monospace;
@@ -683,7 +691,7 @@
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     font-size: 1rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     cursor: pointer;
@@ -711,7 +719,7 @@
 /* 自定义端点输入区域 */
 .ai-endpoint-custom {
     margin-top: 1rem;
-    transition: all 0.3s ease;
+    transition: all 0.5s ease;
     opacity: 0;
     max-height: 0;
     overflow: hidden;
@@ -745,7 +753,7 @@
     border: 2px solid #e2e8f0;
     border-radius: 10px;
     font-size: 0.95rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     font-family: 'Courier New', monospace;
@@ -818,7 +826,7 @@
     font-size: 1.1rem;
     line-height: 1.7;
     resize: vertical;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     background: white;
     font-family: inherit;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
@@ -857,11 +865,11 @@
     font-size: 1.2rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-    animation: fadeInUp 1s ease-out 1.4s both;
+    animation: fadeInUp 0.5s ease-out 0.5s both;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -891,8 +899,8 @@
 }
 
 .ai-generate-btn:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 50px rgba(102, 126, 234, 0.5);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
     background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
 }
 
@@ -906,7 +914,7 @@
 }
 
 .ai-generate-btn:active {
-    transform: translateY(-2px) scale(1.01);
+    transform: translateY(-1px) scale(1.005);
 }
 
 .ai-generate-btn:disabled {
@@ -927,7 +935,7 @@
     min-height: 250px;
     position: relative;
     overflow: hidden;
-    animation: fadeInUp 1s ease-out 1.6s both;
+    animation: fadeInUp 0.5s ease-out 0.6s both;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
@@ -1015,6 +1023,29 @@
         border-radius: 24px;
     }
     
+    /* 移动端文件上传网格布局调整为垂直 */
+    .ai-upload-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .ai-file-upload-compact .ai-file-upload-label {
+        padding: 1.25rem 1.5rem;
+        min-height: 90px;
+    }
+    
+    .ai-file-upload-compact .ai-file-upload-icon {
+        font-size: 2rem;
+    }
+    
+    .ai-file-upload-compact .ai-file-upload-text {
+        font-size: 0.95rem;
+    }
+    
+    .ai-file-upload-compact .ai-file-upload-hint {
+        font-size: 0.8rem;
+    }
+    
     .ai-file-upload-label {
         padding: 1.5rem 2rem;
         min-height: 100px;
@@ -1057,6 +1088,29 @@
     .ai-analysis-card {
         padding: 1.5rem;
         border-radius: 20px;
+    }
+    
+    /* 小屏幕文件上传布局优化 */
+    .ai-upload-grid {
+        gap: 0.75rem;
+    }
+    
+    .ai-file-upload-compact .ai-file-upload-label {
+        padding: 1rem 1.25rem;
+        min-height: 80px;
+        border-radius: 12px;
+    }
+    
+    .ai-file-upload-compact .ai-file-upload-icon {
+        font-size: 1.8rem;
+    }
+    
+    .ai-file-upload-compact .ai-file-upload-text {
+        font-size: 0.9rem;
+    }
+    
+    .ai-file-upload-compact .ai-file-upload-hint {
+        font-size: 0.75rem;
     }
     
     .ai-file-upload-label {
@@ -1192,6 +1246,190 @@
 
 .ai-report-section li {
     margin-bottom: 0.5rem;
+}
+
+/* 学生评价样式 */
+.student-evaluation {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.student-evaluation::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 0 2px 2px 0;
+}
+
+.student-evaluation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+}
+
+.student-name {
+    color: #2d3748;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.student-name::before {
+    content: '👤';
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.evaluation-content {
+    padding-left: 1rem;
+}
+
+.evaluation-content p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+    color: #4a5568;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border-left: 3px solid #cbd5e0;
+    transition: all 0.3s ease;
+}
+
+.evaluation-content p:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-left-color: #667eea;
+    transform: translateX(2px);
+}
+
+.evaluation-content p strong {
+    color: #2d3748;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 80px;
+    margin-right: 0.5rem;
+}
+
+/* 不同评价类型的颜色区分 */
+.evaluation-content p:nth-child(1) {
+    border-left-color: #48bb78; /* 学习积极性 - 绿色 */
+}
+
+.evaluation-content p:nth-child(2) {
+    border-left-color: #4299e1; /* 表现特点 - 蓝色 */
+}
+
+.evaluation-content p:nth-child(3) {
+    border-left-color: #ed8936; /* 建议鼓励 - 橙色 */
+}
+
+.evaluation-content p:nth-child(4) {
+    border-left-color: #f56565; /* 关注问题 - 红色 */
+}
+
+/* 学生评价导航 */
+.student-evaluation-nav {
+    position: sticky;
+    top: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.student-evaluation-nav h5 {
+    color: #2d3748;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.student-evaluation-nav h5::before {
+    content: '📋';
+    font-size: 1.1rem;
+}
+
+.student-evaluation-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.student-evaluation-link {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    color: #4a5568;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.student-evaluation-link:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .student-evaluation {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .student-name {
+        font-size: 1.1rem;
+    }
+    
+    .evaluation-content {
+        padding-left: 0.5rem;
+    }
+    
+    .evaluation-content p {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+    }
+    
+    .student-evaluation-links {
+        gap: 0.25rem;
+    }
+    
+    .student-evaluation-link {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
 }
 
 /* 文件上传状态指示器 */
