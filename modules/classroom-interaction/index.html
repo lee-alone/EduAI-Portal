@@ -12,6 +12,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- XLSX for Excel export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- FileSaver for file downloads -->
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <!-- html-docx for Word export -->
+    <script src="https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.js"></script>
 </head>
 <body>
     <nav class="header-nav">
@@ -538,7 +542,8 @@
                                 <div class="ai-endpoint-group">
                                     <label for="ai-endpoint-select" class="ai-endpoint-label">API端点:</label>
                                     <select id="ai-endpoint-select" class="ai-endpoint-select">
-                                        <option value="https://api.deepseek.com/v1/chat/completions" selected>DeepSeek API</option>
+                                        <option value="auto" selected>自动匹配模型</option>
+                                        <option value="https://api.deepseek.com/v1/chat/completions">DeepSeek API</option>
                                         <option value="https://open.bigmodel.cn/api/paas/v4/chat/completions">智谱AI API</option>
                                         <option value="https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation">通义千问 API</option>
                                         <option value="custom">自定义端点</option>
