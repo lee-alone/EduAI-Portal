@@ -192,25 +192,30 @@
                             <!-- 第二步：加分类型 -->
                             <div class="card-section" id="scoring-type-section">
                                 <h4 class="font-medium mb-2 text-gray-700">第二步：选择加分类型</h4>
-                                <div class="grid grid-cols-2 gap-3 mb-3">
-                                    <button id="individual-scoring-btn" class="btn btn-success w-full">
-                                        <i class="fas fa-user mr-2"></i>个人加分
-                                    </button>
-                                    <button id="group-scoring-btn" class="btn btn-warning w-full">
-                                        <i class="fas fa-users mr-2"></i>集体加分
-                                    </button>
-                                </div>
-                                <div class="bg-blue-50 border-l-4 border-blue-400 p-3">
-                                    <div class="flex items-start">
-                                        <div class="flex-shrink-0 pt-0.5">
-                                            <i class="fas fa-info-circle text-blue-500 text-sm"></i>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm text-blue-700 leading-relaxed">
-                                                <strong>提示：</strong>选择学生后，可以选择个人加分（为每个学生单独评分）或集体加分（为所有学生添加相同分数）。
-                                            </p>
-                                        </div>
+                                <div class="form-group">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">加分类型:</label>
+                                    <div class="flex gap-2 mb-3">
+                                        <button id="individual-scoring-btn" class="btn btn-success btn-sm flex-1">
+                                            <i class="fas fa-user mr-1"></i>个人加分
+                                        </button>
+                                        <button id="group-scoring-btn" class="btn btn-warning btn-sm flex-1">
+                                            <i class="fas fa-users mr-1"></i>集体加分
+                                        </button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 操作提示 -->
+                        <div class="flex justify-center mt-4">
+                            <div class="bg-blue-50 border-l-4 border-blue-400 p-3 w-full max-w-4xl">
+                                <div class="flex items-center justify-center">
+                                    <div class="flex-shrink-0 mr-2">
+                                        <i class="fas fa-info-circle text-blue-500 text-sm"></i>
+                                    </div>
+                                    <p class="text-sm text-blue-700 text-center">
+                                        <strong>操作提示：</strong>个人加分针对个人学习行为，集体加分针对集体活动行为，均支持批量操作。
+                                    </p>
                                 </div>
                             </div>
                         </div>

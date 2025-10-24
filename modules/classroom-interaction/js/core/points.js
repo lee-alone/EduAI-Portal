@@ -198,7 +198,8 @@ class PointsManager {
 
         // 更新统计信息
         if (statsContainer) {
-            const totalStudents = allStudents.length;
+            // 获取真实的班级总人数
+            const totalStudents = window.classroomManager?.classSize || window.studentManager?.students?.size || allStudents.length;
             const studentsWithPoints = allStudents.filter(s => s.points > 0).length;
             const totalPoints = allStudents.reduce((sum, s) => sum + s.points, 0);
             const averagePoints = studentsWithPoints > 0 ? (totalPoints / studentsWithPoints).toFixed(1) : 0;
@@ -496,7 +497,8 @@ class PointsManager {
      */
     calculateStatistics(students) {
         const studentsWithPoints = students.filter(s => s.points > 0);
-        const totalStudents = students.length;
+        // 获取真实的班级总人数
+        const totalStudents = window.classroomManager?.classSize || window.studentManager?.students?.size || students.length;
         const totalPoints = students.reduce((sum, s) => sum + s.points, 0);
         const averagePoints = studentsWithPoints.length > 0 ? (totalPoints / studentsWithPoints.length).toFixed(1) : 0;
         const maxPoints = Math.max(...students.map(s => s.points));
