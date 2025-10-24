@@ -338,7 +338,7 @@ class ClassroomManager {
      */
     saveState() {
         const state = {
-            currentSubject: this.currentSubject,
+            // 不保存学科信息，每次刷新后清空
             classSize: this.classSize,
             timestamp: Date.now()
         };
@@ -353,25 +353,36 @@ class ClassroomManager {
             const savedState = localStorage.getItem('classroomState');
             if (savedState) {
                 const state = JSON.parse(savedState);
-                this.currentSubject = state.currentSubject || '';
+                // 不恢复学科信息，每次刷新后从空白开始
+                this.currentSubject = '';
                 this.classSize = state.classSize || 55;
                 
-                
-                // 恢复UI状态
-                const subjectSelect = document.getElementById('subject-select');
-                const subjectInput = document.getElementById('subject-input');
+                // 只恢复班级大小，不恢复学科选择
                 const classSizeInput = document.getElementById('class-size-input');
-                
-                if (subjectSelect && this.currentSubject) {
-                    subjectSelect.value = this.currentSubject;
-                }
-                if (subjectInput && this.currentSubject) {
-                    subjectInput.value = this.currentSubject;
-                }
                 if (classSizeInput) {
                     classSizeInput.value = this.classSize;
                 }
+                
+                // 清空学科选择
+                const subjectSelect = document.getElementById('subject-select');
+                const subjectInput = document.getElementById('subject-input');
+                if (subjectSelect) {
+                    subjectSelect.value = '';
+                }
+                if (subjectInput) {
+                    subjectInput.value = '';
+                }
             } else {
+                // 如果没有保存的状态，确保学科为空
+                this.currentSubject = '';
+                const subjectSelect = document.getElementById('subject-select');
+                const subjectInput = document.getElementById('subject-input');
+                if (subjectSelect) {
+                    subjectSelect.value = '';
+                }
+                if (subjectInput) {
+                    subjectInput.value = '';
+                }
             }
         } catch (error) {
             // 加载课堂状态失败

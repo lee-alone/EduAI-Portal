@@ -278,6 +278,246 @@ body {
     flex: none !important;
 }
 
+/* 布局切换相关样式 */
+.layout-controls {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: var(--border-radius-lg);
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-gray-200);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 全屏模式样式 */
+.fullscreen-mode .main-content {
+    max-width: 100% !important;
+    margin: 1rem 0 !important;
+    padding: 0 1rem !important;
+}
+
+.fullscreen-mode #module-container {
+    gap: 1rem;
+}
+
+.fullscreen-mode .module-section {
+    min-height: 80vh;
+}
+
+/* 全屏模式按钮状态 */
+#fullscreen-toggle-btn.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.layout-indicator {
+    font-weight: 500;
+    color: var(--color-gray-700);
+}
+
+.layout-indicator i {
+    color: var(--color-primary);
+}
+
+/* 通知样式 */
+.notification {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    animation: slideDown 0.3s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.notification::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.notification.hidden {
+    display: none;
+}
+
+/* 模块容器动画 */
+#module-container {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    grid-template-columns: 1fr 1fr 1fr; /* 默认4:3布局 */
+}
+
+/* 布局模式样式 */
+#module-container.layout-mode-4-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+#module-container.layout-mode-16-9 {
+    grid-template-columns: 1fr 2fr 1fr;
+}
+
+#module-container.layout-mode-mobile {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+#module-container.layout-mode-ultrawide {
+    grid-template-columns: 1fr 3fr 1fr;
+}
+
+/* 大屏幕布局优化 */
+@media (min-width: 1600px) {
+    #module-container.layout-mode-4-3 {
+        grid-template-columns: 1.2fr 1fr 1.2fr; /* 稍微突出两侧 */
+    }
+    
+    #module-container.layout-mode-16-9 {
+        grid-template-columns: 1fr 2.5fr 1fr; /* 进一步突出中间 */
+    }
+}
+
+/* 超大屏幕布局优化 */
+@media (min-width: 1920px) {
+    #module-container.layout-mode-4-3 {
+        grid-template-columns: 1.3fr 1fr 1.3fr;
+    }
+    
+    #module-container.layout-mode-16-9 {
+        grid-template-columns: 1fr 3fr 1fr; /* 中间模块更宽 */
+    }
+}
+
+/* 超宽屏布局优化 */
+@media (min-width: 2560px) {
+    #module-container.layout-mode-4-3 {
+        grid-template-columns: 1.5fr 1fr 1.5fr;
+    }
+    
+    #module-container.layout-mode-16-9 {
+        grid-template-columns: 1fr 4fr 1fr; /* 中间模块最宽 */
+    }
+}
+
+/* 模块切换动画 */
+.module-section {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+.module-section.switching {
+    animation: moduleSwitch 0.6s ease-in-out;
+}
+
+@keyframes moduleSwitch {
+    0% {
+        transform: scale(1) rotateY(0deg);
+    }
+    50% {
+        transform: scale(0.95) rotateY(5deg);
+    }
+    100% {
+        transform: scale(1) rotateY(0deg);
+    }
+}
+
+/* 响应式布局调整 */
+@media (max-width: 1024px) {
+    #module-container.layout-mode-16-9 {
+        grid-template-columns: 1fr 1.5fr 1fr;
+    }
+    
+    #module-container.layout-mode-ultrawide {
+        grid-template-columns: 1fr 2fr 1fr;
+        max-width: 100%;
+    }
+}
+
+/* 大屏幕模块优化 */
+@media (min-width: 1600px) {
+    .module-section {
+        padding: 2rem;
+    }
+    
+    .module-section h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* 超大屏幕模块优化 */
+@media (min-width: 1920px) {
+    .module-section {
+        padding: 2.5rem;
+    }
+    
+    .module-section h3 {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 2rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .layout-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+    
+    #module-container.layout-mode-4-3,
+    #module-container.layout-mode-16-9,
+    #module-container.layout-mode-ultrawide {
+        grid-template-columns: 1fr;
+    }
+    
+    .layout-indicator {
+        font-size: 0.875rem;
+    }
+    
+    .notification {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .layout-controls {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .layout-indicator {
+        font-size: 0.75rem;
+    }
+    
+    .btn.btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
 /* 响应式工具类 */
 @media (max-width: 640px) {
     .sm\:hidden {

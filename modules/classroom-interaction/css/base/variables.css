@@ -1,12 +1,12 @@
 :root {
-    /* 现代教育平台配色方案 */
-    --color-primary: #3B82F6; /* 蓝色 */
-    --color-primary-dark: #1D4ED8;
-    --color-secondary: #8B5CF6; /* 紫色 */
-    --color-accent: #F59E0B; /* 橙色 */
-    --color-success: #10B981; /* 绿色 */
-    --color-warning: #F59E0B; /* 警告色 */
-    --color-error: #EF4444; /* 错误色 */
+    /* 教育风格配色方案 - 温暖友好 */
+    --color-primary: #4F46E5; /* 教育蓝 - 更温暖的蓝色 */
+    --color-primary-dark: #3730A3;
+    --color-secondary: #7C3AED; /* 教育紫 - 温暖的紫色 */
+    --color-accent: #F59E0B; /* 活力橙 - 保持活力感 */
+    --color-success: #059669; /* 成功绿 - 更柔和的绿色 */
+    --color-warning: #D97706; /* 警告橙 - 温暖的橙色 */
+    --color-error: #DC2626; /* 错误红 - 柔和的红色 */
 
     --color-gray-50: #F9FAFB;
     --color-gray-100: #F3F4F6;
@@ -19,11 +19,12 @@
     --color-gray-800: #1F2937;
     --color-gray-900: #111827;
 
-    /* 文字颜色 */
-    --color-text-primary: #1E40AF; /* 温暖的深蓝色 */
-    --color-text-secondary: #6B7280;
+    /* 文字颜色 - 教育风格 */
+    --color-text-primary: #1E3A8A; /* 教育深蓝 - 更温暖的深蓝色 */
+    --color-text-secondary: #64748B; /* 柔和的灰色 */
     --color-text-white: #FFFFFF;
-    --color-text-warm: #7C3AED; /* 温暖的紫色 */
+    --color-text-warm: #6B21A8; /* 教育深紫 - 温暖的深紫色 */
+    --color-text-accent: #B45309; /* 教育橙 - 温暖的橙色 */
 
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);

@@ -13,8 +13,78 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+}
+
+/* 导航栏控制区域 */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* 布局控制区域 */
+.layout-controls-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-lg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 布局指示器 */
+.layout-indicator-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.layout-indicator-header i {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* 导航栏按钮样式 */
+.header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    backdrop-filter: blur(10px);
+}
+
+.header-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-btn.active {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-btn i {
+    font-size: 0.875rem;
+}
+
+.header-btn span {
+    white-space: nowrap;
 }
 
 .header-nav h1 {
@@ -41,4 +111,74 @@
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+    .header-nav .container {
+        max-width: 100%;
+        padding: 0 1rem;
+    }
+    
+    .layout-controls-header {
+        gap: 0.5rem;
+        padding: 0.4rem 0.75rem;
+    }
+    
+    .header-btn span {
+        display: none;
+    }
+    
+    .header-btn {
+        padding: 0.5rem;
+        min-width: 2.5rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-controls {
+        gap: 0.5rem;
+    }
+    
+    .layout-controls-header {
+        gap: 0.25rem;
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .layout-indicator-header {
+        font-size: 0.75rem;
+    }
+    
+    .layout-indicator-header span {
+        display: none;
+    }
+    
+    .header-btn {
+        padding: 0.4rem;
+        min-width: 2rem;
+    }
+    
+    .header-btn i {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-nav {
+        padding: 0.75rem 1rem;
+    }
+    
+    .header-nav h1 {
+        font-size: 1.25rem;
+    }
+    
+    .layout-controls-header {
+        padding: 0.25rem 0.4rem;
+    }
+    
+    .header-btn {
+        padding: 0.3rem;
+        min-width: 1.75rem;
+    }
 }

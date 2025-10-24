@@ -1,8 +1,33 @@
-/* 主要内容区域 */
+/* 主要内容区域 - 响应式宽度优化 */
 .main-content {
-    max-width: 1200px;
+    max-width: 1400px; /* 增加最大宽度 */
     margin: 2rem auto;
     padding: 0 1.5rem;
+    width: 100%;
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1600px) {
+    .main-content {
+        max-width: 1600px;
+        padding: 0 2rem;
+    }
+}
+
+/* 超大屏幕优化 */
+@media (min-width: 1920px) {
+    .main-content {
+        max-width: 1800px;
+        padding: 0 3rem;
+    }
+}
+
+/* 超宽屏优化 */
+@media (min-width: 2560px) {
+    .main-content {
+        max-width: 2400px;
+        padding: 0 4rem;
+    }
 }
 
 /* Tab 切换 */

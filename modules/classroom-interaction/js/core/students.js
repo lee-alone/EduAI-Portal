@@ -85,30 +85,14 @@ class StudentManager {
             const isCalled = this.calledStudents.has(studentId);
 
             const checkbox = document.createElement('div');
-            checkbox.className = 'flex items-center justify-center';
+            checkbox.className = `student-seat-item ${isSelected ? 'selected' : ''} ${isCalled ? 'called' : ''}`;
             checkbox.innerHTML = `
-                <label class="relative flex items-center justify-center cursor-pointer w-14 h-14 rounded-xl border-2 transition-all duration-300 shadow-sm hover:shadow-md ${
-                    isSelected 
-                        ? 'bg-gradient-to-br from-blue-500 to-blue-600 border-blue-500 text-white shadow-blue-200' 
-                        : 'bg-white border-gray-300 text-gray-700 hover:border-blue-400 hover:bg-blue-50 hover:scale-105'
-                }">
-                    <input type="checkbox" 
-                           class="student-checkbox sr-only" 
-                           data-student-id="${studentId}"
-                           ${isSelected ? 'checked' : ''}>
-                    ${isSelected ? `
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <i class="fas fa-check text-white text-xs"></i>
-                        </div>
-                        <span class="text-base font-bold opacity-0">
-                            ${studentId}
-                        </span>
-                    ` : `
-                        <span class="text-base font-bold">
-                            ${studentId}
-                        </span>
-                    `}
-                </label>
+                <input type="checkbox" 
+                       class="student-checkbox sr-only" 
+                       data-student-id="${studentId}"
+                       ${isSelected ? 'checked' : ''}
+                       ${isCalled ? 'disabled' : ''}>
+                <span class="seat-number">${studentId}</span>
             `;
 
             container.appendChild(checkbox);
@@ -124,31 +108,42 @@ class StudentManager {
     bindStudentSelectionEvents() {
         const checkboxes = document.querySelectorAll('.student-checkbox');
         checkboxes.forEach(checkbox => {
-            // 绑定到label点击事件
-            const label = checkbox.closest('label');
-            if (label) {
-                label.addEventListener('click', (e) => {
+            // 绑定到座位项点击事件
+            const seatItem = checkbox.closest('.student-seat-item');
+            if (seatItem) {
+                seatItem.addEventListener('click', (e) => {
                     e.preventDefault();
+                    
+                    // 如果已点名，不允许选择
+                    if (seatItem.classList.contains('called')) {
+                        return;
+                    }
                     
                     const studentId = checkbox.dataset.studentId;
                     if (checkbox.checked) {
                         this.selectedStudents.delete(studentId);
                         checkbox.checked = false;
+                        seatItem.classList.remove('selected');
                     } else {
                         this.selectedStudents.add(studentId);
                         checkbox.checked = true;
+                        seatItem.classList.add('selected');
                     }
                     this.updateSelectedStudentsFromCheckboxes();
                 });
             }
             
-            // 也保留原有的change事件作为备用
+            // 保留change事件作为备用
             checkbox.addEventListener('change', (e) => {
                 const studentId = e.target.dataset.studentId;
+                const seatItem = e.target.closest('.student-seat-item');
+                
                 if (e.target.checked) {
                     this.selectedStudents.add(studentId);
+                    if (seatItem) seatItem.classList.add('selected');
                 } else {
                     this.selectedStudents.delete(studentId);
+                    if (seatItem) seatItem.classList.remove('selected');
                 }
                 this.updateSelectedStudentsFromCheckboxes();
             });
@@ -176,26 +171,42 @@ class StudentManager {
         if (!container) return;
 
         if (this.calledStudents.size === 0) {
-            container.innerHTML = '<li class="text-gray-500 text-center py-4">暂无已点名学生</li>';
+            container.innerHTML = `
+                <div class="called-students-display">
+                    <div class="text-gray-500 text-center py-4 text-sm">
+                        <i class="fas fa-user-check text-2xl mb-2 block opacity-50"></i>
+                        暂无已点名学生
+                    </div>
+                </div>
+            `;
             return;
         }
 
-        container.innerHTML = '';
-        this.calledStudents.forEach(studentId => {
+        const calledStudentsArray = Array.from(this.calledStudents);
+        const studentTags = calledStudentsArray.map(studentId => {
             const studentName = this.getStudentName(studentId);
-            const li = document.createElement('li');
-            li.className = 'flex items-center justify-between p-3 bg-white rounded-lg mb-2 shadow-sm border border-gray-200';
-            li.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">${studentId}</span>
-                    <span class="text-gray-700 font-medium">${studentName}</span>
-                </div>
-                <button class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors duration-200" onclick="window.studentManager.removeCalledStudent('${studentId}')" title="移除">
-                    <i class="fas fa-times text-sm"></i>
-                </button>
+            return `
+                <span class="called-student-tag" 
+                      data-student-id="${studentId}"
+                      onclick="window.studentManager.removeCalledStudent('${studentId}')"
+                      title="点击移除 ${studentName}">
+                    <span class="student-id">${studentId}</span>
+                    <i class="fas fa-times remove-icon"></i>
+                </span>
             `;
-            container.appendChild(li);
-        });
+        }).join('');
+
+        container.innerHTML = `
+            <div class="called-students-display">
+                <div class="called-students-header">
+                    <span class="called-count">已点名 ${this.calledStudents.size} 名学生</span>
+                    <span class="called-time">${new Date().toLocaleTimeString()}</span>
+                </div>
+                <div class="called-students-tags">
+                    ${studentTags}
+                </div>
+            </div>
+        `;
     }
 
     /**
@@ -204,6 +215,7 @@ class StudentManager {
     addCalledStudent(studentId) {
         this.calledStudents.add(studentId);
         this.renderCalledStudents();
+        this.renderGroupStudentSelection(); // 更新座位表状态
     }
 
     /**

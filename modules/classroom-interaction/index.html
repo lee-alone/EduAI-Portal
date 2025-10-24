@@ -17,10 +17,27 @@
     <nav class="header-nav">
         <div class="container">
             <h1>课堂互动平台</h1>
-            <a href="../../index.html" class="back-home-btn">
-                <i class="fas fa-home mr-2"></i>
-                返回首页
-            </a>
+            <div class="header-controls">
+                <!-- 布局控制按钮 -->
+                <div class="layout-controls-header">
+                    <div class="layout-indicator-header">
+                        <i class="fas fa-desktop"></i>
+                        <span id="layout-mode-text-header">自动检测</span>
+                    </div>
+                    <button id="layout-toggle-btn-header" class="header-btn">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>切换布局</span>
+                    </button>
+                    <button id="fullscreen-toggle-btn-header" class="header-btn">
+                        <i class="fas fa-expand"></i>
+                        <span>全屏模式</span>
+                    </button>
+                </div>
+                <a href="../../index.html" class="back-home-btn">
+                    <i class="fas fa-home mr-2"></i>
+                    返回首页
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -31,8 +48,16 @@
             </div>
 
             <div id="live-interaction" class="tab-content active">
-                <h2 class="text-xl font-semibold mb-4 text-gray-800">实时课堂互动</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 equal-height-grid">
+                <div class="mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">实时课堂互动</h2>
+                </div>
+                <div id="layout-switch-notification" class="notification hidden mb-4">
+                    <div class="notification-content">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span id="notification-text">布局已切换</span>
+                    </div>
+                </div>
+                <div id="module-container" class="grid gap-6 equal-height-grid">
                     <!-- 点名系统 -->
                     <div class="module-section">
                         <h3 class="text-lg font-semibold mb-3 text-gray-700"><i class="fas fa-user-check mr-2"></i>点名系统</h3>
@@ -82,11 +107,15 @@
                         </div>
 
                         <div class="card-section">
-                            <h4 class="font-medium mb-2 text-gray-700">已点名学生</h4>
-                            <ul id="called-students-list" class="list-none text-gray-700 min-h-[80px] border p-2 rounded bg-gray-50 overflow-y-auto">
+                            <h4 class="font-medium mb-2 text-gray-700">
+                                <i class="fas fa-user-check mr-2 text-blue-600"></i>已点名学生
+                            </h4>
+                            <div id="called-students-list" class="min-h-[80px]">
                                 <!-- 已点名学生列表 -->
-                            </ul>
-                            <button id="reset-call-btn" class="btn btn-danger w-full mt-3"><i class="fas fa-undo mr-2"></i>重置</button>
+                            </div>
+                            <button id="reset-call-btn" class="btn btn-danger w-full mt-3">
+                                <i class="fas fa-undo mr-2"></i>重置点名
+                            </button>
                         </div>
 
                         <!-- 快速评分区域 -->
@@ -136,26 +165,57 @@
                     <div class="module-section">
                         <h3 class="text-lg font-semibold mb-3 text-gray-700"><i class="fas fa-plus-circle mr-2"></i>加分系统</h3>
                         
-                        <!-- 第一步：选择方式 -->
-                        <div class="card-section">
-                            <h4 class="font-medium mb-2 text-gray-700">第一步：选择方式</h4>
-                            <div class="form-group">
-                                <label class="block text-gray-700 text-sm font-bold mb-2">选择方式:</label>
-                                <div class="flex gap-2 mb-3">
-                                    <button id="manual-selection-btn" class="btn btn-outline flex-1 selection-mode-btn active">
-                                        <i class="fas fa-hand-pointer mr-2"></i>手动选择
-                                    </button>
-                                    <button id="range-selection-btn" class="btn btn-outline flex-1 selection-mode-btn">
-                                        <i class="fas fa-arrows-alt-h mr-2"></i>范围选择
-                                    </button>
+                        <!-- 第一步和第二步并排布局 -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <!-- 第一步：选择方式 -->
+                            <div class="card-section">
+                                <h4 class="font-medium mb-2 text-gray-700">第一步：选择方式</h4>
+                                <div class="form-group">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">选择方式:</label>
+                                    <div class="flex gap-2 mb-3">
+                                        <button id="manual-selection-btn" class="btn btn-outline btn-sm flex-1 selection-mode-btn active">
+                                            <i class="fas fa-hand-pointer mr-1"></i>手动选择
+                                        </button>
+                                        <button id="range-selection-btn" class="btn btn-outline btn-sm flex-1 selection-mode-btn">
+                                            <i class="fas fa-arrows-alt-h mr-1"></i>范围选择
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
+                            <!-- 第二步：加分类型 -->
+                            <div class="card-section" id="scoring-type-section">
+                                <h4 class="font-medium mb-2 text-gray-700">第二步：选择加分类型</h4>
+                                <div class="grid grid-cols-2 gap-3 mb-3">
+                                    <button id="individual-scoring-btn" class="btn btn-success w-full">
+                                        <i class="fas fa-user mr-2"></i>个人加分
+                                    </button>
+                                    <button id="group-scoring-btn" class="btn btn-warning w-full">
+                                        <i class="fas fa-users mr-2"></i>集体加分
+                                    </button>
+                                </div>
+                                <div class="bg-blue-50 border-l-4 border-blue-400 p-3">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 pt-0.5">
+                                            <i class="fas fa-info-circle text-blue-500 text-sm"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-blue-700 leading-relaxed">
+                                                <strong>提示：</strong>选择学生后，可以选择个人加分（为每个学生单独评分）或集体加分（为所有学生添加相同分数）。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 第一步详细内容 -->
+                        <div class="card-section">
                             <!-- 手动选择方式 -->
                             <div id="manual-selection-mode" class="selection-mode">
                                 <div class="form-group">
                                     <span class="block text-gray-700 text-sm font-bold mb-2">选择学生座号:</span>
-                                    <div id="group-student-selection" class="grid grid-cols-8 gap-3 mb-3 max-h-64 overflow-y-auto border-2 border-gray-200 p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 shadow-inner">
+                                    <div id="group-student-selection" class="student-seat-grid mb-3 max-h-96 overflow-y-auto">
                                         <!-- 学生座号复选框将在这里生成 -->
                                     </div>
                                 </div>
@@ -208,30 +268,6 @@
                             </div>
                         </div>
 
-                        <!-- 第二步：加分类型 -->
-                        <div class="card-section" id="scoring-type-section">
-                            <h4 class="font-medium mb-2 text-gray-700">第二步：选择加分类型</h4>
-                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mb-3">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <i class="fas fa-info-circle text-yellow-400"></i>
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm text-yellow-700">
-                                            <strong>提示：</strong>选择学生后，可以选择个人加分（为每个学生单独评分）或集体加分（为所有学生添加相同分数）。
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button id="individual-scoring-btn" class="btn btn-success w-full">
-                                    <i class="fas fa-user mr-2"></i>个人加分
-                                </button>
-                                <button id="group-scoring-btn" class="btn btn-warning w-full">
-                                    <i class="fas fa-users mr-2"></i>集体加分
-                                </button>
-                            </div>
-                        </div>
 
                         <!-- 小组快速评分区域 -->
                         <div class="card-section quick-scoring-card" id="group-quick-scoring-section" style="display: none;">
@@ -1008,6 +1044,7 @@
     <script src="js/core/points.js"></script>
     
     <!-- 功能模块 -->
+    <script src="js/features/layout-manager.js"></script>
     <script src="js/features/rollcall.js"></script>
     <script src="js/features/scoring.js"></script>
     <script src="js/features/ai-analysis.js"></script>

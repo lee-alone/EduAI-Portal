@@ -67,6 +67,7 @@ class ClassroomInteractionApp {
             this.modules.points = new PointsManager();
             
             // 初始化功能模块
+            this.modules.layout = new LayoutManager();
             this.modules.rollcall = new RollCallManager();
             this.modules.scoring = new ScoringManager();
             
@@ -79,6 +80,7 @@ class ClassroomInteractionApp {
             window.classroomManager = this.modules.classroom;
             window.studentManager = this.modules.students;
             window.pointsManager = this.modules.points;
+            window.layoutManager = this.modules.layout;
             window.rollCallManager = this.modules.rollcall;
             window.scoringManager = this.modules.scoring;
             window.storageManager = this.modules.storage;
@@ -378,7 +380,7 @@ ${recentActivities.map(log => `${log.timestamp} - ${log.studentName}：${log.rea
         try {
             const state = {
                 classroom: {
-                    currentSubject: this.modules.classroom?.currentSubject,
+                    // 不保存学科信息，每次刷新后清空
                     classSize: this.modules.classroom?.classSize
                 },
                 students: {
@@ -408,7 +410,8 @@ ${recentActivities.map(log => `${log.timestamp} - ${log.studentName}：${log.rea
             
             // 恢复课堂状态
             if (state.classroom) {
-                this.modules.classroom.currentSubject = state.classroom.currentSubject || '';
+                // 不恢复学科信息，每次刷新后从空白开始
+                this.modules.classroom.currentSubject = '';
                 // 不要覆盖classroom.js中已经加载的classSize
                 // this.modules.classroom.classSize = state.classroom.classSize || 55;
             }
