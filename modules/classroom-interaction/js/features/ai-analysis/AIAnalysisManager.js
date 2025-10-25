@@ -3,15 +3,6 @@
  * 使用模块化组件管理AI分析界面的交互逻辑和数据处理
  */
 
-// 导入模块化组件
-// 注意：这些模块需要在HTML中单独引入
-// <script src="js/features/ai-analysis/FileUploadManager.js"></script>
-// <script src="js/features/ai-analysis/APIConfigManager.js"></script>
-// <script src="js/features/ai-analysis/DataProcessor.js"></script>
-// <script src="js/features/ai-analysis/AIAnalyzer.js"></script>
-// <script src="js/features/ai-analysis/ReportGenerator.js"></script>
-// <script src="js/features/ai-analysis/ExportManager.js"></script>
-
 class AIAnalysisManager {
     constructor() {
         this.isGenerating = false;
@@ -71,29 +62,14 @@ class AIAnalysisManager {
      * 设置全局导出函数
      */
     setupGlobalExportFunctions() {
-        // 全局PDF导出函数
+        // 全局导出函数
         window.exportAIReport = () => {
             this.exportManager.exportAIReport();
         };
 
-        // 全局Word导出函数
-        window.exportAIWord = () => {
-            const reportOutput = document.getElementById('ai-report-output');
-            if (reportOutput) {
-                this.exportManager.exportAsWord(reportOutput);
-            } else {
-                window.notificationManager.error('未找到报告内容');
-            }
-        };
-
-        // 全局文本导出函数
-        window.exportAIText = () => {
-            const reportOutput = document.getElementById('ai-report-output');
-            if (reportOutput) {
-                this.exportManager.exportAsText(reportOutput);
-            } else {
-                window.notificationManager.error('未找到报告内容');
-            }
+        // 全局简单导出函数
+        window.exportAISimple = () => {
+            this.exportManager.exportAsWordSimple();
         };
     }
 
@@ -165,7 +141,7 @@ class AIAnalysisManager {
     }
 
     /**
-     * 生成真实的AI分析报告
+     * 生成真实的AI分析报告（优化版）
      */
     async generateRealAIReport(integratedData, summary) {
         // 生成数据摘要
@@ -173,14 +149,16 @@ class AIAnalysisManager {
         
         // 检查学生数量，决定是否需要分批处理
         const studentCount = integratedData.integratedRecords.length;
-        const shouldUseBatchProcessing = studentCount > 20; // 超过20个学生时使用分批处理
+        const shouldUseBatchProcessing = studentCount > 30; // 提高阈值到30个学生
         
         if (shouldUseBatchProcessing) {
-            console.log(`📊 学生数量较多(${studentCount}名)，使用分批分析模式`);
-            return await this.aiAnalyzer.generateBatchAIReport(integratedData, summary);
+            console.log(`📊 学生数量较多(${studentCount}名)，使用优化的分批分析模式`);
+            this.reportGenerator.updateLoadingMessage('正在使用优化的分批分析模式...');
+            return await this.aiAnalyzer.generateOptimizedBatchAIReport(integratedData, summary);
         } else {
-            // 调用AI分析
-            this.reportGenerator.updateLoadingMessage('正在调用AI进行学情分析...');
+            // 使用优化的单次分析模式
+            console.log(`📊 学生数量适中(${studentCount}名)，使用优化的单次分析模式`);
+            this.reportGenerator.updateLoadingMessage('正在使用优化的单次分析模式...');
             const aiReport = await this.aiAnalyzer.generateAIReport(integratedData, summary);
             
             // 生成最终报告HTML
@@ -195,7 +173,7 @@ class AIAnalysisManager {
 // 创建全局实例
 window.aiAnalysisManager = new AIAnalysisManager();
 
-// 全局PDF导出函数（保持向后兼容）
+// 全局导出函数（保持向后兼容）
 window.exportAIReport = function() {
     if (window.aiAnalysisManager) {
         window.aiAnalysisManager.exportManager.exportAIReport();
@@ -204,29 +182,10 @@ window.exportAIReport = function() {
     }
 };
 
-// 全局Word导出函数
-window.exportAIWord = function() {
+// 全局简单导出函数（保持向后兼容）
+window.exportAISimple = function() {
     if (window.aiAnalysisManager) {
-        const reportOutput = document.getElementById('ai-report-output');
-        if (reportOutput) {
-            window.aiAnalysisManager.exportManager.exportAsWord(reportOutput);
-        } else {
-            console.error('未找到报告内容');
-        }
-    } else {
-        console.error('AI分析管理器未初始化');
-    }
-};
-
-// 全局文本导出函数
-window.exportAIText = function() {
-    if (window.aiAnalysisManager) {
-        const reportOutput = document.getElementById('ai-report-output');
-        if (reportOutput) {
-            window.aiAnalysisManager.exportManager.exportAsText(reportOutput);
-        } else {
-            console.error('未找到报告内容');
-        }
+        window.aiAnalysisManager.exportManager.exportAsWordSimple();
     } else {
         console.error('AI分析管理器未初始化');
     }

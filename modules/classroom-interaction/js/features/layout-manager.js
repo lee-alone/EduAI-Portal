@@ -159,7 +159,7 @@ class LayoutManager {
         }
 
         // 显示切换通知
-        this.showNotification(layoutName);
+        window.notificationManager.info(`已切换到${layoutName}布局`);
 
         // 延迟移除动画类
         setTimeout(() => {
@@ -217,7 +217,7 @@ class LayoutManager {
                 fullscreenBtnHeader.classList.add('active');
                 fullscreenBtnHeader.innerHTML = '<i class="fas fa-compress"></i><span>退出全屏</span>';
             }
-            this.showNotification('已启用全屏模式');
+            window.notificationManager.info('已启用全屏模式');
         } else {
             body.classList.remove('fullscreen-mode');
             // 更新原位置按钮
@@ -230,7 +230,7 @@ class LayoutManager {
                 fullscreenBtnHeader.classList.remove('active');
                 fullscreenBtnHeader.innerHTML = '<i class="fas fa-expand"></i><span>全屏模式</span>';
             }
-            this.showNotification('已退出全屏模式');
+            window.notificationManager.info('已退出全屏模式');
         }
         
         // 保存全屏状态
@@ -257,23 +257,6 @@ class LayoutManager {
         });
     }
 
-    /**
-     * 显示切换通知
-     */
-    showNotification(layoutName) {
-        const notification = document.getElementById('layout-switch-notification');
-        const notificationText = document.getElementById('notification-text');
-
-        if (!notification || !notificationText) return;
-
-        notificationText.textContent = `已切换到 ${layoutName}`;
-        notification.classList.remove('hidden');
-
-        // 3秒后自动隐藏
-        setTimeout(() => {
-            notification.classList.add('hidden');
-        }, 3000);
-    }
 
     /**
      * 根据设备类型获取布局模式

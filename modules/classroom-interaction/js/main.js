@@ -294,26 +294,12 @@ class ClassroomInteractionApp {
      * 构建AI提示词
      */
     buildAIPrompt(customPrompt, pointsData, pointsLog) {
-        const topStudents = pointsData
-            .filter(s => s.points > 0)
-            .sort((a, b) => b.points - a.points)
-            .slice(0, 10);
+        // 使用统一的PromptManager
+        if (!this.promptManager) {
+            this.promptManager = new PromptManager();
+        }
         
-        const recentActivities = pointsLog.slice(0, 20);
-        
-        return `
-${customPrompt}
-
-以下是学生的积分数据：
-
-积分排行榜（前10名）：
-${topStudents.map((s, i) => `${i + 1}. ${s.studentName}（${s.studentId}号）：${s.points}分`).join('\n')}
-
-最近活动记录：
-${recentActivities.map(log => `${log.timestamp} - ${log.studentName}：${log.reason}（${log.points > 0 ? '+' : ''}${log.points}分）`).join('\n')}
-
-请基于以上数据生成学情报告。
-        `.trim();
+        return this.promptManager.getCustomAnalysisPrompt(customPrompt, pointsData, pointsLog);
     }
 
     /**
