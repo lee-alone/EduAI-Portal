@@ -205,23 +205,45 @@ main {
   padding-top: 100px;
 }
 
+/* 滚动容器 */
+.scrolling-wrapper {
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
 /* 水平排列模块样式 */
 .modules-horizontal {
   display: flex;
   flex-wrap: nowrap;
-  justify-content: center;
+  /* justify-content: center; */
   padding: 20px 0;
   gap: 15px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-behavior: smooth;
+  animation: scroll 40s linear infinite;
+}
+
+.modules-horizontal + .modules-horizontal {
+  margin-left: 15px; /* Add a gap between the two sets of modules */
+}
+
+.scrolling-wrapper:hover .modules-horizontal {
+  animation-play-state: paused;
 }
 
 .modules-horizontal .col-lg-3 {
   flex: 0 0 auto;
   width: calc(20% - 12px);
   max-width: none;
-  min-width: 200px;
+  min-width: 240px; /* Increased from 200px */
 }
 
 .modules-horizontal .module-card {
@@ -289,7 +311,13 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 340px;
+  height: 380px; /* 增加固定高度 */
+}
+
+.module-card .card-text {
+  flex-grow: 1; /* 允许文本区域增长 */
+  height: 80px; /* 设置固定高度 */
+  overflow: hidden; /* 隐藏溢出内容 */
 }
 
 .module-card .card-img-top {

@@ -304,9 +304,52 @@ class HorizontalScrollManager {
   }
 }
 
+class DragScrollManager {
+  constructor(container) {
+    this.container = container;
+    this.isDragging = false;
+    this.startX = 0;
+    this.scrollLeft = 0;
+
+    if (this.container) {
+      this.init();
+    }
+  }
+
+  init() {
+    this.container.addEventListener('mousedown', (e) => this.startDragging(e));
+    this.container.addEventListener('mouseup', () => this.stopDragging());
+    this.container.addEventListener('mouseleave', () => this.stopDragging());
+    this.container.addEventListener('mousemove', (e) => this.drag(e));
+  }
+
+  startDragging(e) {
+    this.isDragging = true;
+    this.startX = e.pageX - this.container.offsetLeft;
+    this.scrollLeft = this.container.scrollLeft;
+    this.container.style.cursor = 'grabbing';
+    this.container.style.userSelect = 'none';
+  }
+
+  stopDragging() {
+    this.isDragging = false;
+    this.container.style.cursor = 'grab';
+    this.container.style.removeProperty('user-select');
+  }
+
+  drag(e) {
+    if (!this.isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - this.container.offsetLeft;
+    const walk = (x - this.startX) * 2; //scroll-fast
+    this.container.scrollLeft = this.scrollLeft - walk;
+  }
+}
+
 // 初始化粒子网络系统
 let particleNetwork;
 let horizontalScrollManager;
+let dragScrollManager;
 
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('particleNetworkCanvas')) {
@@ -315,4 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // 初始化水平滚动管理器
   horizontalScrollManager = new HorizontalScrollManager();
+
+  const scrollingWrapper = document.querySelector('.scrolling-wrapper');
+  dragScrollManager = new DragScrollManager(scrollingWrapper);
 });
