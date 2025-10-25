@@ -58,21 +58,27 @@ class FileUploadManager {
         const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
         
         if (!allowedTypes.includes(fileExtension)) {
-            window.notificationManager.error('请上传Excel文件 (.xlsx 或 .xls 格式)');
+            if (window.notificationManager) {
+                window.notificationManager.error('请上传Excel文件 (.xlsx 或 .xls 格式)');
+            }
             event.target.value = '';
             return;
         }
 
         // 验证文件大小 (限制为10MB)
         if (file.size > 10 * 1024 * 1024) {
-            window.notificationManager.error('文件大小不能超过10MB');
+            if (window.notificationManager) {
+                window.notificationManager.error('文件大小不能超过10MB');
+            }
             event.target.value = '';
             return;
         }
 
         this.uploadedFiles[type] = file;
         this.updateFileUploadDisplay(event.target);
-        window.notificationManager.success(`${type === 'activity' ? '课堂活动' : '学生名单'}文件上传成功`);
+        if (window.notificationManager) {
+            window.notificationManager.success(`${type === 'activity' ? '课堂活动' : '学生名单'}文件上传成功`);
+        }
     }
 
     /**

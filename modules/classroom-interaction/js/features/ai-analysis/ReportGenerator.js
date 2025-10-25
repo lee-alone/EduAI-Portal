@@ -79,8 +79,8 @@ class ReportGenerator {
                         gap: 0.5rem;
                         transition: all 0.3s ease;
                     " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <i class="fas fa-download"></i>
-                        导出PDF报告
+                        <i class="fas fa-file-word"></i>
+                        导出报告
                     </button>
                 </div>
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">

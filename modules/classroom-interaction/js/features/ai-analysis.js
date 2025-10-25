@@ -71,9 +71,17 @@ class AIAnalysisManager {
      * 设置全局导出函数
      */
     setupGlobalExportFunctions() {
-        // 全局PDF导出函数
+        console.log('🔧 设置全局导出函数');
+        
+        // 全局PDF导出函数 - 显示导出选项菜单
         window.exportAIReport = () => {
-            this.exportManager.exportAIReport();
+            console.log('📤 调用导出函数');
+            if (window.exportManager) {
+                console.log('✅ 导出管理器已初始化，显示选项菜单');
+                window.exportManager.showExportOptions();
+            } else {
+                console.error('❌ 导出管理器未初始化');
+            }
         };
 
         // 全局Word导出函数
@@ -82,7 +90,9 @@ class AIAnalysisManager {
             if (reportOutput) {
                 this.exportManager.exportAsWord(reportOutput);
             } else {
-                window.notificationManager.error('未找到报告内容');
+                if (window.notificationManager) {
+                    window.notificationManager.error('未找到报告内容');
+                }
             }
         };
 
@@ -92,7 +102,9 @@ class AIAnalysisManager {
             if (reportOutput) {
                 this.exportManager.exportAsText(reportOutput);
             } else {
-                window.notificationManager.error('未找到报告内容');
+                if (window.notificationManager) {
+                    window.notificationManager.error('未找到报告内容');
+                }
             }
         };
     }
@@ -105,14 +117,18 @@ class AIAnalysisManager {
 
         // 验证必要文件
         if (!this.fileUploadManager.hasRequiredFiles()) {
-            window.notificationManager.error('请先上传课堂活动文件和学生名单文件');
+            if (window.notificationManager) {
+                window.notificationManager.error('请先上传课堂活动文件和学生名单文件');
+            }
             return;
         }
 
         // 验证API配置
         const configValidation = this.apiConfigManager.validateConfig();
         if (!configValidation.valid) {
-            window.notificationManager.error(configValidation.message);
+            if (window.notificationManager) {
+                window.notificationManager.error(configValidation.message);
+            }
             return;
         }
 
@@ -124,10 +140,14 @@ class AIAnalysisManager {
             // 真实的数据处理流程
             await this.processExcelFiles();
             
-            window.notificationManager.success('AI学情分析报告生成成功！');
+            if (window.notificationManager) {
+                window.notificationManager.success('AI学情分析报告生成成功！');
+            }
         } catch (error) {
             console.error('AI分析失败:', error);
-            window.notificationManager.error(`AI分析失败: ${error.message}`);
+            if (window.notificationManager) {
+                window.notificationManager.error(`AI分析失败: ${error.message}`);
+            }
         } finally {
             this.isGenerating = false;
             this.reportGenerator.updateGenerateButton(false);

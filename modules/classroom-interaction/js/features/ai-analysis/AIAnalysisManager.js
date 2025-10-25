@@ -81,14 +81,18 @@ class AIAnalysisManager {
 
         // 验证必要文件
         if (!this.fileUploadManager.hasRequiredFiles()) {
-            window.notificationManager.error('请先上传课堂活动文件和学生名单文件');
+            if (window.notificationManager) {
+                window.notificationManager.error('请先上传课堂活动文件和学生名单文件');
+            }
             return;
         }
 
         // 验证API配置
         const configValidation = this.apiConfigManager.validateConfig();
         if (!configValidation.valid) {
-            window.notificationManager.error(configValidation.message);
+            if (window.notificationManager) {
+                window.notificationManager.error(configValidation.message);
+            }
             return;
         }
 
@@ -100,10 +104,14 @@ class AIAnalysisManager {
             // 真实的数据处理流程
             await this.processExcelFiles();
             
-            window.notificationManager.success('AI学情分析报告生成成功！');
+            if (window.notificationManager) {
+                window.notificationManager.success('AI学情分析报告生成成功！');
+            }
         } catch (error) {
             console.error('AI分析失败:', error);
-            window.notificationManager.error(`AI分析失败: ${error.message}`);
+            if (window.notificationManager) {
+                window.notificationManager.error(`AI分析失败: ${error.message}`);
+            }
         } finally {
             this.isGenerating = false;
             this.reportGenerator.updateGenerateButton(false);

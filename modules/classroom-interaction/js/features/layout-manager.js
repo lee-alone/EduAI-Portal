@@ -159,7 +159,9 @@ class LayoutManager {
         }
 
         // 显示切换通知
-        window.notificationManager.info(`已切换到${layoutName}布局`);
+        if (window.notificationManager) {
+            window.notificationManager.info(`已切换到${layoutName}布局`);
+        }
 
         // 延迟移除动画类
         setTimeout(() => {
@@ -217,7 +219,9 @@ class LayoutManager {
                 fullscreenBtnHeader.classList.add('active');
                 fullscreenBtnHeader.innerHTML = '<i class="fas fa-compress"></i><span>退出全屏</span>';
             }
-            window.notificationManager.info('已启用全屏模式');
+            if (window.notificationManager) {
+                window.notificationManager.info('已启用全屏模式');
+            }
         } else {
             body.classList.remove('fullscreen-mode');
             // 更新原位置按钮
@@ -230,7 +234,9 @@ class LayoutManager {
                 fullscreenBtnHeader.classList.remove('active');
                 fullscreenBtnHeader.innerHTML = '<i class="fas fa-expand"></i><span>全屏模式</span>';
             }
-            window.notificationManager.info('已退出全屏模式');
+            if (window.notificationManager) {
+                window.notificationManager.info('已退出全屏模式');
+            }
         }
         
         // 保存全屏状态

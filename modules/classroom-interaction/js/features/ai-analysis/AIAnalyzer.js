@@ -267,6 +267,16 @@ class AIAnalyzer {
             );
             
             const analysis = await this.callAIAnalysisWithPrompt(prompt);
+            
+            // 立即验证这一批的格式
+            const validationResult = this.validateBatchAnalysis(analysis, batch);
+            if (!validationResult.isValid) {
+                console.warn(`⚠️ 批次 ${i + 1} 格式验证失败: ${validationResult.errors.join(', ')}`);
+                console.log(`📊 批次 ${i + 1} 验证详情:`, validationResult);
+            } else {
+                console.log(`✅ 批次 ${i + 1} 格式验证通过`);
+            }
+            
             allAnalyses.push(analysis);
             
             // 减少延迟时间
@@ -592,37 +602,37 @@ ${inactiveStudentNames.length > 0 ?
 - 整体学习状态
 
 ### 2. 个别学生表现评价
-请为数据中的每一个学生生成个性化评价，**必须使用以下格式**：
+请为数据中的每一个学生生成个性化评价，**必须严格遵守以下格式**：
 
-**格式要求：**
-- 每个学生必须用 div class="student-evaluation" 包装
-- 学生姓名用 h4 class="student-name" 作为标题
-- 评价内容用 div class="evaluation-content" 包装
-- 每个学生的评价要独立成段，包含学习积极性、表现特点、建议鼓励、关注问题
-- 使用清晰的段落分隔，每个方面用 p 标签包装
+**格式要求（绝对不允许违反）：**
+- 每个学生的评价必须用以下标注格式包围，不得有任何例外：
+- 开始标注：<!-- STUDENT_START:学生姓名 -->
+- 结束标注：<!-- STUDENT_END:学生姓名 -->
+- 绝对不允许出现未标注的学生评价
+- 如果某个学生没有标注，整个分析将被视为无效
+- 每个学生一段话，约150-200字
+- 不要使用"学习积极性评价："、"课堂表现特点："等标题
+- 直接写一段话，包含：学习积极性、表现特点、建议鼓励、关注问题
+- 语言要积极正面，体现教育关怀
+- 分析要具体、深入、有针对性
 
-**示例格式：**
-div class="student-evaluation"
-    h4 class="student-name"张三/h4
-    div class="evaluation-content"
-        p strong学习积极性：/strong张三同学本学期表现积极，课堂参与度高.../p
-        p strong表现特点：/strong在数学和物理方面表现突出，思维敏捷.../p
-        p strong建议鼓励：/strong建议继续保持这种学习热情，可以尝试挑战更有难度的题目.../p
-        p strong关注问题：/strong在某些基础概念上还需要加强练习.../p
-    /div
-/div
+**示例格式（必须严格按照此格式）：**
+<!-- STUDENT_START:张三 -->
+张三同学这段时间表现积极，课堂参与度高，在数学和物理方面表现突出。他能够主动举手发言，思维敏捷，解题思路清晰。建议继续保持这种学习热情，可以尝试挑战更有难度的题目。需要注意的是，他在某些基础概念上还需要加强练习，建议多做一些基础题巩固。
+<!-- STUDENT_END:张三 -->
 
 **重要提醒：**
 - 必须分析数据中出现的每一个学生（共${studentPerformance.studentList.length}名学生）
-- 每个学生都要有完整的四个方面的评价
+- 每个学生都要有完整的评价，且必须使用标注格式
 - 根据学生的实际表现数据给出针对性建议
 - **特别注意以下情况：**
   - 对于有"无积分记录"的学生，说明他们被点名了但可能回答错误，老师给予了安慰评语，需要特别关注其学习状态
   - 对于只有错误回答的学生，需要分析原因并给予鼓励
   - 对于混合表现的学生，要分析其学习波动原因
   - 对于全部正确的学生，要给予肯定并鼓励继续保持
+- **完成所有学生个人评价后，必须添加分隔标识符：<!-- STUDENT_ANALYSIS_END -->**
 
-### 3. 教学建议
+### 3. 班级整体分析
 - 针对班级整体的教学建议
 - 个别学生的关注重点
 - 改进措施和后续计划
@@ -890,11 +900,8 @@ div class="student-evaluation"
         // 使用HTML渲染器处理AI输出
         const renderedOverallAnalysis = HTMLRenderer.renderOverallAnalysis(overallAnalysis, summary);
         
-        // 合并所有学生分析
-        const combinedStudentAnalysis = studentAnalyses.join('\n\n');
-        
-        // 直接渲染学生分析，不依赖学生数组分割
-        const renderedStudentAnalysis = this.renderStudentAnalysisDirectly(combinedStudentAnalysis);
+        // 使用智能合并学生分析
+        const renderedStudentAnalysis = this.smartCombineStudentAnalyses(studentAnalyses);
         
         // 生成完整报告
         const reportData = {
@@ -912,6 +919,67 @@ div class="student-evaluation"
     }
     
     /**
+     * 智能合并学生分析结果
+     * @param {Array} studentAnalyses - 所有批次的学生分析结果
+     * @returns {string} 合并后的HTML
+     */
+    smartCombineStudentAnalyses(studentAnalyses) {
+        console.log('🔄 开始智能合并学生分析结果...');
+        
+        // 提取每批中的学生评价
+        const allStudentEvaluations = [];
+        let totalBatches = studentAnalyses.length;
+        let validBatches = 0;
+        
+        studentAnalyses.forEach((analysis, batchIndex) => {
+            console.log(`📊 处理批次 ${batchIndex + 1}/${totalBatches}`);
+            
+            // 检查这一批是否包含正确的标注格式
+            if (analysis.includes('<!-- STUDENT_START:') && analysis.includes('<!-- STUDENT_END:')) {
+                const evaluations = StudentEvaluationParser.parseStudentEvaluations(analysis);
+                allStudentEvaluations.push(...evaluations);
+                validBatches++;
+                console.log(`✅ 批次 ${batchIndex + 1} 解析出 ${evaluations.length} 个学生评价`);
+            } else {
+                console.warn(`⚠️ 批次 ${batchIndex + 1} 未包含正确的标注格式，跳过`);
+            }
+        });
+        
+        console.log(`📊 合并结果: ${validBatches}/${totalBatches} 批次有效，共 ${allStudentEvaluations.length} 个学生评价`);
+        
+        // 去重并合并
+        const uniqueEvaluations = this.deduplicateStudentEvaluations(allStudentEvaluations);
+        console.log(`📊 去重后: ${uniqueEvaluations.length} 个学生评价`);
+        
+        // 重新生成HTML
+        const html = StudentEvaluationParser.renderStudentEvaluationsHTML(uniqueEvaluations);
+        console.log('✅ 智能合并完成');
+        
+        return html;
+    }
+    
+    /**
+     * 去重学生评价
+     * @param {Array} evaluations - 学生评价数组
+     * @returns {Array} 去重后的评价数组
+     */
+    deduplicateStudentEvaluations(evaluations) {
+        const seen = new Set();
+        const unique = [];
+        
+        evaluations.forEach(evaluation => {
+            if (!seen.has(evaluation.name)) {
+                seen.add(evaluation.name);
+                unique.push(evaluation);
+            } else {
+                console.log(`🔄 发现重复学生: ${evaluation.name}，保留第一个`);
+            }
+        });
+        
+        return unique;
+    }
+    
+    /**
      * 直接渲染学生分析（优化版 - 支持标注解析）
      */
     renderStudentAnalysisDirectly(analysisText) {
@@ -922,12 +990,98 @@ div class="student-evaluation"
         // 首先尝试使用标注解析器
         if (analysisText.includes('<!-- STUDENT_START:') && analysisText.includes('<!-- STUDENT_END:')) {
             console.log('🔍 检测到标注格式，使用解析器处理学生评价');
-            return StudentEvaluationParser.parseAndRenderStudentEvaluations(analysisText);
+            const result = StudentEvaluationParser.parseAndRenderStudentEvaluations(analysisText);
+            
+            // 检查解析结果的质量
+            if (this.validateStudentAnalysisResult(result)) {
+                return result;
+            } else {
+                console.warn('⚠️ 标注解析结果质量不佳，降级到传统方法');
+                return this.renderStudentAnalysisDirectlyLegacy(analysisText);
+            }
         }
         
         // 降级到传统方法
         console.log('⚠️ 未检测到标注格式，使用传统方法处理学生评价');
         return this.renderStudentAnalysisDirectlyLegacy(analysisText);
+    }
+    
+    /**
+     * 验证学生分析结果的质量
+     * @param {string} result - 解析结果HTML
+     * @returns {boolean} 结果是否有效
+     */
+    validateStudentAnalysisResult(result) {
+        if (!result || result.includes('暂无学生分析数据')) {
+            return false;
+        }
+        
+        // 检查是否包含有效的学生评价
+        const studentEvaluationCount = (result.match(/class="student-evaluation"/g) || []).length;
+        if (studentEvaluationCount === 0) {
+            return false;
+        }
+        
+        // 检查是否包含明显错误的内容
+        const errorPatterns = [
+            /undefined/,
+            /null/,
+            /\[object Object\]/,
+            /NaN/
+        ];
+        
+        for (const pattern of errorPatterns) {
+            if (pattern.test(result)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * 验证批次分析结果
+     * @param {string} analysis - 批次分析结果
+     * @param {Array} batch - 批次学生数据
+     * @returns {Object} 验证结果
+     */
+    validateBatchAnalysis(analysis, batch) {
+        const expectedStudents = batch.map(s => s.name);
+        const foundStudents = [];
+        
+        // 查找所有标注的学生
+        const studentPattern = /<!--\s*STUDENT_START:\s*([^>]+)\s*-->/g;
+        let match;
+        while ((match = studentPattern.exec(analysis)) !== null) {
+            foundStudents.push(match[1].trim());
+        }
+        
+        const missingStudents = expectedStudents.filter(name => !foundStudents.includes(name));
+        const extraStudents = foundStudents.filter(name => !expectedStudents.includes(name));
+        
+        // 检查是否有分隔标识符
+        const hasSeparator = analysis.includes('<!-- STUDENT_ANALYSIS_END -->');
+        
+        const errors = [];
+        if (missingStudents.length > 0) {
+            errors.push(`缺少学生: ${missingStudents.join(', ')}`);
+        }
+        if (extraStudents.length > 0) {
+            errors.push(`多余学生: ${extraStudents.join(', ')}`);
+        }
+        if (!hasSeparator) {
+            errors.push('缺少分隔标识符');
+        }
+        
+        return {
+            isValid: missingStudents.length === 0 && extraStudents.length === 0 && hasSeparator,
+            missingStudents,
+            extraStudents,
+            hasSeparator,
+            expectedCount: expectedStudents.length,
+            foundCount: foundStudents.length,
+            errors
+        };
     }
     
     /**
