@@ -209,22 +209,24 @@ main {
 .modules-horizontal {
   display: flex;
   flex-wrap: nowrap;
+  justify-content: center;
+  padding: 20px 0;
+  gap: 15px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 20px 0;
-  gap: 20px;
   scroll-behavior: smooth;
 }
 
 .modules-horizontal .col-lg-3 {
   flex: 0 0 auto;
-  width: 300px;
+  width: calc(20% - 12px);
   max-width: none;
+  min-width: 200px;
 }
 
 .modules-horizontal .module-card {
   width: 100%;
-  min-width: 280px;
+  min-width: 180px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 }
@@ -356,6 +358,20 @@ footer a:hover {
 }
 
 /* ===== 响应式优化 ===== */
+@media (max-width: 1200px) {
+  .modules-horizontal .col-lg-3 {
+    width: calc(25% - 12px);
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 992px) {
+  .modules-horizontal .col-lg-3 {
+    width: calc(33.333% - 10px);
+    min-width: 160px;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-content {
     padding: 15px;
@@ -391,15 +407,17 @@ footer a:hover {
   /* 移动端水平滚动优化 */
   .modules-horizontal {
     padding: 15px 0;
-    gap: 15px;
+    gap: 12px;
+    justify-content: flex-start;
   }
   
   .modules-horizontal .col-lg-3 {
     width: 250px;
+    min-width: 240px;
   }
   
   .modules-horizontal .module-card {
-    min-width: 240px;
+    min-width: 220px;
   }
 }
 
