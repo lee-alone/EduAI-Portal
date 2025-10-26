@@ -1,7 +1,7 @@
 /**
  * 导出管理模块 - 重构版本
  * 专注于文本导出，最小化文件体积
- * 支持PDF和Word格式，避免图片导出
+ * 支持Word和文本格式，避免图片导出
  */
 
 class ExportManager {
@@ -21,7 +21,6 @@ class ExportManager {
      */
     checkDependencies() {
         return {
-            jsPDF: typeof window.jspdf !== 'undefined' || typeof jsPDF !== 'undefined',
             fileSaver: typeof saveAs !== 'undefined'
         };
     }
@@ -83,13 +82,6 @@ class ExportManager {
                         </div>
                     </button>
                     <button class="export-option-btn">
-                        <i class="fas fa-file-alt"></i>
-                        <div>
-                            <strong>文本PDF</strong>
-                            <small>纯文本格式，文件更小</small>
-                        </div>
-                    </button>
-                    <button class="export-option-btn">
                         <i class="fas fa-file-text"></i>
                         <div>
                             <strong>文本文件</strong>
@@ -109,7 +101,6 @@ class ExportManager {
         buttons.forEach((button, index) => {
             const functions = [
                 () => this.exportAsWordDocument(reportOutput),
-                () => this.exportAsTextPDF(reportOutput),
                 () => this.exportAsText(reportOutput)
             ];
             
@@ -278,10 +269,6 @@ class ExportManager {
             this.downloadFile(docx, fileName);
             
             console.log('✅ Word文档保存成功:', fileName);
-            
-            if (window.notificationManager) {
-                window.notificationManager.success('Word文档导出成功！');
-            }
             
         } catch (error) {
             console.error('❌ Word文档导出失败:', error);
@@ -522,145 +509,7 @@ class ExportManager {
 </html>`;
     }
 
-    /**
-     * 导出为文本PDF（纯文本，最小文件，支持中文）
-     */
-    async exportAsTextPDF(reportOutput, isFallback = false) {
-        try {
-            const { jsPDF } = window.jspdf || window;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            
-            console.log('🔄 开始生成文本PDF...');
-            
-            // 添加标题
-            pdf.setFontSize(16);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('AI学情分析报告', 105, 20, { align: 'center' });
-            
-            // 添加时间
-            pdf.setFontSize(10);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(`生成时间: ${new Date().toLocaleString('zh-CN')}`, 105, 30, { align: 'center' });
-            
-            // 提取并处理内容，保留AI分析内容
-            const textContent = this.extractCleanText(reportOutput);
-            console.log('📝 提取的文本内容长度:', textContent.length);
-            
-            // 处理文本内容，确保正确的格式
-            const processedContent = this.processTextForPDF(textContent);
-            console.log('📝 处理后的文本内容长度:', processedContent.length);
-            
-            // 分段处理内容，确保AI分析内容完整保存
-            const sections = this.splitContentIntoSections(processedContent);
-            console.log('📝 分割后的节数:', sections.length);
-            
-            let yPosition = 50;
-            const pageHeight = 280;
-            const lineHeight = 6;
-            
-            for (const section of sections) {
-                console.log('📝 处理节:', section.title);
-                
-                // 添加节标题
-                if (section.title) {
-                    pdf.setFontSize(14);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.text(section.title, 15, yPosition);
-                    yPosition += 10;
-                }
-                
-                // 添加节内容
-                pdf.setFontSize(11);
-                pdf.setFont('helvetica', 'normal');
-                
-                // 处理文本内容，确保正确的换行
-                const cleanContent = this.cleanTextForPDF(section.content);
-                const lines = pdf.splitTextToSize(cleanContent, 180);
-                
-                console.log('📝 节内容行数:', lines.length);
-                
-                for (const line of lines) {
-                    if (yPosition > pageHeight) {
-                        pdf.addPage();
-                        yPosition = 20;
-                    }
-                    pdf.text(line, 15, yPosition);
-                    yPosition += lineHeight;
-                }
-                
-                yPosition += 5; // 节之间添加间距
-            }
-            
-            // 保存文件
-            const fileName = this.generateFileName('pdf');
-            pdf.save(fileName);
-            
-            console.log('✅ 文本PDF生成成功:', fileName);
-            
-            // 只有在非降级调用时才显示成功提示
-            if (window.notificationManager && !isFallback) {
-                window.notificationManager.success('PDF报告导出成功！');
-            }
-            
-        } catch (error) {
-            console.error('❌ 文本PDF导出失败:', error);
-            if (window.notificationManager && !isFallback) {
-                window.notificationManager.warning('PDF导出失败，将导出为文本格式');
-            }
-            this.exportAsText(reportOutput);
-        }
-    }
     
-    /**
-     * 清理文本内容，确保正确的格式
-     */
-    cleanTextForPDF(text) {
-        if (!text) return '';
-        
-        // 清理文本内容
-        let cleanText = text
-            .replace(/\r\n/g, '\n')  // 统一换行符
-            .replace(/\r/g, '\n')    // 统一换行符
-            .replace(/\n{3,}/g, '\n\n')  // 限制连续换行
-            .replace(/[^\x00-\x7F\u4e00-\u9fff\s]/g, '')  // 移除特殊字符，保留中文和基本ASCII
-            .trim();
-        
-        // 确保段落之间有适当的间距
-        cleanText = cleanText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0)
-            .join('\n');
-        
-        return cleanText;
-    }
-    
-    /**
-     * 将内容分割为不同的节
-     */
-    splitContentIntoSections(content) {
-        const sections = [];
-        
-        // 查找AI智能分析报告部分
-        const aiAnalysisMatch = content.match(/=== AI智能分析报告 ===\n\n([\s\S]*?)(?=\n\n|$)/);
-        if (aiAnalysisMatch) {
-            sections.push({
-                title: 'AI智能分析报告',
-                content: aiAnalysisMatch[1].trim()
-            });
-        }
-        
-        // 查找其他部分
-        const otherContent = content.replace(/=== AI智能分析报告 ===\n\n[\s\S]*?(?=\n\n|$)/, '').trim();
-        if (otherContent) {
-            sections.push({
-                title: '报告基本信息',
-                content: otherContent
-            });
-        }
-        
-        return sections;
-    }
 
     /**
      * 导出为Word格式（纯文本，最小文件）
@@ -679,10 +528,6 @@ class ExportManager {
             });
             const fileName = this.generateFileName('doc');
             this.downloadFile(blob, fileName);
-            
-            if (window.notificationManager) {
-                window.notificationManager.success('Word报告导出成功！');
-            }
             
         } catch (error) {
             console.error('Word导出失败:', error);
@@ -704,10 +549,6 @@ class ExportManager {
             const fileName = this.generateFileName('txt');
             this.downloadFile(blob, fileName);
             
-            if (window.notificationManager) {
-                window.notificationManager.success('文本报告导出成功！');
-            }
-            
         } catch (error) {
             console.error('文本导出失败:', error);
             if (window.notificationManager) {
@@ -716,24 +557,6 @@ class ExportManager {
         }
     }
 
-    /**
-     * 处理文本内容，使其适合PDF导出
-     */
-    processTextForPDF(textContent) {
-        // 保留原始中文内容，只做必要的清理
-        let processedText = textContent;
-        
-        // 清理多余的空格和换行，但保留段落结构
-        processedText = processedText
-            .replace(/\s+/g, ' ')  // 合并多个空格为单个空格
-            .replace(/\n\s*\n/g, '\n\n')  // 合并多个换行，保留段落分隔
-            .replace(/^\s+|\s+$/g, '')  // 去除首尾空格
-            .trim();
-        
-        // 确保AI分析内容不被过度处理
-        // 保留中文内容，因为这是AI分析的核心价值
-        return processedText;
-    }
 
     /**
      * 提取清洁的文本内容

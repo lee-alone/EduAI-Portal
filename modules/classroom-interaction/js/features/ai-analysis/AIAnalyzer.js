@@ -23,20 +23,7 @@ class AIAnalyzer {
     checkDependencies() {
         console.log('🔍 检查AI分析依赖库...');
         
-        // 检查jsPDF库
-        if (typeof window.jspdf !== 'undefined' || typeof jsPDF !== 'undefined') {
-            console.log('✅ jsPDF库已加载');
-        } else {
-            console.warn('⚠️ jsPDF库未加载，PDF导出功能将降级到HTML格式');
-            this.loadPDFLibraries();
-        }
         
-        // 检查html2canvas库
-        if (typeof html2canvas !== 'undefined') {
-            console.log('✅ html2canvas库已加载');
-        } else {
-            console.warn('⚠️ html2canvas库未加载，PDF转换功能可能受限');
-        }
         
         // 检查FileSaver库
         if (typeof saveAs !== 'undefined') {
@@ -46,30 +33,6 @@ class AIAnalyzer {
         }
     }
 
-    /**
-     * 动态加载PDF相关库
-     */
-    async loadPDFLibraries() {
-        try {
-            console.log('🔄 尝试动态加载PDF相关库...');
-            
-            // 动态加载jsPDF
-            if (typeof window.jspdf === 'undefined' && typeof jsPDF === 'undefined') {
-                const jsPDFScript = document.createElement('script');
-                jsPDFScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-                document.head.appendChild(jsPDFScript);
-            }
-            
-            // 动态加载html2canvas
-            if (typeof html2canvas === 'undefined') {
-                const html2canvasScript = document.createElement('script');
-                html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-                document.head.appendChild(html2canvasScript);
-            }
-        } catch (error) {
-            console.error('❌ 动态加载PDF库失败:', error);
-        }
-    }
 
     /**
      * 生成AI分析报告（优化版 - 减少重复发送）

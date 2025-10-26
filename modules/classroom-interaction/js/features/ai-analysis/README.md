@@ -2,7 +2,7 @@
 
 ## 重构概述
 
-原始的 `ai-analysis.js` 文件过于庞大（2451行），包含了太多功能，难以维护。本次重构将其拆分为多个模块化组件，提高了代码的可维护性和可扩展性。
+原始的 `ai-analysis.js` 文件过于庞大（2451行），包含了太多功能，难以维护。本次重构将其拆分为多个模块化组件，提高了代码的可维护性和可扩展性。现在使用 `AIAnalysisManager.js` 作为主文件。
 
 ## 模块结构
 
@@ -39,7 +39,8 @@
 
 ### 6. ExportManager.js
 **功能**: 导出管理
-- PDF导出（jsPDF + html2canvas）
+- Word文档导出（html-docx）
+- 文本文件导出
 - HTML导出
 - 文件下载功能
 
@@ -62,13 +63,13 @@
 <script src="js/features/ai-analysis/ExportManager.js"></script>
 <script src="js/features/ai-analysis/AIAnalysisManager.js"></script>
 <!-- 最后引入主文件 -->
-<script src="js/features/ai-analysis.js"></script>
+<script src="js/features/ai-analysis/AIAnalysisManager.js"></script>
 ```
 
 ### 或者使用重构后的主文件
 ```html
 <!-- 直接使用重构后的主文件（包含所有模块） -->
-<script src="js/features/ai-analysis.js"></script>
+<script src="js/features/ai-analysis/AIAnalysisManager.js"></script>
 ```
 
 ## 重构优势
@@ -89,8 +90,9 @@
 
 | 文件 | 重构前 | 重构后 |
 |------|--------|--------|
-| ai-analysis.js | 2451行 | ~200行 |
-| 总代码量 | 2451行 | 分散到7个模块 |
+| ai-analysis.js | 2451行 | 已删除 |
+| AIAnalysisManager.js | - | ~200行 |
+| 总代码量 | 2451行 | 分散到11个模块 |
 | 主文件复杂度 | 极高 | 低 |
 
 ## 注意事项

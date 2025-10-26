@@ -12,18 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- XLSX for Excel export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- FileSaver for file downloads -->
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    <!-- jsPDF for PDF export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- html2canvas for HTML to PDF conversion -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- JSZip for html-docx dependency -->
-    <script src="https://cdn.bootcdn.net/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- FileSaver.js for file downloads (html-docx dependency) -->
-    <script src="https://cdn.bootcdn.net/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <!-- html-docx for Word document export -->
-    <script src="https://cdn.jsdelivr.net/npm/html-docx-js-version-updated@0.4.0/dist/html-docx.js"></script>
 </head>
 <body>
     <nav class="header-nav">
@@ -1060,35 +1048,25 @@
     </div>
 
     <!-- 核心模块 -->
-    <script src="js/core/classroom.js"></script>
-    <script src="js/core/students.js"></script>
-    <script src="js/core/points.js"></script>
+    <script src="js/core/classroom.js" defer></script>
+    <script src="js/core/students.js" defer></script>
+    <script src="js/core/points.js" defer></script>
     
-    <!-- AI分析模块依赖 -->
-    <script src="js/features/ai-analysis/FileUploadManager.js"></script>
-    <script src="js/features/ai-analysis/APIConfigManager.js"></script>
-    <script src="js/features/ai-analysis/DataProcessor.js"></script>
-    <script src="js/features/ai-analysis/prompts.js"></script>
-    <script src="js/features/ai-analysis/PromptManager.js"></script>
-    <script src="js/features/ai-analysis/StudentEvaluationParser.js"></script>
-    <script src="js/features/ai-analysis/HTMLRenderer.js"></script>
-    <script src="js/features/ai-analysis/AIAnalyzer.js"></script>
-    <script src="js/features/ai-analysis/ReportGenerator.js"></script>
-    <script src="js/features/ai-analysis/ExportManager.js"></script>
+    <!-- AI分析模块加载器（按需加载） -->
+    <script src="js/features/ai-analysis-loader.js" defer></script>
     
     <!-- 工具模块 -->
-    <script src="js/utils/storage.js"></script>
-    <script src="js/utils/helpers.js"></script>
-    <script src="js/utils/component-loader.js"></script>
-    <script src="js/utils/NotificationManager.js"></script>
+    <script src="js/utils/storage.js" defer></script>
+    <script src="js/utils/helpers.js" defer></script>
+    <script src="js/utils/component-loader.js" defer></script>
+    <script src="js/utils/NotificationManager.js" defer></script>
     
     <!-- 功能模块 -->
-    <script src="js/features/layout-manager.js"></script>
-    <script src="js/features/rollcall.js"></script>
-    <script src="js/features/scoring.js"></script>
-    <script src="js/features/ai-analysis.js"></script>
+    <script src="js/features/layout-manager.js" defer></script>
+    <script src="js/features/rollcall.js" defer></script>
+    <script src="js/features/scoring.js" defer></script>
     
     <!-- 主入口文件 -->
-    <script src="js/main.js"></script>
+    <script src="js/main.js" defer></script>
 </body>
 </html>
