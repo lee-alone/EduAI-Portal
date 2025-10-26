@@ -240,6 +240,88 @@ const DOMCache = {
   }
 };
 
+// 调试信息 - 帮助诊断布局问题
+function debugLayout() {
+  const singleRow = document.querySelector('.single-row');
+  const container = document.querySelector('.single-row-container');
+  
+  if (singleRow) {
+    const computedStyle = window.getComputedStyle(singleRow);
+    console.log('🔍 布局调试信息:');
+    console.log('屏幕宽度:', window.innerWidth);
+    console.log('视口宽度:', document.documentElement.clientWidth);
+    console.log('Flex Direction:', computedStyle.flexDirection);
+    console.log('Display:', computedStyle.display);
+    console.log('Container宽度:', container ? container.offsetWidth : 'N/A');
+    console.log('Row宽度:', singleRow.offsetWidth);
+    console.log('模块数量:', document.querySelectorAll('.module-item').length);
+    
+    // 检查是否在移动端模式
+    if (computedStyle.flexDirection === 'column') {
+      console.warn('⚠️ 检测到垂直布局 - 可能是移动端模式被意外触发');
+    } else {
+      console.log('✅ 水平布局正常');
+    }
+  }
+}
+
+// 缓存检测和CSS版本检查
+function checkCacheAndVersion() {
+  console.log('🔍 缓存和版本检测:');
+  console.log('当前时间:', new Date().toLocaleString());
+  console.log('页面URL:', window.location.href);
+  
+  // 检查CSS文件加载时间
+  const cssLink = document.querySelector('link[href*="style.css"]');
+  if (cssLink) {
+    console.log('CSS文件URL:', cssLink.href);
+    
+    // 尝试获取CSS文件的最后修改时间
+    fetch(cssLink.href, { method: 'HEAD' })
+      .then(response => {
+        const lastModified = response.headers.get('last-modified');
+        const cacheControl = response.headers.get('cache-control');
+        const etag = response.headers.get('etag');
+        
+        console.log('CSS最后修改时间:', lastModified);
+        console.log('缓存控制:', cacheControl);
+        console.log('ETag:', etag);
+        
+        if (lastModified) {
+          const cssDate = new Date(lastModified);
+          const now = new Date();
+          const diffHours = (now - cssDate) / (1000 * 60 * 60);
+          console.log('CSS文件年龄:', Math.round(diffHours * 100) / 100, '小时');
+          
+          if (diffHours > 1) {
+            console.warn('⚠️ CSS文件可能被缓存，建议清除Cloudflare缓存');
+          }
+        }
+      })
+      .catch(err => console.log('无法获取CSS文件信息:', err));
+  }
+  
+  // 检查是否有我们的新样式规则
+  const testElement = document.createElement('div');
+  testElement.className = 'single-row';
+  testElement.style.cssText = 'display: flex; flex-direction: row;';
+  document.body.appendChild(testElement);
+  
+  const computedStyle = window.getComputedStyle(testElement);
+  const hasNewRules = computedStyle.flexDirection === 'row';
+  
+  console.log('新CSS规则是否生效:', hasNewRules ? '✅ 是' : '❌ 否');
+  
+  document.body.removeChild(testElement);
+  
+  if (!hasNewRules) {
+    console.warn('⚠️ 检测到CSS可能未更新，建议：');
+    console.warn('1. 清除Cloudflare缓存');
+    console.warn('2. 等待几分钟后重试');
+    console.warn('3. 检查CSS文件是否包含新的媒体查询规则');
+  }
+}
+
 // 初始化粒子网络系统
 let particleNetwork;
 
@@ -248,4 +330,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (DOMCache.get('particleNetworkCanvas')) {
     particleNetwork = new ParticleNetwork();
   }
+  
+  // 延迟执行调试，确保CSS完全加载
+  setTimeout(() => {
+    debugLayout();
+    checkCacheAndVersion();
+  }, 1000);
+  
+  // 监听窗口大小变化
+  window.addEventListener('resize', () => {
+    setTimeout(debugLayout, 100);
+  });
 });
