@@ -149,6 +149,9 @@ class LessonPlanCore {
 
         // 融合比例交互
         this.setupFusionRatioInteraction();
+        
+        // 学科融合开关交互
+        this.setupFusionToggle();
     }
 
     /**
@@ -250,63 +253,117 @@ class LessonPlanCore {
     }
 
     /**
-     * 设置融合比例交互功能
+     * 设置学科融合开关交互功能
      */
-    setupFusionRatioInteraction() {
-        const ratioRadios = document.querySelectorAll('input[name="fusion-ratio"]');
-        const customRatioContainer = document.getElementById('custom-ratio-container');
-        const customRatioInput = document.getElementById('custom-ratio');
-
-        ratioRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                if (radio.value === 'custom') {
-                    customRatioContainer.classList.remove('hidden');
-                    customRatioInput.focus();
-                } else {
-                    customRatioContainer.classList.add('hidden');
-                }
-                this.updateConfirmationInfo();
-            });
-        });
-
-        // 自定义比例输入验证
-        if (customRatioInput) {
-            customRatioInput.addEventListener('blur', () => {
-                this.validateCustomRatio(customRatioInput);
-            });
-            customRatioInput.addEventListener('input', () => {
+    setupFusionToggle() {
+        const enableFusionCheckbox = document.getElementById('enable-fusion');
+        const fusionSettings = document.getElementById('fusion-settings');
+        
+        if (enableFusionCheckbox && fusionSettings) {
+            // 初始状态设置
+            this.toggleFusionSettings(enableFusionCheckbox.checked);
+            
+            // 监听开关变化
+            enableFusionCheckbox.addEventListener('change', () => {
+                this.toggleFusionSettings(enableFusionCheckbox.checked);
                 this.updateConfirmationInfo();
             });
         }
     }
 
     /**
-     * 验证自定义比例格式
+     * 切换融合设置显示/隐藏
      */
-    validateCustomRatio(input) {
-        const value = input.value.trim();
-        if (!value) return true;
-
-        // 简单验证：检查是否包含百分号和加号
-        const hasPercentage = value.includes('%');
+    toggleFusionSettings(enableFusion) {
+        const fusionSettings = document.getElementById('fusion-settings');
+        const fusionInfo = document.getElementById('fusion-info');
+        const fusionRatioInfo = document.getElementById('fusion-ratio-info');
+        const fusionApproachInfo = document.getElementById('fusion-approach-info');
         
-        if (hasPercentage) {
-            // 提取所有百分比数字
-            const percentages = value.match(/(\d+)%/g);
-            if (percentages) {
-                const total = percentages.reduce((sum, p) => {
-                    return sum + parseInt(p.replace('%', ''));
-                }, 0);
-                
-                if (total !== 100) {
-                    this.showFieldError(input, '所有比例相加必须等于100%');
-                    return false;
-                }
+        if (fusionSettings) {
+            if (enableFusion) {
+                fusionSettings.classList.remove('hidden');
+            } else {
+                fusionSettings.classList.add('hidden');
             }
         }
         
-        this.clearFieldError(input);
-        return true;
+        // 更新确认页面的显示
+        if (fusionInfo) {
+            fusionInfo.style.display = enableFusion ? 'block' : 'none';
+        }
+        if (fusionRatioInfo) {
+            fusionRatioInfo.style.display = enableFusion ? 'block' : 'none';
+        }
+        if (fusionApproachInfo) {
+            fusionApproachInfo.style.display = enableFusion ? 'block' : 'none';
+        }
+    }
+
+    /**
+     * 设置融合比例交互功能
+     */
+    setupFusionRatioInteraction() {
+        // 直接初始化滑动条，因为现在滑动条是直接显示的
+        this.initializeSliders();
+    }
+
+    /**
+     * 初始化滑动条功能
+     */
+    initializeSliders() {
+        const subjectSlider = document.getElementById('subject-ratio-slider');
+        const mainSubjectValue = document.getElementById('main-subject-value');
+        const fusionSubjectValue = document.getElementById('fusion-subject-value');
+        const ratioPreview = document.getElementById('ratio-preview');
+
+        if (!subjectSlider) {
+            return;
+        }
+
+        // 检查是否已经初始化过，避免重复绑定事件
+        if (subjectSlider.dataset.initialized === 'true') return;
+
+        // 滑动条事件
+        subjectSlider.addEventListener('input', () => {
+            const mainValue = parseInt(subjectSlider.value);
+            const fusionValue = 100 - mainValue;
+            
+            // 更新显示值
+            if (mainSubjectValue) mainSubjectValue.textContent = `${mainValue}%`;
+            if (fusionSubjectValue) fusionSubjectValue.textContent = `${fusionValue}%`;
+            
+            // 更新预览
+            if (ratioPreview) ratioPreview.textContent = `主学科${mainValue}% + 融合学科${fusionValue}%`;
+            
+            // 更新确认信息
+            this.updateConfirmationInfo();
+        });
+
+        // 初始化显示值
+        const initialMainValue = parseInt(subjectSlider.value);
+        const initialFusionValue = 100 - initialMainValue;
+        if (mainSubjectValue) mainSubjectValue.textContent = `${initialMainValue}%`;
+        if (fusionSubjectValue) fusionSubjectValue.textContent = `${initialFusionValue}%`;
+        if (ratioPreview) ratioPreview.textContent = `主学科${initialMainValue}% + 融合学科${initialFusionValue}%`;
+
+        // 标记为已初始化
+        subjectSlider.dataset.initialized = 'true';
+    }
+
+    /**
+     * 获取滑动条自定义比例
+     */
+    getCustomRatioFromSliders() {
+        const subjectSlider = document.getElementById('subject-ratio-slider');
+        
+        if (subjectSlider) {
+            const mainValue = parseInt(subjectSlider.value);
+            const fusionValue = 100 - mainValue;
+            return `主学科${mainValue}%+融合学科${fusionValue}%`;
+        }
+        
+        return '主学科90%+融合学科10%';
     }
 
     /**
@@ -332,29 +389,21 @@ class LessonPlanCore {
         const courseName = document.getElementById('course-name')?.value?.trim() || '-';
         const teacher = document.getElementById('teacher')?.value?.trim() || '-';
         const gradeLevel = document.getElementById('grade-level')?.value || 'AI自动判断';
+        const classHours = document.getElementById('class-hours')?.value?.trim() || 'AI自动确定';
+        
+        // 检查是否启用学科融合
+        const enableFusion = document.getElementById('enable-fusion')?.checked ?? true;
         const fusionSubjects = document.getElementById('fusion-subjects')?.value?.trim() || 'AI自动推荐';
         const fusionApproach = document.getElementById('fusion-approach')?.value || 'AI自动选择';
         
-        // 获取融合比例
-        const selectedRatio = document.querySelector('input[name="fusion-ratio"]:checked')?.value || '70:30';
+        // 获取融合比例（现在直接从滑动条获取）
         let ratioDisplay = '';
         
-        switch (selectedRatio) {
-            case '70:30':
-                ratioDisplay = '主导型(70:30)';
-                break;
-            case '60:40':
-                ratioDisplay = '偏重型(60:40)';
-                break;
-            case '50:50':
-                ratioDisplay = '均衡型(50:50)';
-                break;
-            case 'custom':
-                const customRatio = document.getElementById('custom-ratio')?.value?.trim();
-                ratioDisplay = customRatio ? `自定义(${customRatio})` : '自定义';
-                break;
-            default:
-                ratioDisplay = '主导型(70:30)';
+        if (enableFusion) {
+            const customRatio = this.getCustomRatioFromSliders();
+            ratioDisplay = customRatio;
+        } else {
+            ratioDisplay = '单一学科教学';
         }
         
         // 获取教学方式显示名称
@@ -365,9 +414,7 @@ class LessonPlanCore {
             'case-study': '案例研究',
             'inquiry-based': '探究式学习'
         };
-        const approachDisplay = approachNames[fusionApproach] || 'AI自动选择';
-        
-        const classHours = document.getElementById('class-hours')?.value?.trim() || 'AI自动确定';
+        const approachDisplay = enableFusion ? (approachNames[fusionApproach] || 'AI自动选择') : '传统教学方式';
         
         const confirmCourseName = document.getElementById('confirm-course-name');
         const confirmTeacher = document.getElementById('confirm-teacher');
@@ -381,7 +428,7 @@ class LessonPlanCore {
         if (confirmTeacher) confirmTeacher.textContent = teacher;
         if (confirmGrade) confirmGrade.textContent = gradeLevel;
         if (confirmClassHours) confirmClassHours.textContent = classHours === '' ? 'AI自动确定' : `${classHours}课时`;
-        if (confirmSubjects) confirmSubjects.textContent = fusionSubjects;
+        if (confirmSubjects) confirmSubjects.textContent = enableFusion ? fusionSubjects : '单一学科';
         if (confirmRatio) confirmRatio.textContent = ratioDisplay;
         if (confirmApproach) confirmApproach.textContent = approachDisplay;
     }
@@ -564,13 +611,24 @@ class LessonPlanCore {
             }
         });
 
-        // 保存融合比例选择
-        const ratioRadios = document.querySelectorAll('input[name="fusion-ratio"]');
-        ratioRadios.forEach(radio => {
-            radio.addEventListener('change', () => {
-                this.saveFieldData('fusion-ratio', radio.value);
+        // 融合比例现在通过滑动条直接设置，无需保存固定选择
+
+        // 保存滑动条值
+        const subjectSlider = document.getElementById('subject-ratio-slider');
+        
+        if (subjectSlider) {
+            subjectSlider.addEventListener('input', () => {
+                this.saveFieldData('subject-ratio-slider', subjectSlider.value);
             });
-        });
+        }
+
+        // 保存融合开关状态
+        const enableFusionCheckbox = document.getElementById('enable-fusion');
+        if (enableFusionCheckbox) {
+            enableFusionCheckbox.addEventListener('change', () => {
+                this.saveFieldData('enable-fusion', enableFusionCheckbox.checked);
+            });
+        }
     }
 
     /**
@@ -607,20 +665,34 @@ class LessonPlanCore {
             }
         });
 
-        // 加载融合比例选择
+        // 融合比例现在通过滑动条直接设置，无需加载固定选择
+
+        // 加载滑动条值
         try {
-            const savedRatio = localStorage.getItem('lessonPlan_fusion-ratio');
+            const savedRatio = localStorage.getItem('lessonPlan_subject-ratio-slider');
+            
             if (savedRatio) {
-                const ratioRadio = document.querySelector(`input[name="fusion-ratio"][value="${savedRatio}"]`);
-                if (ratioRadio) {
-                    ratioRadio.checked = true;
-                    // 如果是自定义比例，显示输入框
-                    if (savedRatio === 'custom') {
-                        const customRatioContainer = document.getElementById('custom-ratio-container');
-                        if (customRatioContainer) {
-                            customRatioContainer.classList.remove('hidden');
-                        }
-                    }
+                const subjectSlider = document.getElementById('subject-ratio-slider');
+                if (subjectSlider) {
+                    subjectSlider.value = savedRatio;
+                }
+            }
+            
+            // 重新初始化滑动条显示
+            this.initializeSliders();
+        } catch (error) {
+            // 静默处理本地存储错误
+        }
+
+        // 加载融合开关状态
+        try {
+            const savedFusionState = localStorage.getItem('lessonPlan_enable-fusion');
+            if (savedFusionState !== null) {
+                const enableFusionCheckbox = document.getElementById('enable-fusion');
+                if (enableFusionCheckbox) {
+                    enableFusionCheckbox.checked = savedFusionState === 'true';
+                    // 触发融合设置显示/隐藏
+                    this.toggleFusionSettings(enableFusionCheckbox.checked);
                 }
             }
         } catch (error) {
@@ -680,7 +752,8 @@ class LessonPlanCore {
     clearSavedData() {
         const fields = [
             'course-name', 'teacher', 'grade-level', 'fusion-subjects', 
-            'fusion-approach', 'lesson-content', 'real-world-context', 'custom-requirements', 'custom-ratio', 'fusion-ratio'
+            'fusion-approach', 'lesson-content', 'real-world-context', 'custom-requirements', 'enable-fusion',
+            'subject-ratio-slider'
         ];
         
         fields.forEach(fieldId => {
@@ -696,13 +769,16 @@ class LessonPlanCore {
      * 获取表单数据
      */
     getFormData() {
-        // 获取融合比例
-        const selectedRatio = document.querySelector('input[name="fusion-ratio"]:checked')?.value || '70:30';
-        let fusionRatio = selectedRatio;
+        // 检查是否启用学科融合
+        const enableFusion = document.getElementById('enable-fusion')?.checked ?? true;
         
-        if (selectedRatio === 'custom') {
-            const customRatio = document.getElementById('custom-ratio')?.value?.trim();
-            fusionRatio = customRatio || '主学科70%+融合学科30%';
+        // 获取融合比例（现在直接从滑动条获取）
+        let fusionRatio = '';
+        
+        if (enableFusion) {
+            fusionRatio = this.getCustomRatioFromSliders();
+        } else {
+            fusionRatio = '单一学科教学';
         }
 
         return {
@@ -710,9 +786,10 @@ class LessonPlanCore {
             teacher: document.getElementById('teacher')?.value?.trim() || '',
             gradeLevel: document.getElementById('grade-level')?.value?.trim() || '',
             classHours: document.getElementById('class-hours')?.value?.trim() || '',
-            fusionSubjects: document.getElementById('fusion-subjects')?.value?.trim() || '',
+            enableFusion: enableFusion,
+            fusionSubjects: enableFusion ? (document.getElementById('fusion-subjects')?.value?.trim() || '') : '',
             fusionGoals: document.getElementById('fusion-goals')?.value?.trim() || '',
-            fusionApproach: document.getElementById('fusion-approach')?.value?.trim() || '',
+            fusionApproach: enableFusion ? (document.getElementById('fusion-approach')?.value?.trim() || '') : '',
             fusionRatio: fusionRatio,
             lessonContent: document.getElementById('lesson-content')?.value?.trim() || '',
             realWorldContext: document.getElementById('real-world-context')?.value?.trim() || '',

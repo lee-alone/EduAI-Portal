@@ -3,37 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学科融合教学设计助手</title>
+    <title>智能教学设计助手</title>
     <!-- 引入Tailwind CSS -->
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <!-- 引入Font Awesome图标 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
-    <!-- 引入Marked.js用于Markdown渲染 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- 引入html-docx-js用于Word导出 -->
-    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
-    <!-- 引入独立的PDF生成库 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- 库加载检查 -->
-    <script>
-        // 检查PDF库是否加载成功
-        window.addEventListener('load', function() {
-            const checkLibraries = () => {
-                const jsPDFLoaded = typeof window.jspdf !== 'undefined';
-                const html2canvasLoaded = typeof html2canvas !== 'undefined';
-                
-                console.log('jsPDF loaded:', jsPDFLoaded);
-                console.log('html2canvas loaded:', html2canvasLoaded);
-                
-                if (!jsPDFLoaded || !html2canvasLoaded) {
-                    console.warn('PDF libraries not fully loaded, retrying...');
-                    setTimeout(checkLibraries, 1000);
-                }
-            };
-            checkLibraries();
-        });
-    </script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <!-- 延迟加载的库 - 仅在第三步需要 -->
+    <!-- Marked.js用于Markdown渲染 -->
+    <!-- html-docx-js用于Word导出 -->
+    <!-- 库加载现在由JavaScript动态管理 -->
     <!-- 引入自定义样式 -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -47,8 +25,8 @@
                         <i class="fas fa-graduation-cap text-white text-lg"></i>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-900">学科融合教学设计助手</h1>
-                        <p class="text-xs text-gray-500">让学科融合教学设计更简单、更智能</p>
+                        <h1 class="text-xl font-bold text-gray-900">智能教学设计助手</h1>
+                        <p class="text-xs text-gray-500">让教学设计更简单、更智能</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -72,7 +50,7 @@
         <!-- 欢迎区域 -->
         <div class="text-center mb-12">
             <h2 class="text-3xl font-bold text-gray-900 mb-4">开始创建您的教学设计</h2>
-            <p class="text-lg text-gray-600 max-w-2xl mx-auto">只需简单几步，AI将为您生成专业的多学科融合教学方案</p>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">只需简单几步，AI将为您生成专业的教学方案</p>
         </div>
 
         <!-- 进度指示器 -->
@@ -172,33 +150,103 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold text-gray-900">教学内容设计</h3>
-                            <p class="text-gray-600">设置学科融合和教学重点</p>
+                            <p class="text-gray-600">设置教学重点和学科融合选项</p>
                         </div>
                     </div>
 
                     <div class="space-y-6">
+                        <!-- 学科融合开关 -->
                         <div class="form-group">
-                            <label for="fusion-subjects" class="block text-sm font-medium text-gray-700 mb-2">
-                                期望融合的学科 <span class="text-gray-400">(可选)</span>
+                            <label class="flex items-center space-x-3 cursor-pointer">
+                                <input type="checkbox" id="enable-fusion" class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500" checked>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-700">启用学科融合教学</span>
+                                    <p class="text-xs text-gray-500">开启后将设计多学科融合的教学方案，关闭则专注于单一学科教学</p>
+                                </div>
                             </label>
-                            <input type="text" id="fusion-subjects" class="modern-input" placeholder="例如：支持多个学科融合，数学+美术、语文+历史、物理+化学">
-                            <p class="text-xs text-gray-500 mt-1">留空时AI将自动推荐合适的融合学科</p>
                         </div>
 
-                        <div class="form-group">
-                            <label for="fusion-approach" class="block text-sm font-medium text-gray-700 mb-2">
-                                教学方式 <span class="text-gray-400">(可选)</span>
-                            </label>
-                            <select id="fusion-approach" class="modern-select">
-                                <option value="">AI自动选择最佳方式</option>
-                                <option value="project-based">项目式学习</option>
-                                <option value="problem-based">问题导向学习</option>
-                                <option value="theme-based">主题式融合</option>
-                                <option value="case-study">案例研究</option>
-                                <option value="inquiry-based">探究式学习</option>
-                            </select>
+                        <!-- 融合学科设置（仅在启用融合时显示） -->
+                        <div id="fusion-settings" class="space-y-4">
+                            <div class="form-group">
+                                <label for="fusion-subjects" class="block text-sm font-medium text-gray-700 mb-2">
+                                    期望融合的学科 <span class="text-gray-400">(可选)</span>
+                                </label>
+                                <input type="text" id="fusion-subjects" class="modern-input" placeholder="例如：数学+美术、语文+历史、物理+化学">
+                                <p class="text-xs text-gray-500 mt-1">留空时AI将自动推荐合适的融合学科</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fusion-approach" class="block text-sm font-medium text-gray-700 mb-2">
+                                    教学方式 <span class="text-gray-400">(可选)</span>
+                                </label>
+                                <select id="fusion-approach" class="modern-select">
+                                    <option value="">AI自动选择最佳方式</option>
+                                    <option value="project-based">项目式学习</option>
+                                    <option value="problem-based">问题导向学习</option>
+                                    <option value="theme-based">主题式融合</option>
+                                    <option value="case-study">案例研究</option>
+                                    <option value="inquiry-based">探究式学习</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-3">学科融合比例 <span class="text-gray-400">(可选)</span></label>
+                                <div class="bg-gray-50 rounded-xl p-4 space-y-4">
+                                    <p class="text-xs text-gray-600 mb-3">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        主学科将由AI根据课程名称自动识别，融合学科为您选择的辅助学科
+                                    </p>
+                                    
+                                    <!-- 滑动条比例设置 -->
+                                    <div class="space-y-4">
+                                        <!-- 比例滑动条 -->
+                                        <div class="space-y-3">
+                                            <div class="flex justify-between items-center">
+                                                <div class="text-sm font-medium text-gray-700">
+                                                    <span class="text-blue-600">主学科</span> ← → <span class="text-green-600">融合学科</span>
+                                                </div>
+                                                <div class="text-sm font-semibold">
+                                                    <span id="main-subject-value" class="text-blue-600">90%</span> + 
+                                                    <span id="fusion-subject-value" class="text-green-600">10%</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="relative">
+                                                <input type="range" id="subject-ratio-slider" min="50" max="95" value="90" step="5"
+                                                       class="w-full h-3 bg-gradient-to-r from-blue-200 via-gray-200 to-green-200 rounded-lg appearance-none cursor-pointer slider">
+                                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                                    <span class="text-blue-600">95%</span>
+                                                    <span class="text-gray-500">90%</span>
+                                                    <span class="text-green-600">50%</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- 比例说明 -->
+                                            <div class="flex justify-between text-xs text-gray-500">
+                                                <span class="text-blue-600">← 主学科95%+融合5%</span>
+                                                <span class="text-gray-500">当前90%+10%</span>
+                                                <span class="text-green-600">主学科50%+融合50% →</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 比例预览 -->
+                                        <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-3 border border-gray-200">
+                                            <div class="flex items-center justify-between text-sm">
+                                                <span class="text-gray-600">当前设置：</span>
+                                                <span id="ratio-preview" class="font-semibold text-gray-800">主学科90% + 融合学科10%</span>
+                                            </div>
+                                            <div class="mt-2 text-xs text-gray-500">
+                                                <i class="fas fa-info-circle mr-1"></i>
+                                                拖动滑动条调整比例，步进为5%，总和始终为100%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
+                        <!-- 通用教学设置 -->
                         <div class="form-group">
                             <label for="lesson-content" class="block text-sm font-medium text-gray-700 mb-2">
                                 教学重点 <span class="text-gray-400">(可选)</span>
@@ -211,52 +259,6 @@
                                 实际应用场景 <span class="text-gray-400">(可选)</span>
                             </label>
                             <textarea id="real-world-context" class="modern-textarea" rows="2" placeholder="描述如何将教学内容与现实生活相结合..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">学科融合比例 <span class="text-gray-400">(可选)</span></label>
-                            <div class="bg-gray-50 rounded-xl p-4 space-y-3">
-                                <p class="text-xs text-gray-600 mb-3">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    主学科将由AI根据课程名称自动识别，融合学科为您选择的辅助学科
-                                </p>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <label class="fusion-ratio-option flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
-                                        <input type="radio" name="fusion-ratio" value="70:30" class="text-blue-500 focus:ring-blue-500" checked>
-                                        <div>
-                                            <span class="font-medium text-gray-900">主导型</span>
-                                            <p class="text-xs text-gray-500">主学科70% + 融合学科30%</p>
-                                        </div>
-                                    </label>
-                                    <label class="fusion-ratio-option flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
-                                        <input type="radio" name="fusion-ratio" value="60:40" class="text-blue-500 focus:ring-blue-500">
-                                        <div>
-                                            <span class="font-medium text-gray-900">偏重型</span>
-                                            <p class="text-xs text-gray-500">主学科60% + 融合学科40%</p>
-                                        </div>
-                                    </label>
-                                    <label class="fusion-ratio-option flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
-                                        <input type="radio" name="fusion-ratio" value="50:50" class="text-blue-500 focus:ring-blue-500">
-                                        <div>
-                                            <span class="font-medium text-gray-900">均衡型</span>
-                                            <p class="text-xs text-gray-500">主学科50% + 融合学科50%</p>
-                                        </div>
-                                    </label>
-                                    <label class="fusion-ratio-option flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
-                                        <input type="radio" name="fusion-ratio" value="custom" class="text-blue-500 focus:ring-blue-500">
-                                        <div>
-                                            <span class="font-medium text-gray-900">自定义</span>
-                                            <p class="text-xs text-gray-500">自定义比例分配</p>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                <div id="custom-ratio-container" class="hidden">
-                                    <label for="custom-ratio" class="block text-sm font-medium text-gray-700 mb-2">自定义比例</label>
-                                    <input type="text" id="custom-ratio" class="modern-input" placeholder="例如：数学50%+美术30%+信息技术20%">
-                                    <p class="text-xs text-gray-500 mt-1">请确保所有比例相加等于100%，主学科为AI识别的学科</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -304,15 +306,15 @@
                                 <span class="text-gray-600">课时数：</span>
                                 <span id="confirm-class-hours" class="font-medium">AI自动确定</span>
                             </div>
-                            <div>
+                            <div id="fusion-info" class="col-span-2">
                                 <span class="text-gray-600">融合学科：</span>
                                 <span id="confirm-subjects" class="font-medium">AI自动推荐</span>
                             </div>
-                            <div>
+                            <div id="fusion-ratio-info" class="col-span-2">
                                 <span class="text-gray-600">融合比例：</span>
                                 <span id="confirm-ratio" class="font-medium">主导型(70:30)</span>
                             </div>
-                            <div>
+                            <div id="fusion-approach-info" class="col-span-2">
                                 <span class="text-gray-600">教学方式：</span>
                                 <span id="confirm-approach" class="font-medium">AI自动选择</span>
                             </div>
@@ -395,9 +397,6 @@
                             </div>
                         </div>
                         <div class="flex space-x-3">
-                            <button id="export-pdf-btn" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                <i class="fas fa-file-pdf mr-2"></i> 导出PDF
-                            </button>
                             <button id="export-word-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                                 <i class="fas fa-file-word mr-2"></i> 导出Word
                             </button>
@@ -466,6 +465,7 @@
 
     <!-- 引入JavaScript文件 -->
     <script src="../../js/config.js"></script>
+    <script src="prompts.js"></script>
     <script src="script-core.js"></script>
     <script src="script-ai.js"></script>
 </body>

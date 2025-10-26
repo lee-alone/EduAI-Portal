@@ -1,0 +1,13 @@
+# 重定向规则
+# 如果用户访问根目录，重定向到index.html
+/ /index.html 200
+
+# 模块重定向
+/modules/lesson-plans /modules/lesson-plans/ 301
+/modules/classroom-interaction /modules/classroom-interaction/ 301
+/modules/ai-homework /modules/ai-homework/ 301
+/modules/class-meetings /modules/class-meetings/ 301
+/modules/thinkeduai /modules/thinkeduai/ 301
+
+# 404页面重定向到首页
+/* /index.html 404

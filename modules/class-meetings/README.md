@@ -120,7 +120,7 @@ class ClassMeetingGenerator {
    open index.html
    # 或使用本地服务器（推荐）
    python -m http.server 8000
-   # 然后访问 http://localhost:8000
+   # 然后访问 https://your-username.github.io/EduAI-Portal/modules/class-meetings/
    ```
 
 3. **配置API密钥**（可选）

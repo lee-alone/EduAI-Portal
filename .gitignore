@@ -1,0 +1,73 @@
+# 依赖项
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境变量
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 临时文件
+temp/
+tmp/
+*.tmp
+*.temp
+
+# 日志文件
+*.log
+logs/
+
+# 构建输出
+dist/
+build/
+out/
+
+# 缓存
+.cache/
+.parcel-cache/
+
+# 测试覆盖率
+coverage/
+
+# 本地开发服务器
+.vercel
+.netlify
+
+# 敏感信息
+*.key
+*.pem
+*.p12
+*.pfx
+
+# 备份文件
+*.bak
+*.backup
+*~
+
+# Excel临时文件
+~$*.xlsx
+~$*.xls
+
+# 特定于项目的忽略文件
+modules/classroom-interaction/temp/
+modules/classroom-interaction/dist/

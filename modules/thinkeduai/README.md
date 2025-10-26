@@ -74,7 +74,7 @@ thinkeduai/
    npx serve .
    ```
    
-   然后访问 `http://localhost:8000`
+   然后访问 `https://your-username.github.io/EduAI-Portal/modules/thinkeduai/`
 
 ### 配置说明
 

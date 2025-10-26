@@ -12,6 +12,16 @@ class LessonPlanAI {
             'baichuan2': 'https://api.baichuan-ai.com/v1/chat/completions'
         };
         
+        // 库加载状态管理
+        this.libraryStatus = {
+            marked: false,
+            htmlDocx: false
+        };
+        
+        // 提示词管理器
+        this.promptManager = null;
+        this.promptsLoaded = false;
+        
         this.init();
     }
 
@@ -21,6 +31,260 @@ class LessonPlanAI {
     init() {
         this.bindEvents();
         this.setupMarkdownRenderer();
+        this.setupLazyLoading();
+        this.loadPrompts();
+    }
+
+    /**
+     * 异步加载提示词文件
+     */
+    async loadPrompts() {
+        try {
+            // 检查是否已经加载过
+            if (this.promptsLoaded) {
+                return;
+            }
+
+            // 检查PromptManager是否已存在
+            if (typeof PromptManager !== 'undefined') {
+                this.promptManager = new PromptManager();
+                this.promptsLoaded = true;
+                console.log('✅ 提示词管理器加载成功');
+                return;
+            }
+
+            // 动态加载提示词文件
+            await this.loadScript('./prompts.js');
+            
+            // 等待PromptManager类可用
+            let attempts = 0;
+            const maxAttempts = 10;
+            while (typeof PromptManager === 'undefined' && attempts < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+
+            if (typeof PromptManager !== 'undefined') {
+                this.promptManager = new PromptManager();
+                this.promptsLoaded = true;
+                console.log('✅ 提示词管理器异步加载成功');
+            } else {
+                throw new Error('提示词管理器加载失败');
+            }
+        } catch (error) {
+            console.error('❌ 提示词加载失败:', error);
+            this.promptsLoaded = false;
+        }
+    }
+
+    /**
+     * 设置延迟加载
+     */
+    setupLazyLoading() {
+        // 页面加载完成后3秒开始后台加载库
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                this.loadThirdStepLibrariesInBackground();
+            }, 3000); // 3秒延迟
+        });
+
+        // 监听生成按钮，确保所有库都已加载
+        const generateBtn = document.getElementById('generate-btn');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => {
+                this.ensureLibrariesLoaded();
+            });
+        }
+    }
+
+    /**
+     * 后台静默加载Word导出和Markdown渲染需要的库
+     */
+    async loadThirdStepLibrariesInBackground() {
+        // 防止重复加载
+        if (this.isLoadingLibraries) {
+            console.log('库正在加载中，跳过重复加载');
+            return;
+        }
+
+        this.isLoadingLibraries = true;
+        console.log('开始后台加载Word导出和Markdown渲染库...');
+
+        const libraries = [
+            {
+                name: 'marked',
+                url: 'https://cdn.bootcdn.net/ajax/libs/marked/4.3.0/marked.min.js',
+                check: () => typeof marked !== 'undefined'
+            },
+            {
+                name: 'htmlDocx',
+                url: 'https://unpkg.com/html-docx-js@0.3.1/dist/html-docx.js',
+                check: () => typeof htmlDocx !== 'undefined'
+            }
+        ];
+
+        for (const lib of libraries) {
+            if (!this.libraryStatus[lib.name]) {
+                let loaded = false;
+                
+                // 支持多个URL的库（如html2canvas）
+                const urls = lib.urls || [lib.url];
+                
+                for (const url of urls) {
+                    try {
+                        console.log(`🔄 尝试加载 ${lib.name} 从: ${url}`);
+                        await this.loadScript(url);
+                        
+                        // 等待更长时间让库完全初始化
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        
+                        // 多次检查库是否真正可用
+                        let isLoaded = false;
+                        for (let i = 0; i < 3; i++) {
+                            isLoaded = lib.check();
+                            if (isLoaded) break;
+                            
+                            
+                            await new Promise(resolve => setTimeout(resolve, 200));
+                        }
+                        
+                        if (isLoaded) {
+                            this.libraryStatus[lib.name] = true;
+                            console.log(`✅ ${lib.name} 库后台加载成功`);
+                            loaded = true;
+                            break;
+                        } else {
+                            console.warn(`⚠️ ${lib.name} 库加载后检查失败，尝试下一个URL`);
+                        }
+                    } catch (error) {
+                        console.warn(`⚠️ ${lib.name} 库从 ${url} 加载失败:`, error);
+                        continue;
+                    }
+                }
+                
+                if (!loaded) {
+                    console.error(`❌ ${lib.name} 库所有URL都加载失败`);
+                    this.libraryStatus[lib.name] = false;
+                }
+            } else {
+                console.log(`✅ ${lib.name} 库已加载`);
+            }
+        }
+
+        this.isLoadingLibraries = false;
+
+        // 检查加载状态
+        const allLoaded = Object.values(this.libraryStatus).every(status => status);
+        if (allLoaded) {
+            console.log('🎉 所有Word导出和Markdown渲染库后台加载完成');
+        } else {
+            const failedLibs = Object.entries(this.libraryStatus)
+                .filter(([name, status]) => !status)
+                .map(([name]) => name);
+            console.warn(`⚠️ 以下库加载失败: ${failedLibs.join(', ')}`);
+        }
+    }
+
+    /**
+     * 加载Word导出和Markdown渲染需要的库（用户触发时的快速加载）
+     */
+    async loadThirdStepLibraries() {
+        // 如果后台已经加载完成，直接返回
+        const allLoaded = Object.values(this.libraryStatus).every(status => status);
+        if (allLoaded) {
+            console.log('所有库已加载完成，无需重复加载');
+            return;
+        }
+
+        // 如果后台正在加载，等待完成
+        if (this.isLoadingLibraries) {
+            console.log('等待后台加载完成...');
+            // 等待后台加载完成
+            while (this.isLoadingLibraries) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            return;
+        }
+
+        // 如果后台加载失败或未开始，重新尝试
+        console.log('重新尝试加载缺失的库...');
+        await this.loadThirdStepLibrariesInBackground();
+    }
+
+    /**
+     * 动态加载脚本（带重试机制）
+     */
+    async loadScript(url, maxRetries = 3) {
+        // 检查是否已经加载
+        if (document.querySelector(`script[src="${url}"]`)) {
+            console.log(`📦 脚本已存在，跳过加载: ${url}`);
+            return Promise.resolve();
+        }
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                const script = document.createElement('script');
+                script.src = url;
+                script.async = true;
+                
+                return new Promise((resolve, reject) => {
+                    script.onload = () => {
+                        console.log(`📦 脚本加载成功: ${url}`);
+                        resolve();
+                    };
+                    script.onerror = (error) => {
+                        console.warn(`⚠️ 脚本加载失败 (尝试 ${attempt}/${maxRetries}): ${url}`, error);
+                        // 清理失败的脚本标签
+                        if (script.parentNode) {
+                            script.parentNode.removeChild(script);
+                        }
+                        if (attempt === maxRetries) {
+                            reject(error);
+                        } else {
+                            console.log(`🔄 重试加载脚本 (${attempt}/${maxRetries}): ${url}`);
+                            setTimeout(() => {
+                                this.loadScript(url, maxRetries).then(resolve).catch(reject);
+                            }, 1000 * attempt);
+                        }
+                    };
+                    document.head.appendChild(script);
+                });
+            } catch (error) {
+                if (attempt === maxRetries) {
+                    throw error;
+                }
+                console.log(`🔄 重试加载脚本 (${attempt}/${maxRetries}): ${url}`);
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
+        }
+    }
+
+
+    /**
+     * 确保所有库都已加载
+     */
+    async ensureLibrariesLoaded() {
+        const allLoaded = Object.values(this.libraryStatus).every(status => status);
+        
+        if (!allLoaded) {
+            console.log('检测到缺失的库，尝试加载...');
+            // 静默尝试加载缺失的库
+            await this.loadThirdStepLibraries();
+            
+            // 再次检查加载状态
+            const stillMissing = Object.values(this.libraryStatus).some(status => !status);
+            if (stillMissing) {
+                const failedLibs = Object.entries(this.libraryStatus)
+                    .filter(([name, status]) => !status)
+                    .map(([name]) => name);
+                console.error('以下库加载失败:', failedLibs);
+                window.lessonPlanCore.showNotification(`导出功能库加载失败: ${failedLibs.join(', ')}，请刷新页面重试`, 'error');
+                return false;
+            }
+        }
+        
+        console.log('所有库加载完成，可以开始生成教案');
+        return true;
     }
 
     /**
@@ -32,14 +296,6 @@ class LessonPlanAI {
         if (generateBtn) {
             generateBtn.addEventListener('click', () => {
                 this.generateLessonPlan();
-            });
-        }
-
-        // 导出PDF按钮
-        const exportPdfBtn = document.getElementById('export-pdf-btn');
-        if (exportPdfBtn) {
-            exportPdfBtn.addEventListener('click', () => {
-                this.exportToPDF();
             });
         }
 
@@ -73,6 +329,22 @@ class LessonPlanAI {
             // 验证表单
             if (!window.lessonPlanCore.validateAllFields()) {
                 window.lessonPlanCore.showNotification('请填写所有必填字段', 'error');
+                return;
+            }
+
+            // 确保提示词已加载
+            if (!this.promptsLoaded) {
+                window.lessonPlanCore.showNotification('正在加载提示词，请稍候...', 'info');
+                await this.loadPrompts();
+                if (!this.promptsLoaded) {
+                    window.lessonPlanCore.showNotification('提示词加载失败，请刷新页面重试', 'error');
+                    return;
+                }
+            }
+
+            // 确保所有必要的库都已加载
+            const librariesReady = await this.ensureLibrariesLoaded();
+            if (!librariesReady) {
                 return;
             }
 
@@ -161,6 +433,11 @@ class LessonPlanAI {
      * 构建AI提示词
      */
     buildPrompt(formData) {
+        // 检查提示词是否已加载
+        if (!this.promptsLoaded || !this.promptManager) {
+            throw new Error('提示词尚未加载完成，请稍后重试');
+        }
+
         // 首先定义当前日期
         const currentDate = new Date().toLocaleDateString('zh-CN', {
             year: 'numeric',
@@ -168,127 +445,16 @@ class LessonPlanAI {
             day: '2-digit'
         });
         
-        const systemPrompt = `你是一位资深的教育专家，专门从事教学设计和课程开发。请根据用户提供的课程信息，按照标准教案格式生成一份完整的教学设计方案。
+        // 根据是否启用融合生成不同的系统提示词
+        const systemPromptType = formData.enableFusion ? 'fusionSystem' : 'singleSubjectSystem';
+        const userPromptType = formData.enableFusion ? 'fusionUser' : 'singleSubjectUser';
 
-**重要要求：必须严格按照以下分块结构输出，每个部分都要详细完整**
-
-## 第一部分：教案基本信息
-
-### 1. 课题课标要求
-- 课程标题和课程标准要求
-
-### 2. 基本信息
-- 备课时间：${currentDate}
-- 课时数：[根据用户输入或自动确定]
-- 教师：[用户输入的教师姓名]
-
-### 3. 素养目标
-- 学科核心素养培养目标
-- 跨学科综合素养目标
-- 21世纪技能培养目标
-
-### 4. 重点
-- 本课程的教学重点内容
-- 核心知识点和技能要求
-
-### 5. 难点
-- 学生理解和掌握的难点
-- 需要重点突破的认知障碍
-
-### 6. 学情分析
-- 学生年龄特点和认知水平
-- 已有知识基础和经验
-- 学习兴趣和动机分析
-- 个体差异考虑
-
-### 7. 教学策略
-- 采用的教学方法和策略
-- 学科融合的具体方式
-- 信息技术应用策略
-
-### 8. 教学资源
-- 教学媒体和技术工具
-- 实验器材和教具
-- 学习材料和参考资源
-- 网络资源和数字化工具
-
-## 第二部分：教学过程设计
-
-### 教学过程表格
-请按照以下三列格式详细设计：
-
-| 教师活动 | 学生活动 | 设计意图 |
-|---------|---------|---------|
-| [详细描述教师在各个教学环节的具体活动] | [详细描述学生的学习活动和参与方式] | [说明每个环节的教学目的和设计理念] |
-
-教学过程应包括：
-1. 导入环节（5-10分钟）
-2. 新课讲授（20-25分钟）
-3. 巩固练习（10-15分钟）
-4. 总结反思（5分钟）
-
-## 第三部分：板书设计与教学反思
-
-### 9. 板书设计
-- 板书布局和结构设计
-- 关键概念和知识点呈现
-- 图表、公式或示意图设计
-- 板书的逻辑关系和层次
-
-### 10. 教学反思
-- 教学目标达成情况分析
-- 教学方法效果评估
-- 学生学习效果反馈
-- 教学改进建议和优化方向
-- 下次教学的调整策略
-
-**格式要求：**
-- 使用Markdown格式输出
-- 每个部分都要有明确的标题
-- 内容要详实具体，符合实际教学需要
-- 语言专业规范，便于教师实际使用
-- 确保所有10个部分都完整包含`;
-
-        const userPrompt = `请为以下课程设计标准教案：
-
-**课程信息：**
-- 课程名称：${formData.courseName}
-- 教师：${formData.teacher}
-- 备课时间：${currentDate}
-- 年级段：${formData.gradeLevel || '请根据课程名称自动判断'}
-- 课时数：${formData.classHours || '请根据课程内容自动确定'}
-
-**教学设计要求：**
-- 期望融合的学科：${formData.fusionSubjects || '请根据课程名称自动推荐相关学科'}
-- 教学方式偏好：${formData.fusionApproach || '请选择最适合的教学方式'}
-- 学科融合比例：${formData.fusionRatio}
-
-**教学内容重点：**
-${formData.lessonContent || '请根据课程名称分析教学内容要点'}
-
-**实际应用场景：**
-${formData.realWorldContext || '请设计与现实生活相关的应用情境'}
-
-**特殊要求：**
-${formData.customRequirements || '请按照标准教案格式进行设计'}
-
-**重要提醒：**
-1. 必须严格按照上述10个分块结构输出，不能遗漏任何部分
-2. 首先分析课程名称，识别主要学科和适合的年级段
-3. 根据课程特点确定合适的课时数（如果用户未指定）
-4. 教学过程设计要详细具体，包含完整的时间安排
-5. 板书设计要有实际可操作性
-6. 教学反思要深入具体，有指导价值
-7. 所有内容都要符合实际教学需要，便于教师直接使用
-   - 如果是70:30比例，主学科内容应占70%，融合学科占30%
-   - 如果是自定义比例，请严格按照指定百分比分配
-   - 在教学过程设计中明确体现各学科的时间和内容分配
-   - 确保主学科始终保持主导地位，融合学科起辅助和拓展作用
-
-请生成一份完整的多学科融合教学设计方案。`;
+        const systemPrompt = this.promptManager.getPrompt(systemPromptType, formData, currentDate);
+        const userPrompt = this.promptManager.getPrompt(userPromptType, formData, currentDate);
 
         return { systemPrompt, userPrompt };
     }
+
 
     /**
      * 调用AI API (串流版本)
@@ -618,11 +784,15 @@ ${formData.customRequirements || '请按照标准教案格式进行设计'}
      * 增强HTML以适配教案格式
      */
     enhanceHTMLForLessonPlan(html) {
-        // 添加融合教学设计头部信息
+        // 添加教学设计头部信息
         const formData = window.lessonPlanCore.getFormData();
+        const headerTitle = formData.enableFusion ? 
+            `${formData.courseName} - 多学科融合教学设计` : 
+            `${formData.courseName} - 教学设计`;
+        
         const headerInfo = `
             <div class="lesson-header">
-                <h1>${formData.courseName} - 多学科融合教学设计</h1>
+                <h1>${headerTitle}</h1>
                 <div class="lesson-info">
                     <div class="lesson-info-item">
                         <span class="lesson-info-label">课程名称：</span>
@@ -632,6 +802,7 @@ ${formData.customRequirements || '请按照标准教案格式进行设计'}
                         <span class="lesson-info-label">设计教师：</span>
                         <span>${formData.teacher}</span>
                     </div>
+                    ${formData.enableFusion ? `
                     <div class="lesson-info-item">
                         <span class="lesson-info-label">融合学科：</span>
                         <span>${formData.fusionSubjects || 'AI自动推荐'}</span>
@@ -640,6 +811,12 @@ ${formData.customRequirements || '请按照标准教案格式进行设计'}
                         <span class="lesson-info-label">融合方式：</span>
                         <span>${formData.fusionApproach || 'AI自动选择'}</span>
                     </div>
+                    ` : `
+                    <div class="lesson-info-item">
+                        <span class="lesson-info-label">教学类型：</span>
+                        <span>单一学科教学</span>
+                    </div>
+                    `}
                     <div class="lesson-info-item">
                         <span class="lesson-info-label">设计时间：</span>
                         <span>${window.lessonPlanCore.getCurrentDateTime()}</span>
@@ -698,132 +875,6 @@ ${formData.customRequirements || '请按照标准教案格式进行设计'}
         `;
     }
 
-    /**
-     * 导出为PDF文档
-     */
-    async exportToPDF() {
-        try {
-            const previewContent = document.getElementById('preview-content');
-            if (!previewContent || !previewContent.innerHTML.trim()) {
-                window.lessonPlanCore.showNotification('没有可导出的内容，请先生成教案', 'warning');
-                return;
-            }
-
-            // 显示加载提示
-            window.lessonPlanCore.showNotification('正在生成PDF，请稍候...', 'info');
-
-            // 检查库是否加载 - 支持多种加载方式
-            const html2canvasLoaded = typeof html2canvas !== 'undefined';
-            const jsPDFLoaded = typeof jsPDF !== 'undefined' || typeof window.jsPDF !== 'undefined';
-            
-            if (!html2canvasLoaded || !jsPDFLoaded) {
-                // 如果库未加载，尝试备用方案
-                console.warn('PDF库未完全加载，尝试备用方案');
-                await this.exportToPDFFallback();
-                return;
-            }
-
-            // 使用html2canvas将HTML转换为canvas
-            const canvas = await html2canvas(previewContent, {
-                scale: 2,
-                backgroundColor: '#ffffff',
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                width: previewContent.scrollWidth,
-                height: previewContent.scrollHeight
-            });
-
-            // 创建PDF文档 - 兼容不同的加载方式
-            const imgData = canvas.toDataURL('image/jpeg', 0.8);
-            const PDFClass = window.jsPDF || jsPDF;
-            const pdf = new PDFClass('p', 'mm', 'a4');
-            
-            // 计算PDF页面尺寸
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = canvas.width;
-            const imgHeight = canvas.height;
-            const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-            const imgX = (pdfWidth - imgWidth * ratio) / 2;
-            const imgY = 10;
-
-            // 添加图片到PDF
-            pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-
-            // 保存PDF
-            const fileName = this.getPDFFileName();
-            pdf.save(fileName);
-            
-            window.lessonPlanCore.showNotification('PDF导出成功！', 'success');
-
-        } catch (error) {
-            console.error('PDF导出错误:', error);
-            // 尝试备用方案
-            try {
-                await this.exportToPDFFallback();
-            } catch (fallbackError) {
-                window.lessonPlanCore.showNotification(`PDF导出失败: ${error.message}`, 'error');
-            }
-        }
-    }
-
-    /**
-     * PDF导出备用方案 - 使用浏览器打印功能
-     */
-    async exportToPDFFallback() {
-        const previewContent = document.getElementById('preview-content');
-        if (!previewContent) {
-            throw new Error('没有可导出的内容');
-        }
-
-        // 创建新窗口进行打印
-        const printWindow = window.open('', '_blank');
-        const formData = window.lessonPlanCore.getFormData();
-        
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>${formData.courseName} - 教学设计</title>
-                <style>
-                    body { 
-                        font-family: "SimSun", "Times New Roman", serif; 
-                        margin: 20px;
-                        line-height: 1.6;
-                        color: #000;
-                    }
-                    @media print {
-                        body { margin: 0; }
-                        @page { margin: 1cm; }
-                    }
-                    h1, h2, h3 { color: #333; margin-top: 1.5em; }
-                    table { border-collapse: collapse; width: 100%; margin: 1em 0; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f5f5f5; }
-                </style>
-            </head>
-            <body>
-                ${previewContent.innerHTML}
-                <script>
-                    window.onload = function() {
-                        setTimeout(function() {
-                            window.print();
-                            window.onafterprint = function() {
-                                window.close();
-                            };
-                        }, 500);
-                    };
-                </script>
-            </body>
-            </html>
-        `);
-        
-        printWindow.document.close();
-        
-        window.lessonPlanCore.showNotification('已打开打印对话框，请选择"保存为PDF"', 'info');
-    }
 
 
 
@@ -831,15 +882,7 @@ ${formData.customRequirements || '请按照标准教案格式进行设计'}
 
 
 
-    /**
-     * 获取PDF文件名
-     */
-    getPDFFileName() {
-        const formData = window.lessonPlanCore.getFormData();
-        const timestamp = new Date().toISOString().slice(0, 10);
-        const baseName = `教学设计_${formData.courseName}_${formData.teacher}_${timestamp}`;
-        return baseName.replace(/[^\w\u4e00-\u9fa5]/g, '_') + '.pdf';
-    }
+
 
     /**
      * 导出为Word文档
