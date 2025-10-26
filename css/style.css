@@ -201,25 +201,8 @@ header {
   }
 }
 
-/* 通用按钮基础样式 */
-.btn-base {
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none;
-  display: inline-block;
-}
 
-/* 通用卡片悬停效果 - 性能优化 */
-.card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  will-change: transform; /* 提示浏览器优化 */
-}
 
-.card-hover:hover {
-  transform: translate3d(0, -6px, 0); /* 使用3D变换 */
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
 
 .hero .btn {
   margin-top: 30px;
@@ -609,95 +592,7 @@ main {
   overflow: hidden;
 }
 
-/* 预留扩展模块样式 */
-.module-placeholder {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border: 2px dashed #dee2e6;
-  opacity: 0.8;
-}
 
-.placeholder-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 20px;
-}
-
-.placeholder-icon {
-  font-size: 3rem;
-  color: #6c757d;
-  margin-bottom: 15px;
-  opacity: 0.6;
-}
-
-.module-placeholder .card-title {
-  color: #6c757d;
-  font-weight: 600;
-}
-
-.module-placeholder .card-text {
-  color: #adb5bd;
-  font-style: italic;
-}
-
-/* 响应式优化 */
-@media (max-width: 992px) {
-  .modules-container {
-    padding: 0 15px;
-  }
-  
-  .module-card {
-    height: 380px;
-    margin-bottom: 20px;
-  }
-  
-  .module-card .card-img-top {
-    height: 160px;
-  }
-}
-
-@media (max-width: 768px) {
-  .modules-container {
-    padding: 0 10px;
-  }
-  
-  .module-card {
-    height: 360px;
-    margin-bottom: 15px;
-  }
-  
-  .module-card .card-img-top {
-    height: 140px;
-  }
-  
-  .module-card .card-body {
-    padding: 15px;
-  }
-  
-  .module-card .card-title {
-    font-size: 1.2rem;
-  }
-  
-  .module-card .card-text {
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .module-card {
-    height: 340px;
-  }
-  
-  .module-card .card-img-top {
-    height: 120px;
-  }
-  
-  .module-card .card-body {
-    padding: 12px;
-  }
-}
 
 .section {
   padding: 80px 0;
@@ -713,31 +608,81 @@ main {
   font-size: 2.5rem;
   font-weight: 700;
   line-height: 1.4;
-  letter-spacing: 2px;
+  letter-spacing: 5px; /* 进一步增加字间距 */
   margin-bottom: 60px;
   position: relative;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 .title-line {
-  display: inline-block;
+  display: block;
   position: relative;
-  margin: 0 10px;
+  margin: 0 auto;
+  text-align: center;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 .title-separator {
-  font-size: 2.2rem;
-  color: #007bff;
-  margin: 0 15px;
-  font-weight: 300;
+  display: none;
 }
 
-/* 高亮关键词 - 学问和矩阵 */
+/* 高亮关键词 - 八种颜色方案 */
 .highlight-word {
   position: relative;
-  color: #007bff;
   font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
   transition: all 0.3s ease;
+}
+
+/* 学可成矩 - 沉稳蓝系列 */
+/* 学 - 学习、知识（深宝蓝色） */
+.highlight-word:nth-child(1) {
+  color: #003366;
+  text-shadow: 0 2px 4px rgba(0, 51, 102, 0.3);
+}
+
+/* 可 - 能力、可能性（深宝蓝色变体） */
+.highlight-word:nth-child(2) {
+  color: #004080;
+  text-shadow: 0 2px 4px rgba(0, 64, 128, 0.3);
+}
+
+/* 成 - 成就、完成（深宝蓝色变体） */
+.highlight-word:nth-child(3) {
+  color: #005099;
+  text-shadow: 0 2px 4px rgba(0, 80, 153, 0.3);
+}
+
+/* 矩 - 规矩、标准（深宝蓝色变体） */
+.highlight-word:nth-child(4) {
+  color: #0060b3;
+  text-shadow: 0 2px 4px rgba(0, 96, 179, 0.3);
+}
+
+/* 问以立阵 - 橙色系列 */
+/* 问 - 探索、质疑（橙色） */
+.title-line:last-child .highlight-word:nth-child(1) {
+  color: #FF6600;
+  text-shadow: 0 2px 4px rgba(255, 102, 0, 0.3);
+}
+
+/* 以 - 方法、手段（橙色变体） */
+.title-line:last-child .highlight-word:nth-child(2) {
+  color: #ff8533;
+  text-shadow: 0 2px 4px rgba(255, 133, 51, 0.3);
+}
+
+/* 立 - 建立、确立（橙色变体） */
+.title-line:last-child .highlight-word:nth-child(3) {
+  color: #ff9933;
+  text-shadow: 0 2px 4px rgba(255, 153, 51, 0.3);
+}
+
+/* 阵 - 阵型、体系（橙色变体） */
+.title-line:last-child .highlight-word:nth-child(4) {
+  color: #ffaa44;
+  text-shadow: 0 2px 4px rgba(255, 170, 68, 0.3);
 }
 
 .highlight-word::before {
@@ -747,90 +692,125 @@ main {
   left: -4px;
   right: -4px;
   bottom: -2px;
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(0, 180, 255, 0.1));
   border-radius: 8px;
   z-index: -1;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
+/* 学 - 悬停效果（沉稳蓝） */
+.highlight-word:nth-child(1)::before {
+  background: linear-gradient(135deg, rgba(0, 51, 102, 0.1), rgba(0, 64, 128, 0.1));
+}
+
+.highlight-word:nth-child(1):hover {
+  color: #002244;
+  transform: scale(1.05);
+  text-shadow: 0 4px 8px rgba(0, 51, 102, 0.4);
+}
+
+/* 可 - 悬停效果（沉稳蓝） */
+.highlight-word:nth-child(2)::before {
+  background: linear-gradient(135deg, rgba(0, 64, 128, 0.1), rgba(0, 80, 153, 0.1));
+}
+
+.highlight-word:nth-child(2):hover {
+  color: #003366;
+  transform: scale(1.05);
+  text-shadow: 0 4px 8px rgba(0, 64, 128, 0.4);
+}
+
+/* 成 - 悬停效果（沉稳蓝） */
+.highlight-word:nth-child(3)::before {
+  background: linear-gradient(135deg, rgba(0, 80, 153, 0.1), rgba(0, 96, 179, 0.1));
+}
+
+.highlight-word:nth-child(3):hover {
+  color: #004080;
+  transform: scale(1.05);
+  text-shadow: 0 4px 8px rgba(0, 80, 153, 0.4);
+}
+
+/* 矩 - 悬停效果（沉稳蓝） */
+.highlight-word:nth-child(4)::before {
+  background: linear-gradient(135deg, rgba(0, 96, 179, 0.1), rgba(0, 112, 204, 0.1));
+}
+
+.highlight-word:nth-child(4):hover {
+  color: #005099;
+  transform: scale(1.05);
+  text-shadow: 0 4px 8px rgba(0, 96, 179, 0.4);
+}
+
+/* 问 - 悬停效果（橙色） */
+.title-line:last-child .highlight-word:nth-child(1)::before {
+  background: linear-gradient(135deg, rgba(255, 102, 0, 0.1), rgba(255, 133, 51, 0.1));
+}
+
+.title-line:last-child .highlight-word:nth-child(1):hover {
+  color: #e55a00;
+  transform: scale(1.05);
+  text-shadow: 0 4px 8px rgba(255, 102, 0, 0.4);
+}
+
+/* 以 - 悬停效果（橙色） */
+.title-line:last-child .highlight-word:nth-child(2)::before {
+  background: linear-gradient(135deg, rgba(255, 133, 51, 0.1), rgba(255, 153, 77, 0.1));
+}
+
+.title-line:last-child .highlight-word:nth-child(2):hover {
+  color: #ff6600;
+  transform: scale(1.05);
+  text-shadow: 0 4px 8px rgba(255, 133, 51, 0.4);
+}
+
+/* 立 - 悬停效果（橙色） */
+.title-line:last-child .highlight-word:nth-child(3)::before {
+  background: linear-gradient(135deg, rgba(255, 153, 51, 0.1), rgba(255, 170, 68, 0.1));
+}
+
+.title-line:last-child .highlight-word:nth-child(3):hover {
+  color: #ff8533;
+  transform: scale(1.05);
+  text-shadow: 0 4px 8px rgba(255, 153, 51, 0.4);
+}
+
+/* 阵 - 悬停效果（橙色） */
+.title-line:last-child .highlight-word:nth-child(4)::before {
+  background: linear-gradient(135deg, rgba(255, 170, 68, 0.1), rgba(255, 187, 85, 0.1));
+}
+
+.title-line:last-child .highlight-word:nth-child(4):hover {
+  color: #ff9933;
+  transform: scale(1.05);
+  text-shadow: 0 4px 8px rgba(255, 170, 68, 0.4);
+}
+
 .highlight-word:hover::before {
   opacity: 1;
 }
 
-.highlight-word:hover {
-  color: #0056d6;
-  transform: scale(1.05);
-  text-shadow: 0 4px 8px rgba(0, 123, 255, 0.4);
-}
-
-/* 为"学问"和"矩阵"添加特殊的连接线效果 */
-.title-line:first-child .highlight-word:last-child::after,
-.title-line:last-child .highlight-word:first-child::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 60px;
-  height: 2px;
-  background: linear-gradient(90deg, #007bff, #00b0ff, #007bff);
-  opacity: 0.6;
-  z-index: -1;
-}
-
-.title-line:first-child .highlight-word:last-child::after {
-  right: -70px;
-  transform: translateY(-50%);
-}
-
-.title-line:last-child .highlight-word:first-child::after {
-  left: -70px;
-  transform: translateY(-50%);
+/* 移除所有连接线效果，保持简洁 */
+.title-line .highlight-word::after {
+  display: none;
 }
 
 /* 响应式优化 */
 @media (max-width: 768px) {
   .section-title {
     font-size: 2rem;
-    letter-spacing: 1px;
-  }
-  
-  .title-separator {
-    font-size: 1.8rem;
-    margin: 0 8px;
+    letter-spacing: 2px; /* 移动端适当减少字间距 */
   }
   
   .title-line {
-    margin: 0 5px;
-  }
-  
-  .title-line:first-child .highlight-word:last-child::after,
-  .title-line:last-child .highlight-word:first-child::after {
-    width: 40px;
-  }
-  
-  .title-line:first-child .highlight-word:last-child::after {
-    right: -50px;
-  }
-  
-  .title-line:last-child .highlight-word:first-child::after {
-    left: -50px;
+    margin: 0 auto;
   }
 }
 
 @media (max-width: 480px) {
   .section-title {
     font-size: 1.6rem;
-    letter-spacing: 0.5px;
-  }
-  
-  .title-separator {
-    font-size: 1.4rem;
-    margin: 0 5px;
-  }
-  
-  .title-line:first-child .highlight-word:last-child::after,
-  .title-line:last-child .highlight-word:first-child::after {
-    display: none; /* 在小屏幕上隐藏连接线 */
+    letter-spacing: 1px; /* 小屏幕保持适中的字间距 */
   }
 }
 
@@ -851,21 +831,6 @@ main {
   transition: all 0.6s ease;
 }
 
-/* 旧样式已移至上方统一管理 */
-
-/* 应用通用悬停效果 - 性能优化 */
-.card:hover,
-.module-card:hover {
-  transform: translate3d(0, -6px, 0); /* 使用3D变换 */
-}
-
-.card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.module-card:hover {
-  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-}
 
 .card-img-top {
   object-fit: cover;
@@ -919,20 +884,6 @@ footer a:hover {
   text-decoration: underline;
 }
 
-/* ===== 响应式优化 ===== */
-@media (max-width: 1200px) {
-  .modules-horizontal .col-lg-3 {
-    width: calc(25% - 12px);
-    min-width: 180px;
-  }
-}
-
-@media (max-width: 992px) {
-  .modules-horizontal .col-lg-3 {
-    width: calc(33.333% - 10px);
-    min-width: 160px;
-  }
-}
 
 @media (max-width: 768px) {
   .hero-content {

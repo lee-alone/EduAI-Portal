@@ -325,10 +325,31 @@ function checkCacheAndVersion() {
 // 初始化粒子网络系统
 let particleNetwork;
 
+// 处理"开始探索"按钮点击
+function handleExploreButtonClick() {
+  // 滚动到模块区域
+  const modulesSection = document.getElementById('modules');
+  if (modulesSection) {
+    modulesSection.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // 初始化粒子网络系统
   if (DOMCache.get('particleNetworkCanvas')) {
     particleNetwork = new ParticleNetwork();
+  }
+  
+  // 绑定"开始探索"按钮事件
+  const exploreButton = document.querySelector('.hero .btn');
+  if (exploreButton) {
+    exploreButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleExploreButtonClick();
+    });
   }
   
   // 延迟执行调试，确保CSS完全加载
