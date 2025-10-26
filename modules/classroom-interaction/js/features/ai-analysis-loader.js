@@ -25,11 +25,9 @@ class AIAnalysisLoader {
      * 设置智能预加载
      */
     setupSmartPreloading() {
-        // 1. 页面加载完成后，延迟5秒开始预加载
-        this.preloadTimer = setTimeout(() => {
-            this.preloadAIModules();
-        }, 5000);
-
+        // 暂时禁用预加载，直接使用按需加载
+        console.log('🚫 预加载已禁用，将使用按需加载');
+        
         // 2. 用户行为触发预加载
         this.setupBehaviorDetection();
     }
@@ -38,31 +36,31 @@ class AIAnalysisLoader {
      * 设置用户行为检测
      */
     setupBehaviorDetection() {
-        // 鼠标悬停AI标签时预加载
-        const aiTab = document.querySelector('[data-tab="ai-analysis"]');
-        if (aiTab) {
-            aiTab.addEventListener('mouseenter', () => {
-                this.preloadAIModules();
-            });
-        }
+        // 鼠标悬停AI标签时预加载（暂时禁用）
+        // const aiTab = document.querySelector('[data-tab="ai-analysis"]');
+        // if (aiTab) {
+        //     aiTab.addEventListener('mouseenter', () => {
+        //         this.preloadAIModules();
+        //     });
+        // }
 
-        // 上传文件时预加载
-        const fileInputs = document.querySelectorAll('input[type="file"]');
-        fileInputs.forEach(input => {
-            input.addEventListener('change', () => {
-                if (input.files.length > 0) {
-                    this.preloadAIModules();
-                }
-            });
-        });
+        // 上传文件时预加载（暂时禁用）
+        // const fileInputs = document.querySelectorAll('input[type="file"]');
+        // fileInputs.forEach(input => {
+        //     input.addEventListener('change', () => {
+        //         if (input.files.length > 0) {
+        //             this.preloadAIModules();
+        //         }
+        //     });
+        // });
 
-        // 用户开始输入时预加载（可能要进行AI分析）
-        const textInputs = document.querySelectorAll('input[type="text"], textarea');
-        textInputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                this.preloadAIModules();
-            });
-        });
+        // 用户开始输入时预加载（暂时禁用）
+        // const textInputs = document.querySelectorAll('input[type="text"], textarea');
+        // textInputs.forEach(input => {
+        //     input.addEventListener('focus', () => {
+        //         this.preloadAIModules();
+        //     });
+        // });
     }
 
     /**
@@ -82,6 +80,7 @@ class AIAnalysisLoader {
      */
     async preloadAIModules() {
         if (this.isLoaded || this.isLoading || this.isPreloading) {
+            console.log('⏭️ 跳过预加载，状态:', { isLoaded: this.isLoaded, isLoading: this.isLoading, isPreloading: this.isPreloading });
             return;
         }
 
@@ -100,6 +99,8 @@ class AIAnalysisLoader {
             }
         } catch (error) {
             console.warn('⚠️ AI模块预加载失败，将在用户点击时重新加载:', error);
+            // 预加载失败时，重置状态以便用户点击时重新尝试
+            this.isPreloading = false;
         } finally {
             this.isPreloading = false;
         }
@@ -147,7 +148,12 @@ class AIAnalysisLoader {
             
             this.isLoaded = true;
             this.hideLoadingIndicator();
-            this.showSuccessMessage();
+            
+            // 在DOM更新后初始化AI分析管理器
+            setTimeout(() => {
+                this.initializeAIAnalysisManager();
+                this.showSuccessMessage();
+            }, 100);
             
         } catch (error) {
             console.error('AI分析模块加载失败:', error);
@@ -159,11 +165,28 @@ class AIAnalysisLoader {
     }
 
     /**
+     * 初始化AI分析管理器
+     */
+    initializeAIAnalysisManager() {
+        if (window.AIAnalysisManager && !window.aiAnalysisManager) {
+            window.aiAnalysisManager = new window.AIAnalysisManager();
+            console.log('✅ AI分析管理器初始化完成');
+        }
+    }
+
+    /**
      * 按依赖顺序加载模块
      */
     async loadModulesInOrder() {
+        console.log('📚 开始按顺序加载模块');
+        
         // 首先加载AI分析相关CDN
-        await this.loadAIDependencies();
+        try {
+            await this.loadAIDependencies();
+            console.log('✅ CDN依赖加载完成');
+        } catch (error) {
+            console.warn('⚠️ CDN依赖加载失败，继续加载本地模块:', error);
+        }
         
         // 然后加载AI分析模块
         const modules = [
@@ -180,9 +203,21 @@ class AIAnalysisLoader {
             'js/features/ai-analysis/AIAnalysisManager.js'
         ];
 
-        for (const module of modules) {
-            await this.loadScript(module);
+        for (let i = 0; i < modules.length; i++) {
+            const module = modules[i];
+            try {
+                console.log(`📦 加载模块 ${i + 1}/${modules.length}: ${module}`);
+                await this.loadScript(module);
+            } catch (error) {
+                console.error(`❌ 模块加载失败: ${module}`, error);
+                // 对于非关键模块，继续加载其他模块
+                if (module.includes('FileUploadManager') || module.includes('AIAnalysisManager')) {
+                    throw error; // 关键模块失败则停止
+                }
+            }
         }
+        
+        console.log('✅ 所有模块加载完成');
     }
 
     /**
@@ -193,7 +228,7 @@ class AIAnalysisLoader {
         
         const aiCDNs = [
             'https://cdn.bootcdn.net/ajax/libs/jszip/3.10.1/jszip.min.js',
-            'https://cdn.jsdelivr.net/npm/html-docx-js-version-updated@0.4.0/dist/html-docx.js',
+            'https://unpkg.com/html-docx-js@0.3.1/dist/html-docx.js',
             'https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js'
         ];
 
@@ -210,16 +245,36 @@ class AIAnalysisLoader {
      */
     loadScript(src) {
         return new Promise((resolve, reject) => {
+            console.log(`📦 正在加载脚本: ${src}`);
+            
             // 检查脚本是否已经加载
             if (document.querySelector(`script[src="${src}"]`)) {
+                console.log(`✅ 脚本已存在: ${src}`);
                 resolve();
                 return;
             }
 
             const script = document.createElement('script');
             script.src = src;
-            script.onload = resolve;
-            script.onerror = reject;
+            
+            // 设置超时机制（10秒）
+            const timeout = setTimeout(() => {
+                console.error(`❌ 脚本加载超时: ${src}`);
+                reject(new Error(`脚本加载超时: ${src}`));
+            }, 10000);
+            
+            script.onload = () => {
+                clearTimeout(timeout);
+                console.log(`✅ 脚本加载成功: ${src}`);
+                resolve();
+            };
+            
+            script.onerror = (error) => {
+                clearTimeout(timeout);
+                console.error(`❌ 脚本加载失败: ${src}`, error);
+                reject(new Error(`脚本加载失败: ${src}`));
+            };
+            
             document.head.appendChild(script);
         });
     }

@@ -34,9 +34,12 @@ class AIAnalysisManager {
      */
     bindEvents() {
         // 生成报告按钮
-        document.getElementById('generate-ai-report-btn').addEventListener('click', () => {
-            this.generateAIReport();
-        });
+        const generateBtn = document.getElementById('generate-ai-report-btn');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => {
+                this.generateAIReport();
+            });
+        }
     }
 
     /**
@@ -178,8 +181,7 @@ class AIAnalysisManager {
 
 }
 
-// 创建全局实例
-window.aiAnalysisManager = new AIAnalysisManager();
+// 不自动创建实例，由加载器控制创建时机
 
 // 全局导出函数（保持向后兼容）
 window.exportAIReport = function() {
