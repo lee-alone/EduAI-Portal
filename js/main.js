@@ -221,144 +221,31 @@ const observer = new IntersectionObserver(entries => {
 
 document.querySelectorAll('.card').forEach(card => observer.observe(card));
 
-// 水平滚动模块自动移动功能
-class HorizontalScrollManager {
-  constructor() {
-    this.container = document.querySelector('.modules-horizontal');
-    this.cards = document.querySelectorAll('.modules-horizontal .module-card');
-    this.isScrolling = false;
-    this.scrollSpeed = 2;
-    this.edgeThreshold = 100; // 边缘检测阈值
-    
-    if (this.container) {
-      this.init();
+// 滚动管理器已移除 - 使用静态布局
+
+// DOM缓存管理器 - 避免重复查询
+const DOMCache = {
+  elements: new Map(),
+  get(id) {
+    if (!this.elements.has(id)) {
+      this.elements.set(id, document.getElementById(id));
     }
-  }
-  
-  init() {
-    this.bindEvents();
-  }
-  
-  bindEvents() {
-    // 鼠标移动事件
-    this.container.addEventListener('mousemove', (e) => {
-      if (this.isScrolling) return;
-      
-      const rect = this.container.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const containerWidth = rect.width;
-      
-      // 检测是否在边缘区域
-      if (mouseX < this.edgeThreshold) {
-        // 左边缘 - 向左滚动
-        this.startScrolling('left');
-      } else if (mouseX > containerWidth - this.edgeThreshold) {
-        // 右边缘 - 向右滚动
-        this.startScrolling('right');
-      } else {
-        // 中间区域 - 停止滚动
-        this.stopScrolling();
-      }
-    });
-    
-    // 鼠标离开容器时停止滚动
-    this.container.addEventListener('mouseleave', () => {
-      this.stopScrolling();
-    });
-    
-    // 触摸事件支持
-    this.container.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-    });
-  }
-  
-  startScrolling(direction) {
-    if (this.isScrolling) return;
-    
-    this.isScrolling = true;
-    this.scrollDirection = direction;
-    
-    const scroll = () => {
-      if (!this.isScrolling) return;
-      
-      const currentScroll = this.container.scrollLeft;
-      const maxScroll = this.container.scrollWidth - this.container.clientWidth;
-      
-      if (direction === 'left' && currentScroll > 0) {
-        this.container.scrollLeft -= this.scrollSpeed;
-        requestAnimationFrame(scroll);
-      } else if (direction === 'right' && currentScroll < maxScroll) {
-        this.container.scrollLeft += this.scrollSpeed;
-        requestAnimationFrame(scroll);
-      } else {
-        this.stopScrolling();
-      }
-    };
-    
-    requestAnimationFrame(scroll);
-  }
-  
-  stopScrolling() {
-    this.isScrolling = false;
-    this.scrollDirection = null;
-  }
-}
-
-class DragScrollManager {
-  constructor(container) {
-    this.container = container;
-    this.isDragging = false;
-    this.startX = 0;
-    this.scrollLeft = 0;
-
-    if (this.container) {
-      this.init();
+    return this.elements.get(id);
+  },
+  query(selector) {
+    if (!this.elements.has(selector)) {
+      this.elements.set(selector, document.querySelector(selector));
     }
+    return this.elements.get(selector);
   }
-
-  init() {
-    this.container.addEventListener('mousedown', (e) => this.startDragging(e));
-    this.container.addEventListener('mouseup', () => this.stopDragging());
-    this.container.addEventListener('mouseleave', () => this.stopDragging());
-    this.container.addEventListener('mousemove', (e) => this.drag(e));
-  }
-
-  startDragging(e) {
-    this.isDragging = true;
-    this.startX = e.pageX - this.container.offsetLeft;
-    this.scrollLeft = this.container.scrollLeft;
-    this.container.style.cursor = 'grabbing';
-    this.container.style.userSelect = 'none';
-  }
-
-  stopDragging() {
-    this.isDragging = false;
-    this.container.style.cursor = 'grab';
-    this.container.style.removeProperty('user-select');
-  }
-
-  drag(e) {
-    if (!this.isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - this.container.offsetLeft;
-    const walk = (x - this.startX) * 2; //scroll-fast
-    this.container.scrollLeft = this.scrollLeft - walk;
-  }
-}
+};
 
 // 初始化粒子网络系统
 let particleNetwork;
-let horizontalScrollManager;
-let dragScrollManager;
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('particleNetworkCanvas')) {
+  // 初始化粒子网络系统
+  if (DOMCache.get('particleNetworkCanvas')) {
     particleNetwork = new ParticleNetwork();
   }
-  
-  // 初始化水平滚动管理器
-  horizontalScrollManager = new HorizontalScrollManager();
-
-  const scrollingWrapper = document.querySelector('.scrolling-wrapper');
-  dragScrollManager = new DragScrollManager(scrollingWrapper);
 });
